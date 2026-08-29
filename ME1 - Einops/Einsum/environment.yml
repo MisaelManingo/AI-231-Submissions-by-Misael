@@ -1,0 +1,16 @@
+name: AI_231_env
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pytorch
+  - torchvision
+  - cpuonly
+  - einops
+  - matplotlib
+  - ipykernel
+  - notebook
+  - tqdm
+  - numpy
