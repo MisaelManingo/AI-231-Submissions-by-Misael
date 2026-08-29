@@ -95,3 +95,4 @@ The model was trained for 5 epochs using Adam optimizer ($\text{lr} = 0.001$) an
 conda activate AI_231_env
 jupyter notebook "ME1 - Einops/Einsum/ME1_Einops_Einsum_MNIST.ipynb"
 ```
+

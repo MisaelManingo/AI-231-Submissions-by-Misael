@@ -24,3 +24,4 @@ conda activate AI_231_env
 # Register kernel for Jupyter
 python -m ipykernel install --user --name AI_231_env --display-name "Python (AI_231_env)"
 ```
+
