@@ -1,7 +1,9 @@
 # Machine Exercise 1: Custom 3-Layer CNN for MNIST Classification using Einops & Einsum
 
 **Course:** AI 231 - Advanced Deep Learning  
-**Author:** Misael Maningo  
+**Authors / Contributors:**  
+- **Misael Maningo** (Student / Developer)  
+- **Google Antigravity** (AI Assistant / Pair Programmer)  
 **Environment:** `AI_231_env`  
 **Notebook:** [`ME1_Einops_Einsum_MNIST.ipynb`](./ME1_Einops_Einsum_MNIST.ipynb)
 

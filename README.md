@@ -25,3 +25,10 @@ conda activate AI_231_env
 python -m ipykernel install --user --name AI_231_env --display-name "Python (AI_231_env)"
 ```
 
+---
+
+## 👥 Contributors
+
+- **Misael Maningo** ([@MisaelManingo](https://github.com/MisaelManingo)) - Student / Developer
+- **Google Antigravity** - AI Assistant / Autonomous Coding Agent
+
