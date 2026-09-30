@@ -1,0 +1,12 @@
+{
+  "model": "bcresnet_32",
+  "num_classes": 32,
+  "parameters": 69696,
+  "test_accuracy": 0.9921793534932221,
+  "test_macro_f1": 0.9923891402283918,
+  "bg_rejection_rate": 0.9667,
+  "user_ambient_rejection_rate": 0.9365895628929138,
+  "fp32_size_kb": 279.1611328125,
+  "int8_size_kb": 113.6416015625,
+  "cpu_latency_ms": 15.74824143666774
+}

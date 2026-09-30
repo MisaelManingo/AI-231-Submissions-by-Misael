@@ -9,21 +9,22 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 | Directory | Topic / Machine Exercise | Key Technologies | Status |
 |---|---|---|---|
 | [`ME1 - Einops/Einsum`](./ME1%20-%20Einops/Einsum/) | Custom 3-Layer CNN for MNIST Classification | PyTorch, `einops`, `torch.einsum`, First-Principles CNN | Completed (Test Acc: 98.99%) |
+| [`ME2 - Voice Command Model`](./ME2%20-%20Voice%20Command%20Model/) | On-Device Tiny Voice Command & Personalized Wake Word Spotter on Raspberry Pi 5 | BC-ResNet-1, RobustWakeNet, ONNX Runtime INT8, Pure NumPy DSP, 32-Class Joint Intent & Slot Recognition | Completed (Test Acc: 99.22%, Latency: 15.75 ms) |
 
 ---
 
-## 🛠️ Environment Setup
+## 🛠️ Machine Exercise Overview
 
-To reproduce the experiments in this repository, set up the `AI_231_env` conda environment:
+### 1. [ME1: Einops & Einsum CNN](./ME1%20-%20Einops/Einsum/)
+- Implements convolutional layers, spatial reductions, and dense projections strictly from first principles using tensor contractions and index manipulations.
+- Verified on MNIST achieving **98.99% test accuracy**.
 
-```bash
-# Create and activate environment
-conda env create -f "ME1 - Einops/Einsum/environment.yml"
-conda activate AI_231_env
-
-# Register kernel for Jupyter
-python -m ipykernel install --user --name AI_231_env --display-name "Python (AI_231_env)"
-```
+### 2. [ME2: Edge Voice Command Model & Wake Word Spotter](./ME2%20-%20Voice%20Command%20Model/)
+- Complete, 100% on-device edge voice assistant deployed on **Raspberry Pi 5** using a **G-Mark Micro Go USB mic/speaker**.
+- Zero PyTorch dependencies on device: pure NumPy Mel-Spectrogram extraction + ONNX Runtime CPU.
+- **Personalized Wake Word Spotter ("Hey Raspberry")**: 27.4 KB INT8, 98.5% confidence on user takes, 0.00% on idle noise.
+- **32-Class Joint Intent & Slot VCM**: 113.6 KB INT8 BC-ResNet, 99.22% top-1 accuracy, 0.9924 Macro F1, 15.75 ms latency.
+- Full real-time smart-home state management with continuous ALSA audio capture, adaptive peak normalization, and VAD energy gating.
 
 ---
 
@@ -31,4 +32,3 @@ python -m ipykernel install --user --name AI_231_env --display-name "Python (AI_
 
 - **Misael Maningo** ([@MisaelManingo](https://github.com/MisaelManingo)) - Student / Developer
 - **Google Antigravity** - AI Assistant / Autonomous Coding Agent
-

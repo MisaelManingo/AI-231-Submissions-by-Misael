@@ -1,0 +1,233 @@
+{
+  "num_classes": 32,
+  "label2idx": {
+    "_BACKGROUND_": 0,
+    "ALARM_6_00AM": 1,
+    "ALARM_8_00AM": 2,
+    "ALARM_9_00PM": 3,
+    "BRIGHTNESS_100": 4,
+    "BRIGHTNESS_20": 5,
+    "BRIGHTNESS_60": 6,
+    "CALL": 7,
+    "COLOR_BLUE": 8,
+    "COLOR_GREEN": 9,
+    "COLOR_RED": 10,
+    "CREATE_REMINDER_DRINK_WATER": 11,
+    "CREATE_REMINDER_EXERCISE": 12,
+    "CREATE_REMINDER_STUDY": 13,
+    "LIGHT_OFF": 14,
+    "LIGHT_ON": 15,
+    "LIST_REMINDERS": 16,
+    "MESSAGE": 17,
+    "NEXT": 18,
+    "PAUSE": 19,
+    "PLAY_MUSIC": 20,
+    "STOP": 21,
+    "TEMPERATURE_18": 22,
+    "TEMPERATURE_22": 23,
+    "TEMPERATURE_26": 24,
+    "TIME": 25,
+    "TIMER_10s": 26,
+    "TIMER_1m": 27,
+    "TIMER_30s": 28,
+    "VOLUME_DOWN": 29,
+    "VOLUME_UP": 30,
+    "WEATHER": 31
+  },
+  "idx2label": {
+    "0": "_BACKGROUND_",
+    "1": "ALARM_6_00AM",
+    "2": "ALARM_8_00AM",
+    "3": "ALARM_9_00PM",
+    "4": "BRIGHTNESS_100",
+    "5": "BRIGHTNESS_20",
+    "6": "BRIGHTNESS_60",
+    "7": "CALL",
+    "8": "COLOR_BLUE",
+    "9": "COLOR_GREEN",
+    "10": "COLOR_RED",
+    "11": "CREATE_REMINDER_DRINK_WATER",
+    "12": "CREATE_REMINDER_EXERCISE",
+    "13": "CREATE_REMINDER_STUDY",
+    "14": "LIGHT_OFF",
+    "15": "LIGHT_ON",
+    "16": "LIST_REMINDERS",
+    "17": "MESSAGE",
+    "18": "NEXT",
+    "19": "PAUSE",
+    "20": "PLAY_MUSIC",
+    "21": "STOP",
+    "22": "TEMPERATURE_18",
+    "23": "TEMPERATURE_22",
+    "24": "TEMPERATURE_26",
+    "25": "TIME",
+    "26": "TIMER_10s",
+    "27": "TIMER_1m",
+    "28": "TIMER_30s",
+    "29": "VOLUME_DOWN",
+    "30": "VOLUME_UP",
+    "31": "WEATHER"
+  },
+  "slot_meta": {
+    "_BACKGROUND_": {
+      "intent": "_BACKGROUND_",
+      "slot": null,
+      "slot_value": null
+    },
+    "ALARM_6_00AM": {
+      "intent": "ALARM",
+      "slot": "time",
+      "slot_value": "6 AM"
+    },
+    "ALARM_8_00AM": {
+      "intent": "ALARM",
+      "slot": "time",
+      "slot_value": "8 AM"
+    },
+    "ALARM_9_00PM": {
+      "intent": "ALARM",
+      "slot": "time",
+      "slot_value": "9 PM"
+    },
+    "BRIGHTNESS_100": {
+      "intent": "BRIGHTNESS",
+      "slot": "percent",
+      "slot_value": "100 percent"
+    },
+    "BRIGHTNESS_20": {
+      "intent": "BRIGHTNESS",
+      "slot": "percent",
+      "slot_value": "20 percent"
+    },
+    "BRIGHTNESS_60": {
+      "intent": "BRIGHTNESS",
+      "slot": "percent",
+      "slot_value": "60 percent"
+    },
+    "CALL": {
+      "intent": "CALL",
+      "slot": null,
+      "slot_value": null
+    },
+    "COLOR_BLUE": {
+      "intent": "COLOR",
+      "slot": "color",
+      "slot_value": "blue"
+    },
+    "COLOR_GREEN": {
+      "intent": "COLOR",
+      "slot": "color",
+      "slot_value": "green"
+    },
+    "COLOR_RED": {
+      "intent": "COLOR",
+      "slot": "color",
+      "slot_value": "red"
+    },
+    "CREATE_REMINDER_DRINK_WATER": {
+      "intent": "CREATE_REMINDER",
+      "slot": "task",
+      "slot_value": "drink water"
+    },
+    "CREATE_REMINDER_EXERCISE": {
+      "intent": "CREATE_REMINDER",
+      "slot": "task",
+      "slot_value": "exercise"
+    },
+    "CREATE_REMINDER_STUDY": {
+      "intent": "CREATE_REMINDER",
+      "slot": "task",
+      "slot_value": "study"
+    },
+    "LIGHT_OFF": {
+      "intent": "LIGHT_OFF",
+      "slot": null,
+      "slot_value": null
+    },
+    "LIGHT_ON": {
+      "intent": "LIGHT_ON",
+      "slot": null,
+      "slot_value": null
+    },
+    "LIST_REMINDERS": {
+      "intent": "LIST_REMINDERS",
+      "slot": null,
+      "slot_value": null
+    },
+    "MESSAGE": {
+      "intent": "MESSAGE",
+      "slot": null,
+      "slot_value": null
+    },
+    "NEXT": {
+      "intent": "NEXT",
+      "slot": null,
+      "slot_value": null
+    },
+    "PAUSE": {
+      "intent": "PAUSE",
+      "slot": null,
+      "slot_value": null
+    },
+    "PLAY_MUSIC": {
+      "intent": "PLAY_MUSIC",
+      "slot": null,
+      "slot_value": null
+    },
+    "STOP": {
+      "intent": "STOP",
+      "slot": null,
+      "slot_value": null
+    },
+    "TEMPERATURE_18": {
+      "intent": "TEMPERATURE",
+      "slot": "degrees",
+      "slot_value": "18 degrees"
+    },
+    "TEMPERATURE_22": {
+      "intent": "TEMPERATURE",
+      "slot": "degrees",
+      "slot_value": "22 degrees"
+    },
+    "TEMPERATURE_26": {
+      "intent": "TEMPERATURE",
+      "slot": "degrees",
+      "slot_value": "26 degrees"
+    },
+    "TIME": {
+      "intent": "TIME",
+      "slot": null,
+      "slot_value": null
+    },
+    "TIMER_10s": {
+      "intent": "TIMER",
+      "slot": "duration",
+      "slot_value": "10 seconds"
+    },
+    "TIMER_1m": {
+      "intent": "TIMER",
+      "slot": "duration",
+      "slot_value": "1 minute"
+    },
+    "TIMER_30s": {
+      "intent": "TIMER",
+      "slot": "duration",
+      "slot_value": "30 seconds"
+    },
+    "VOLUME_DOWN": {
+      "intent": "VOLUME_DOWN",
+      "slot": null,
+      "slot_value": null
+    },
+    "VOLUME_UP": {
+      "intent": "VOLUME_UP",
+      "slot": null,
+      "slot_value": null
+    },
+    "WEATHER": {
+      "intent": "WEATHER",
+      "slot": null,
+      "slot_value": null
+    }
+  }
+}

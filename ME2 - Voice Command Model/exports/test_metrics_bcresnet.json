@@ -1,0 +1,8 @@
+{
+  "model": "bcresnet",
+  "parameters": 68532,
+  "test_loss": 0.5091974248913456,
+  "test_acc": 0.9801876955161627,
+  "test_macro_f1": 0.9776056115205843,
+  "bg_rejection_rate": 0.975
+}

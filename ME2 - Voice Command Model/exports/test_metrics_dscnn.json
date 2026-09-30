@@ -1,0 +1,8 @@
+{
+  "model": "dscnn",
+  "parameters": 53460,
+  "test_loss": 0.5857296815380936,
+  "test_acc": 0.9676746611053181,
+  "test_macro_f1": 0.9620051322840475,
+  "bg_rejection_rate": 0.95
+}

@@ -1,0 +1,78 @@
+{
+  "wake_word_threshold_analysis": [
+    {
+      "threshold": 0.5,
+      "far_pct": 7.017543859649122,
+      "frr_pct": 10.526315789473683,
+      "precision": 0.8095238095238095,
+      "recall": 0.8947368421052632,
+      "f1": 0.8500000000000001
+    },
+    {
+      "threshold": 0.6,
+      "far_pct": 5.263157894736842,
+      "frr_pct": 15.789473684210526,
+      "precision": 0.8421052631578947,
+      "recall": 0.8421052631578947,
+      "f1": 0.8421052631578947
+    },
+    {
+      "threshold": 0.7,
+      "far_pct": 3.508771929824561,
+      "frr_pct": 47.368421052631575,
+      "precision": 0.8333333333333334,
+      "recall": 0.5263157894736842,
+      "f1": 0.6451612903225806
+    },
+    {
+      "threshold": 0.8,
+      "far_pct": 0.0,
+      "frr_pct": 94.73684210526315,
+      "precision": 1.0,
+      "recall": 0.05263157894736842,
+      "f1": 0.1
+    },
+    {
+      "threshold": 0.85,
+      "far_pct": 0.0,
+      "frr_pct": 100.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "far_pct": 0.0,
+      "frr_pct": 100.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.95,
+      "far_pct": 0.0,
+      "frr_pct": 100.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "vcm_cohort_metrics": {
+    "overall_accuracy": 0.9807090719499478,
+    "overall_f1": 0.9777950867025137,
+    "filipino_accuracy": 0.8555555555555555,
+    "foreign_accuracy": 0.9950556242274413,
+    "clean_accuracy": 0.978865406006674,
+    "noisy_accuracy": 0.9833147942157954,
+    "background_rejection": 0.975
+  },
+  "latency_profiling": {
+    "wake_feature_ms": 67.22188715077937,
+    "wake_infer_ms": 2.321240550838411,
+    "vcm_feature_ms": 65.00256362836808,
+    "vcm_infer_ms": 18.104476754553616,
+    "total_vcm_ms": 83.1070403829217,
+    "latency_budget_ms": 200.0,
+    "headroom_pct": 58.44647980853915
+  }
+}
