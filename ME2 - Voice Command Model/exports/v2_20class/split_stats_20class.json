@@ -1,59 +1,71 @@
 {
   "train": {
-    "utterances": 9393,
-    "hours": 5.343,
-    "speakers": 278,
-    "oos_count": 473,
+    "utterances": 9906,
+    "hours": 5.817,
+    "speakers": 280,
+    "oos_count": 549,
+    "filipino_in_scope_count": 547,
     "class_distribution": {
-      "ALARM": 890,
-      "BRIGHTNESS": 879,
-      "CALL": 272,
-      "COLOR": 871,
-      "CREATE_REMINDER": 887,
-      "LIGHT_OFF": 278,
-      "LIGHT_ON": 287,
-      "LIST_REMINDERS": 276,
-      "MESSAGE": 278,
-      "NEXT": 267,
-      "PAUSE": 291,
-      "PLAY_MUSIC": 250,
-      "STOP": 287,
-      "TEMPERATURE": 904,
-      "TIME": 277,
-      "TIMER": 895,
-      "VOLUME_DOWN": 279,
-      "VOLUME_UP": 271,
-      "WEATHER": 281,
-      "OUT_OF_SCOPE": 473
+      "ALARM": 929,
+      "BRIGHTNESS": 932,
+      "CALL": 287,
+      "COLOR": 842,
+      "CREATE_REMINDER": 921,
+      "LIGHT_OFF": 311,
+      "LIGHT_ON": 270,
+      "LIST_REMINDERS": 299,
+      "MESSAGE": 298,
+      "NEXT": 293,
+      "PAUSE": 292,
+      "PLAY_MUSIC": 308,
+      "STOP": 295,
+      "TEMPERATURE": 954,
+      "TIME": 289,
+      "TIMER": 940,
+      "VOLUME_DOWN": 299,
+      "VOLUME_UP": 301,
+      "WEATHER": 297,
+      "OUT_OF_SCOPE": 549
+    },
+    "voice_type_distribution": {
+      "open_source": 1864,
+      "real_filipino": 637,
+      "synthetic": 7030,
+      "mic_ambient_noise": 375
     }
   },
   "val": {
-    "utterances": 1664,
-    "hours": 1.204,
-    "speakers": 38,
-    "oos_count": 103,
-    "filipino_in_scope_count": 494,
+    "utterances": 1151,
+    "hours": 0.731,
+    "speakers": 36,
+    "oos_count": 27,
+    "filipino_in_scope_count": 72,
     "class_distribution": {
-      "ALARM": 132,
-      "BRIGHTNESS": 153,
-      "CALL": 61,
-      "COLOR": 128,
-      "CREATE_REMINDER": 128,
-      "LIGHT_OFF": 55,
-      "LIGHT_ON": 46,
-      "LIST_REMINDERS": 57,
-      "MESSAGE": 55,
-      "NEXT": 66,
-      "PAUSE": 42,
-      "PLAY_MUSIC": 83,
-      "STOP": 46,
-      "TEMPERATURE": 144,
-      "TIME": 56,
-      "TIMER": 141,
-      "VOLUME_DOWN": 54,
-      "VOLUME_UP": 62,
-      "WEATHER": 52,
-      "OUT_OF_SCOPE": 103
+      "ALARM": 93,
+      "BRIGHTNESS": 100,
+      "CALL": 46,
+      "COLOR": 157,
+      "CREATE_REMINDER": 94,
+      "LIGHT_OFF": 22,
+      "LIGHT_ON": 63,
+      "LIST_REMINDERS": 34,
+      "MESSAGE": 35,
+      "NEXT": 40,
+      "PAUSE": 41,
+      "PLAY_MUSIC": 25,
+      "STOP": 38,
+      "TEMPERATURE": 94,
+      "TIME": 44,
+      "TIMER": 96,
+      "VOLUME_DOWN": 34,
+      "VOLUME_UP": 32,
+      "WEATHER": 36,
+      "OUT_OF_SCOPE": 27
+    },
+    "voice_type_distribution": {
+      "open_source": 303,
+      "real_filipino": 72,
+      "synthetic": 776
     }
   },
   "test": {
@@ -83,6 +95,11 @@
       "VOLUME_UP": 141,
       "WEATHER": 141,
       "OUT_OF_SCOPE": 47
+    },
+    "voice_type_distribution": {
+      "real_filipino": 189,
+      "open_source": 861,
+      "synthetic": 3368
     }
   },
   "holdout": {
@@ -112,6 +129,11 @@
       "VOLUME_UP": 6,
       "WEATHER": 6,
       "OUT_OF_SCOPE": 10
+    },
+    "voice_type_distribution": {
+      "real_filipino": 73,
+      "synthetic": 100,
+      "open_source": 23
     }
   }
 }

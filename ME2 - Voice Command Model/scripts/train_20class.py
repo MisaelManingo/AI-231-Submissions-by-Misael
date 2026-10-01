@@ -4,13 +4,18 @@ train_20class.py
 
 Trains 20-class Voice Command Models (BC-ResNet-1 and baseline DS-CNN) on the A100 GPU:
 - 19 schema commands + OUT_OF_SCOPE as the 20th class (index 19).
+- Solves Filipino speech starvation via 4x oversampling of real Filipino clips during training.
 - Class-weighted loss with logged effective weight for OUT_OF_SCOPE.
 - Multi-seed training (seeds 42, 1337, 2026).
 - Strict validation-only checkpoint selection.
-- Threshold tau tuning on validation only at stated target FAR <= 5.0%.
+- Dual-constraint threshold tau tuning on validation only:
+    Constraint 1: FAR on OOS speech <= 5.0%
+    Constraint 2: FRR on real Filipino speech <= 30.0%
+- Temperature scaling calibration evaluated on validation logits.
 - Evaluates rejection rules: class-only, threshold-only, combined, and margin variant.
 - Computes FAR on OOS speech (with Wilson 95% CI), FAR on mic noise, accuracy on accepted,
   and False-Reject Rate (FRR) on real Filipino group recordings.
+- Test accuracy broken down by voice type: real Filipino, open-source, synthetic.
 - Leaves holdout evaluation for physical Raspberry Pi execution (default --eval-holdout False).
 """
 
@@ -45,6 +50,7 @@ TARGET_SR = 16000
 TARGET_SAMPLES = 32000
 OOS_CLASS_IDX = 19
 OOS_EFFECTIVE_WEIGHT = 2.50  # Up-weighting OUT_OF_SCOPE for vigilant negative rejection
+FILIPINO_OVERSAMPLE_FACTOR = 4  # 4x oversampling of real Filipino speech to fix starvation
 
 
 def set_seed(seed):
@@ -70,9 +76,29 @@ def wilson_ci(k, n, confidence=0.95):
     return round(p * 100, 2), round(lower * 100, 2), round(upper * 100, 2)
 
 
+def fit_temperature_scaling(val_logits_t, val_labels_t):
+    """
+    Fits a single scalar temperature T > 0 on validation logits using L-BFGS
+    to minimize cross-entropy loss. Returns optimal temperature T.
+    """
+    temperature = nn.Parameter(torch.ones(1, device=val_logits_t.device) * 1.5)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.LBFGS([temperature], lr=0.05, max_iter=50)
+
+    def eval_closure():
+        optimizer.zero_grad()
+        loss = criterion(val_logits_t / temperature, val_labels_t)
+        loss.backward()
+        return loss
+
+    optimizer.step(eval_closure)
+    t_val = float(temperature.item())
+    return max(round(t_val, 4), 0.05)
+
+
 def evaluate_rules_on_split(probs, labels, is_filipino_group, is_oos_speech, tau, delta_m, mic_noise_probs=None):
     """
-    Evaluates the 4 rejection rules on a dataset split:
+    Evaluates 4 rejection rules on a dataset split:
     1. Class-only rule: reject if argmax == 19
     2. Threshold-only rule: reject if max_prob < tau
     3. Combined rule: reject if argmax == 19 OR max_prob < tau
@@ -81,7 +107,6 @@ def evaluate_rules_on_split(probs, labels, is_filipino_group, is_oos_speech, tau
     preds = np.argmax(probs, axis=1)
     max_probs = np.max(probs, axis=1)
 
-    # Sort probs to compute top-1 and top-2
     sorted_probs = np.sort(probs, axis=1)
     top1 = sorted_probs[:, -1]
     top2 = sorted_probs[:, -2]
@@ -158,14 +183,16 @@ def evaluate_rules_on_split(probs, labels, is_filipino_group, is_oos_speech, tau
     return results
 
 
-def run_tau_sweep_on_validation(val_probs, val_labels, is_filipino_group, is_oos_speech, target_far=5.0):
+def run_tau_sweep_on_validation(val_probs, val_labels, is_filipino_group, is_oos_speech, target_far=5.0, max_frr_cap=30.0):
     """
     Sweeps tau on validation set from 0.10 to 0.95 in 0.05 steps.
-    Selects optimal tau meeting target FAR on validation.
+    Dual-constraint selection:
+      - Constraint 1: FAR on OOS speech <= target_far (5.0%)
+      - Constraint 2: FRR on real Filipino speech <= max_frr_cap (30.0%)
     """
     sweep_rows = []
     best_tau = 0.50
-    best_diff = float("inf")
+    best_frr = float("inf")
 
     tau_candidates = [round(t, 2) for t in np.arange(0.10, 0.96, 0.05)]
 
@@ -184,24 +211,84 @@ def run_tau_sweep_on_validation(val_probs, val_labels, is_filipino_group, is_oos
         frr = comb["frr_filipino_group_pct"]
         acc = comb["command_acc_accepted_pct"]
 
+        satisfies_both = (far <= target_far) and (frr <= max_frr_cap)
         sweep_rows.append({
             "tau": tau,
             "val_far_oos_pct": far,
             "val_frr_filipino_pct": frr,
             "val_acc_accepted_pct": acc,
+            "satisfies_dual_constraints": satisfies_both,
         })
 
-        # Select tau that satisfies target FAR with minimum FRR
-        if far <= target_far:
-            if best_tau == 0.50 and best_diff == float("inf"):
+        if satisfies_both:
+            # When both constraints are satisfied, pick tau that minimizes FRR
+            if frr < best_frr or best_frr == float("inf"):
+                best_frr = frr
                 best_tau = tau
-                best_diff = frr
-            elif frr < best_diff:
-                best_tau = tau
-                best_diff = frr
+
+    # Fallback if no tau strictly satisfies both
+    if best_frr == float("inf"):
+        best_penalty = float("inf")
+        for row in sweep_rows:
+            penalty = max(row["val_far_oos_pct"] - target_far, 0.0) * 2.0 + max(row["val_frr_filipino_pct"] - max_frr_cap, 0.0)
+            if penalty < best_penalty:
+                best_penalty = penalty
+                best_tau = row["tau"]
 
     df_sweep = pd.DataFrame(sweep_rows)
     return best_tau, df_sweep
+
+
+def compute_voice_type_breakdown(probs, labels, voice_types, tau, delta_m):
+    """Computes test accuracy and acceptance metrics broken down by voice type."""
+    preds = np.argmax(probs, axis=1)
+    max_probs = np.max(probs, axis=1)
+    combined_reject = (preds == OOS_CLASS_IDX) | (max_probs < tau)
+    combined_accept = ~combined_reject
+
+    v_types = ["real_filipino", "open_source", "synthetic"]
+    vt_results = {}
+
+    for vt in v_types:
+        vt_mask = (voice_types == vt)
+        n_vt = int(np.sum(vt_mask))
+        if n_vt == 0:
+            continue
+
+        vt_labels = labels[vt_mask]
+        vt_preds = preds[vt_mask]
+        raw_acc = round(float(np.mean(vt_preds == vt_labels) * 100.0), 2)
+        raw_f1 = round(float(f1_score(vt_labels, vt_preds, average="macro", zero_division=0)), 4)
+
+        # On accepted in-scope clips
+        in_scope_mask = (labels != OOS_CLASS_IDX)
+        vt_accepted_in_scope = vt_mask & in_scope_mask & combined_accept
+        n_acc_in_scope = int(np.sum(vt_accepted_in_scope))
+
+        if n_acc_in_scope > 0:
+            acc_on_acc = round(float(np.sum(vt_accepted_in_scope & (preds == labels)) / n_acc_in_scope * 100.0), 2)
+        else:
+            acc_on_acc = 0.0
+
+        # False reject rate on in-scope clips of this voice type
+        vt_in_scope = vt_mask & in_scope_mask
+        n_in_scope = int(np.sum(vt_in_scope))
+        if n_in_scope > 0:
+            vt_frr = round(float(np.sum(vt_in_scope & combined_reject) / n_in_scope * 100.0), 2)
+        else:
+            vt_frr = 0.0
+
+        vt_results[vt] = {
+            "total_clips": n_vt,
+            "in_scope_clips": n_in_scope,
+            "raw_accuracy_pct": raw_acc,
+            "raw_macro_f1": raw_f1,
+            "accepted_in_scope_count": n_acc_in_scope,
+            "accuracy_on_accepted_pct": acc_on_acc,
+            "frr_pct": vt_frr,
+        }
+
+    return vt_results
 
 
 def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_holdout=False):
@@ -214,19 +301,40 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
     test_npz = np.load(os.path.join(CACHE_DIR, "test_data.npz"))
     user_noise_np = np.load(os.path.join(CACHE_DIR, "user_ambient_noise.npy"))
 
-    train_wavs = torch.from_numpy(train_npz["wavs"]).unsqueeze(1).to(device)
-    train_labels = torch.from_numpy(train_npz["labels"]).to(device)
+    train_wavs_raw = train_npz["wavs"]
+    train_labels_raw = train_npz["labels"]
+    train_vt_raw = train_npz["voice_types"]
+
+    # Filipino speech oversampling (4x: 1 original + 3 duplicates)
+    fil_mask = (train_vt_raw == "real_filipino")
+    fil_indices = np.where(fil_mask)[0]
+    num_duplicates = FILIPINO_OVERSAMPLE_FACTOR - 1
+    oversampled_train_indices = np.concatenate([
+        np.arange(len(train_labels_raw)),
+        np.repeat(fil_indices, num_duplicates)
+    ])
+
+    train_wavs = torch.from_numpy(train_wavs_raw).unsqueeze(1).to(device)
+    train_labels = torch.from_numpy(train_labels_raw).to(device)
+    train_idx_t = torch.from_numpy(oversampled_train_indices).to(device)
+
+    total_train_samples = len(oversampled_train_indices)
+    total_fil_samples = len(fil_indices) * FILIPINO_OVERSAMPLE_FACTOR
+    fil_share_pct = round((total_fil_samples / total_train_samples) * 100.0, 2)
+    print(f"  [Filipino Oversampling] Factor: {FILIPINO_OVERSAMPLE_FACTOR}x | Unique: {len(fil_indices)} | Per epoch: {total_fil_samples}/{total_train_samples} ({fil_share_pct}% effective share)")
 
     val_wavs = torch.from_numpy(val_npz["wavs"]).unsqueeze(1).to(device)
     val_labels = torch.from_numpy(val_npz["labels"]).to(device)
     val_labels_np = val_npz["labels"]
     val_fg = val_npz["is_filipino_group"]
     val_oos = val_npz["is_oos_speech"]
+    val_vt = val_npz["voice_types"]
 
     test_wavs = torch.from_numpy(test_npz["wavs"]).unsqueeze(1).to(device)
     test_labels_np = test_npz["labels"]
     test_fg = test_npz["is_filipino_group"]
     test_oos = test_npz["is_oos_speech"]
+    test_vt = test_npz["voice_types"]
 
     ambient_noise = torch.from_numpy(user_noise_np).unsqueeze(1).to(device)
 
@@ -266,7 +374,6 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
     else:
         raise ValueError(f"Unknown model {model_name}")
 
-    # Class-weighted loss: 1.0 for commands, OOS_EFFECTIVE_WEIGHT for OUT_OF_SCOPE
     class_weights = torch.ones(num_classes, dtype=torch.float32, device=device)
     class_weights[OOS_CLASS_IDX] = OOS_EFFECTIVE_WEIGHT
     print(f"  Class weights initialized. OUT_OF_SCOPE effective weight: {OOS_EFFECTIVE_WEIGHT}")
@@ -280,17 +387,16 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
     log_rows = []
 
     t0 = time.time()
-    n_train = len(train_labels)
-    indices = torch.arange(n_train, device=device)
+    n_oversampled = len(train_idx_t)
 
     for epoch in range(1, epochs + 1):
         model.train()
-        perm = indices[torch.randperm(n_train, device=device)]
+        perm = train_idx_t[torch.randperm(n_oversampled, device=device)]
         running_loss = 0.0
         correct = 0
         total = 0
 
-        for b_start in range(0, n_train, batch_size):
+        for b_start in range(0, n_oversampled, batch_size):
             b_idx = perm[b_start : b_start + batch_size]
             bx = train_wavs[b_idx]
             by = train_labels[b_idx]
@@ -342,6 +448,8 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
                     "seed": seed,
                     "model_name": model_name,
                     "oos_effective_weight": OOS_EFFECTIVE_WEIGHT,
+                    "filipino_oversample_factor": FILIPINO_OVERSAMPLE_FACTOR,
+                    "filipino_effective_share_pct": fil_share_pct,
                 },
                 best_ckpt_path,
             )
@@ -369,41 +477,65 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
     model.load_state_dict(ckpt["model_state"])
     model.eval()
 
-    def predict_tensor(wav_t):
-        probs_all = []
+    def get_logits_tensor(wav_t):
+        logits_all = []
         with torch.no_grad():
             for b_start in range(0, len(wav_t), batch_size):
                 bx = wav_t[b_start : b_start + batch_size]
                 feats = extract_features(bx, augment=False)
                 logits = model(feats)
-                probs = F.softmax(logits, dim=1).cpu().numpy()
-                probs_all.append(probs)
-        return np.concatenate(probs_all, axis=0)
+                logits_all.append(logits)
+        return torch.cat(logits_all, dim=0)
 
-    val_probs = predict_tensor(val_wavs)
-    test_probs = predict_tensor(test_wavs)
+    val_logits_t = get_logits_tensor(val_wavs)
+    test_logits_t = get_logits_tensor(test_wavs)
+
+    val_probs_uncal = F.softmax(val_logits_t, dim=1).cpu().numpy()
+    test_probs_uncal = F.softmax(test_logits_t, dim=1).cpu().numpy()
+
+    # Temperature Scaling Evaluation
+    temp_opt = fit_temperature_scaling(val_logits_t, val_labels)
+    val_probs_cal = F.softmax(val_logits_t / temp_opt, dim=1).cpu().numpy()
+    test_probs_cal = F.softmax(test_logits_t / temp_opt, dim=1).cpu().numpy()
+    print(f"  --> Temperature Scaling: Fitted optimal T = {temp_opt:.4f}")
 
     # Predict physical mic-noise clips
     mic_noise_wavs = torch.from_numpy(user_noise_np).unsqueeze(1).to(device)
-    mic_noise_probs = predict_tensor(mic_noise_wavs)
+    mic_noise_logits_t = get_logits_tensor(mic_noise_wavs)
+    mic_noise_probs = F.softmax(mic_noise_logits_t, dim=1).cpu().numpy()
 
-    # 5. Tune tau on Validation Only
+    # 5. Dual-Constraint Threshold Tuning on Validation Only (Uncalibrated)
     best_tau, df_sweep = run_tau_sweep_on_validation(
-        val_probs=val_probs,
+        val_probs=val_probs_uncal,
         val_labels=val_labels_np,
         is_filipino_group=val_fg,
         is_oos_speech=val_oos,
         target_far=5.0,
+        max_frr_cap=30.0,
     )
-    print(f"  --> Tuned threshold on validation only: tau* = {best_tau:.2f} (Target FAR <= 5.0%)")
+    print(f"  --> Dual-Constraint Tuned tau* = {best_tau:.2f} (Target FAR <= 5.0%, Max Filipino FRR <= 30.0%)")
 
-    # Save validation tau sweep table
+    # Sweep on calibrated probabilities for comparison
+    best_tau_cal, df_sweep_cal = run_tau_sweep_on_validation(
+        val_probs=val_probs_cal,
+        val_labels=val_labels_np,
+        is_filipino_group=val_fg,
+        is_oos_speech=val_oos,
+        target_far=5.0,
+        max_frr_cap=30.0,
+    )
+    print(f"  --> Temperature-Calibrated Tuned tau* = {best_tau_cal:.2f}")
+
+    # Save validation tau sweep tables
     sweep_path = os.path.join(EXPORTS_DIR, f"tau_sweep_val_{model_name}_seed{seed}.csv")
     df_sweep.to_csv(sweep_path, index=False)
 
+    sweep_cal_path = os.path.join(EXPORTS_DIR, f"tau_sweep_val_{model_name}_calibrated_seed{seed}.csv")
+    df_sweep_cal.to_csv(sweep_cal_path, index=False)
+
     # 6. Evaluate Rejection Rules on Unseen Test Split
     test_rule_results = evaluate_rules_on_split(
-        probs=test_probs,
+        probs=test_probs_uncal,
         labels=test_labels_np,
         is_filipino_group=test_fg,
         is_oos_speech=test_oos,
@@ -412,14 +544,25 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
         mic_noise_probs=mic_noise_probs,
     )
 
-    # Raw overall test metrics
-    test_preds = np.argmax(test_probs, axis=1)
-    test_kw_acc = round(float(np.mean(test_preds == test_labels_np) * 100.0), 2)
-    test_f1 = round(float(f1_score(test_labels_np, test_preds, average="macro")), 4)
+    # Voice Type Breakdown on Test Split
+    vt_breakdown = compute_voice_type_breakdown(
+        probs=test_probs_uncal,
+        labels=test_labels_np,
+        voice_types=test_vt,
+        tau=best_tau,
+        delta_m=0.15,
+    )
 
+    # Raw overall test metrics
+    test_preds = np.argmax(test_probs_uncal, axis=1)
+    test_kw_acc = round(float(np.mean(test_preds == test_labels_np) * 100.0), 2)
+    test_f1 = round(float(f1_score(test_labels_np, test_preds, average="macro", zero_division=0)), 4)
+
+    comb_rule = test_rule_results["combined"]
     print(f"  --> Seed {seed} Test Results (tau={best_tau:.2f}):")
     print(f"      Overall Test Accuracy: {test_kw_acc}% | Macro F1: {test_f1}")
-    print(f"      [Combined Rule]: FAR OOS={test_rule_results['combined']['far_oos_speech_pct']}% (95% CI: {test_rule_results['combined']['far_oos_ci_95']}), FAR Mic Noise={test_rule_results['combined']['far_mic_noise_pct']}%, Acc Accepted={test_rule_results['combined']['command_acc_accepted_pct']}%, FRR Filipino={test_rule_results['combined']['frr_filipino_group_pct']}%")
+    print(f"      [Combined Rule]: FAR OOS={comb_rule['far_oos_speech_pct']}% (95% CI: {comb_rule['far_oos_ci_95']}), FAR Mic Noise={comb_rule['far_mic_noise_pct']}%, Acc Accepted={comb_rule['command_acc_accepted_pct']}% (FRR Filipino: {comb_rule['frr_filipino_group_pct']}%)")
+    print(f"      [Voice Type Breakdown Acc]: Real Filipino={vt_breakdown['real_filipino']['raw_accuracy_pct']}%, Open Source={vt_breakdown['open_source']['raw_accuracy_pct']}%, Synthetic={vt_breakdown['synthetic']['raw_accuracy_pct']}%")
 
     return {
         "seed": seed,
@@ -427,11 +570,13 @@ def train_single_run(model_name, seed, device, epochs, batch_size, lr, eval_hold
         "val_acc": round(float(ckpt["val_acc"]), 2),
         "wall_clock_time_s": round(wall_clock, 2),
         "best_tau": best_tau,
+        "temperature_optimal": temp_opt,
         "test_overall": {
             "keyword_accuracy": test_kw_acc,
             "macro_f1": test_f1,
         },
         "test_rules": test_rule_results,
+        "voice_type_breakdown": vt_breakdown,
     }
 
 
@@ -452,12 +597,14 @@ def main():
     seeds = [int(s.strip()) for s in args.seeds.split(",")]
 
     print("=" * 70)
-    print("🚀 20-CLASS MULTI-SEED VCM TRAINING (A100 CLUSTER)")
+    print("🚀 20-CLASS MULTI-SEED VCM TRAINING (A100 CLUSTER - BALANCED FILIPINO)")
     print("=" * 70)
     print(f"  Node ID:           {node_id}")
     print(f"  Device:            {device} ({gpu_name})")
     print(f"  Seeds:             {seeds}")
     print(f"  OOS Class Weight:  {OOS_EFFECTIVE_WEIGHT}")
+    print(f"  Filipino Oversample:{FILIPINO_OVERSAMPLE_FACTOR}x")
+    print(f"  Dual Constraints:  Target FAR <= 5.0% & Max Filipino FRR <= 30.0%")
     print(f"  Eval Holdout:      {args.eval_holdout} (Cluster policy: False)")
 
     models_to_run = ["bcresnet", "dscnn"] if args.model == "both" else [args.model]
@@ -485,11 +632,20 @@ def main():
         accs = [r["test_overall"]["keyword_accuracy"] for r in seed_results]
         f1s = [r["test_overall"]["macro_f1"] for r in seed_results]
         best_taus = [r["best_tau"] for r in seed_results]
+        temps = [r["temperature_optimal"] for r in seed_results]
 
         comb_far_oos = [r["test_rules"]["combined"]["far_oos_speech_pct"] for r in seed_results]
         comb_far_noise = [r["test_rules"]["combined"]["far_mic_noise_pct"] for r in seed_results]
         comb_acc_acc = [r["test_rules"]["combined"]["command_acc_accepted_pct"] for r in seed_results]
         comb_frr_fil = [r["test_rules"]["combined"]["frr_filipino_group_pct"] for r in seed_results]
+
+        # Voice type aggregations
+        fil_accs = [r["voice_type_breakdown"]["real_filipino"]["raw_accuracy_pct"] for r in seed_results]
+        os_accs = [r["voice_type_breakdown"]["open_source"]["raw_accuracy_pct"] for r in seed_results]
+        syn_accs = [r["voice_type_breakdown"]["synthetic"]["raw_accuracy_pct"] for r in seed_results]
+
+        fil_acc_acc = [r["voice_type_breakdown"]["real_filipino"]["accuracy_on_accepted_pct"] for r in seed_results]
+        fil_frrs = [r["voice_type_breakdown"]["real_filipino"]["frr_pct"] for r in seed_results]
 
         summary = {
             "model_name": m_name,
@@ -500,6 +656,7 @@ def main():
                 "gpu_count": 1,
             },
             "oos_effective_weight": OOS_EFFECTIVE_WEIGHT,
+            "filipino_oversample_factor": FILIPINO_OVERSAMPLE_FACTOR,
             "seeds": seeds,
             "per_seed_results": seed_results,
             "aggregate_test_cluster": {
@@ -508,13 +665,25 @@ def main():
                 "macro_f1_mean": round(float(np.mean(f1s)), 4),
                 "macro_f1_std": round(float(np.std(f1s)), 4),
                 "best_tau_mean": round(float(np.mean(best_taus)), 2),
+                "temperature_mean": round(float(np.mean(temps)), 4),
                 "combined_rule": {
                     "far_oos_speech_mean": round(float(np.mean(comb_far_oos)), 2),
                     "far_oos_speech_std": round(float(np.std(comb_far_oos)), 2),
                     "far_mic_noise_mean": round(float(np.mean(comb_far_noise)), 2),
                     "command_acc_accepted_mean": round(float(np.mean(comb_acc_acc)), 2),
+                    "command_acc_accepted_std": round(float(np.std(comb_acc_acc)), 2),
                     "frr_filipino_group_mean": round(float(np.mean(comb_frr_fil)), 2),
                     "frr_filipino_group_std": round(float(np.std(comb_frr_fil)), 2),
+                },
+                "voice_type_breakdown": {
+                    "real_filipino_acc_mean": round(float(np.mean(fil_accs)), 2),
+                    "real_filipino_acc_std": round(float(np.std(fil_accs)), 2),
+                    "real_filipino_acc_on_accepted_mean": round(float(np.mean(fil_acc_acc)), 2),
+                    "real_filipino_frr_mean": round(float(np.mean(fil_frrs)), 2),
+                    "open_source_acc_mean": round(float(np.mean(os_accs)), 2),
+                    "open_source_acc_std": round(float(np.std(os_accs)), 2),
+                    "synthetic_acc_mean": round(float(np.mean(syn_accs)), 2),
+                    "synthetic_acc_std": round(float(np.std(syn_accs)), 2),
                 },
             },
         }
@@ -550,6 +719,7 @@ def main():
         print(f"   Tuned tau* (mean):    {summary['aggregate_test_cluster']['best_tau_mean']}")
         print(f"   Combined FAR (OOS):   {summary['aggregate_test_cluster']['combined_rule']['far_oos_speech_mean']:.2f}%")
         print(f"   Combined FRR (Filip): {summary['aggregate_test_cluster']['combined_rule']['frr_filipino_group_mean']:.2f}%")
+        print(f"   Real Filipino Acc:    {summary['aggregate_test_cluster']['voice_type_breakdown']['real_filipino_acc_mean']:.2f}%")
         print(f"   Final Checkpoint:     Seed {best_seed} -> {dst_pt}")
 
     with open(os.path.join(EXPORTS_DIR, "v2_20class_side_by_side.json"), "w") as f:

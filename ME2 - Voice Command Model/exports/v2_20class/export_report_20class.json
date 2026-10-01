@@ -1,42 +1,42 @@
 {
   "bcresnet": {
     "model_name": "bcresnet",
-    "checkpoint": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v2/bcresnet_20class_final.pt",
+    "checkpoint": "checkpoints/v2/bcresnet_20class_final.pt",
     "parameters": 68532,
     "parameters_m": 0.0685,
     "fp32": {
-      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2_20class/bcresnet_20class_fp32.onnx",
+      "path": "exports/v2_20class/bcresnet_20class_fp32.onnx",
       "size_mb": 0.268,
-      "test_accuracy": 83.41,
-      "test_macro_f1": 0.7539
+      "test_accuracy": 82.19,
+      "test_macro_f1": 0.7432
     },
     "int8": {
-      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2_20class/bcresnet_20class_int8.onnx",
+      "path": "exports/v2_20class/bcresnet_20class_int8.onnx",
       "size_mb": 0.11,
       "compression_ratio": 2.44,
-      "test_accuracy": 83.32,
-      "test_macro_f1": 0.7529,
-      "accuracy_drop_pct": 0.09
+      "test_accuracy": 82.07,
+      "test_macro_f1": 0.7407,
+      "accuracy_drop_pct": 0.12
     }
   },
   "dscnn": {
     "model_name": "dscnn",
-    "checkpoint": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v2/dscnn_20class_final.pt",
+    "checkpoint": "checkpoints/v2/dscnn_20class_final.pt",
     "parameters": 53460,
     "parameters_m": 0.0535,
     "fp32": {
-      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2_20class/dscnn_20class_fp32.onnx",
+      "path": "exports/v2_20class/dscnn_20class_fp32.onnx",
       "size_mb": 0.205,
-      "test_accuracy": 75.19,
-      "test_macro_f1": 0.6359
+      "test_accuracy": 75.74,
+      "test_macro_f1": 0.648
     },
     "int8": {
-      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2_20class/dscnn_20class_int8.onnx",
+      "path": "exports/v2_20class/dscnn_20class_int8.onnx",
       "size_mb": 0.073,
       "compression_ratio": 2.81,
-      "test_accuracy": 74.72,
-      "test_macro_f1": 0.6303,
-      "accuracy_drop_pct": 0.47
+      "test_accuracy": 75.46,
+      "test_macro_f1": 0.6467,
+      "accuracy_drop_pct": 0.28
     }
   }
 }

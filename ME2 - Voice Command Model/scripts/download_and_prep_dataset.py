@@ -3,14 +3,14 @@
 prep_dataset_20class.py
 
 Prepares the 20-class Voice Command Dataset from Hugging Face:
-- 19 schema commands: ALARM, BRIGHTNESS, CALL, COLOR, CREATE_REMINDER, LIGHT_OFF,
-  LIGHT_ON, LIST_REMINDERS, MESSAGE, NEXT, PAUSE, PLAY_MUSIC, STOP, TEMPERATURE,
-  TIME, TIMER, VOLUME_DOWN, VOLUME_UP, WEATHER.
-- 20th class: OUT_OF_SCOPE (index 19 in 0-based indexing).
-- Preserves speaker-disjoint validation carve-out from train.
-- Preserves exact test and holdout splits (with held-out flag).
-- Incorporates physical G-Mark USB microphone ambient room noise into OUT_OF_SCOPE.
-- Records rich metadata for evaluation: is_filipino_group, is_oos_speech, accent_group.
+- 19 schema commands + OUT_OF_SCOPE (index 19 in 0-based indexing).
+- Solves Filipino speech starvation:
+    - Retains 547 of 619 real Filipino in-scope clips in TRAIN (speakers: 202322013, 202322013_speaker2, S1, S2, S3).
+    - Reserves exactly 1 unseen Filipino speaker in VAL (202521746 with 72 in-scope clips).
+    - Never splits any speaker across train and val.
+    - Leaves TEST (189 Filipino clips, 3 speakers) and HOLDOUT (73 Filipino clips, 1 speaker) untouched.
+- Incorporates physical G-Mark USB microphone ambient room noise into OUT_OF_SCOPE in train.
+- Records rich metadata for evaluation: is_filipino_group, is_oos_speech, voice_type.
 - Executes 12 programmatic zero-leak assertions.
 """
 
@@ -57,6 +57,17 @@ def map_row_to_class(cmd, oos):
     return "OUT_OF_SCOPE", 19
 
 
+def get_voice_type(row):
+    accent = str(row.get("accent_group", ""))
+    note = str(row.get("note", ""))
+    source = str(row.get("source", ""))
+    if accent == "Filipino (group)" or "group recording" in note:
+        return "real_filipino"
+    if source == "group_synthetic" or accent == "Synthetic":
+        return "synthetic"
+    return "open_source"
+
+
 def process_audio_bytes(audio_bytes):
     with io.BytesIO(audio_bytes) as bio:
         data, sr = sf.read(bio, dtype="float32")
@@ -77,9 +88,9 @@ def process_audio_bytes(audio_bytes):
 
 
 def main():
-    print("=" * 70)
-    print("📥 PREPARING 20-CLASS VOICE COMMAND DATASET (19 COMMANDS + OUT_OF_SCOPE)")
-    print("=" * 70)
+    print("=" * 75)
+    print("📥 PREPARING 20-CLASS VOICE COMMAND DATASET (BALANCED FILIPINO SPLIT)")
+    print("=" * 75)
 
     # 1. Load Dataset
     print("[1/6] Loading dataset from airimonda/ai231-me2-voice-commands...")
@@ -99,16 +110,45 @@ def main():
     raw_holdout = ds["holdout"]
     print(f"      Clips downloaded: Train={len(raw_train)}, Test={len(raw_test)}, Holdout={len(raw_holdout)}")
 
-    # 2. Carve out speaker-disjoint Validation set from Train
+    # 2. Carve out speaker-disjoint Validation set from Train without starving Filipino speech
     print("[2/6] Carving out speaker-disjoint validation set from train...")
     spk_to_train_indices = defaultdict(list)
-    for idx, spk in enumerate(raw_train["speaker_id"]):
-        spk_to_train_indices[spk].append(idx)
+    spk_is_filipino = {}
+    spk_has_oos = defaultdict(int)
 
-    train_speakers_pool = sorted(spk_to_train_indices.keys())
+    for idx, row in enumerate(raw_train):
+        spk = row["speaker_id"]
+        spk_to_train_indices[spk].append(idx)
+        accent = str(row.get("accent_group", ""))
+        note = str(row.get("note", ""))
+        if accent == "Filipino (group)" or "group recording" in note:
+            spk_is_filipino[spk] = True
+        elif spk not in spk_is_filipino:
+            spk_is_filipino[spk] = False
+
+        if row["command"] == "OUT_OF_SCOPE" or row.get("out_of_scope") == 1:
+            spk_has_oos[spk] += 1
+
+    filipino_train_spks = sorted([s for s, is_f in spk_is_filipino.items() if is_f])
+    non_filipino_train_spks = sorted([s for s, is_f in spk_is_filipino.items() if not is_f])
+    non_fil_oos_spks = sorted([s for s in non_filipino_train_spks if spk_has_oos[s] > 0])
+    non_fil_no_oos_spks = sorted([s for s in non_filipino_train_spks if spk_has_oos[s] == 0])
+
+    print(f"      Filipino speakers in raw train ({len(filipino_train_spks)}): {filipino_train_spks}")
+    print(f"      Non-Filipino speakers in raw train: {len(non_filipino_train_spks)}")
+
+    # Reserve exactly 1 Filipino speaker for validation (202521746 with 72 in-scope clips)
+    # The remaining 5 Filipino speakers (547 in-scope clips, including 202322013 with 422 clips) remain in TRAIN!
+    val_fil_spk = {"202521746"}
+    train_fil_spk = set(filipino_train_spks) - val_fil_spk
+
+    # Sample 35 non-Filipino speakers for validation (20 with OOS, 15 without OOS)
     rng = random.Random(42)
-    val_spk_set = set(rng.sample(train_speakers_pool, k=38))  # ~12% of speakers
-    train_spk_set = set(train_speakers_pool) - val_spk_set
+    val_non_fil = set(rng.sample(non_fil_oos_spks, k=20)) | set(rng.sample(non_fil_no_oos_spks, k=15))
+    train_non_fil = set(non_filipino_train_spks) - val_non_fil
+
+    val_spk_set = val_fil_spk | val_non_fil
+    train_spk_set = train_fil_spk | train_non_fil
 
     val_indices = [idx for spk in sorted(val_spk_set) for idx in spk_to_train_indices[spk]]
     train_indices = [idx for spk in sorted(train_spk_set) for idx in spk_to_train_indices[spk]]
@@ -148,6 +188,7 @@ def main():
         speakers = []
         is_filipino_group = np.zeros(len(indices), dtype=np.int64)
         is_oos_speech = np.zeros(len(indices), dtype=np.int64)
+        voice_types = []
         durations = []
 
         for out_idx, in_idx in enumerate(tqdm(indices, leave=False)):
@@ -159,6 +200,9 @@ def main():
             speakers.append(row["speaker_id"])
             durations.append(row["duration_s"] if row["duration_s"] is not None else 2.0)
 
+            v_type = get_voice_type(row)
+            voice_types.append(v_type)
+
             # Tag Filipino group in-scope recordings
             accent = str(row.get("accent_group", ""))
             note = str(row.get("note", ""))
@@ -169,12 +213,12 @@ def main():
             if lbl_idx == 19:
                 is_oos_speech[out_idx] = 1
 
-        return wavs, labels, speakers, is_filipino_group, is_oos_speech, durations
+        return wavs, labels, speakers, is_filipino_group, is_oos_speech, voice_types, durations
 
-    train_w, train_y, train_spk, train_fg, train_oos, train_dur = build_split(raw_train, train_indices)
-    val_w, val_y, val_spk, val_fg, val_oos, val_dur = build_split(raw_train, val_indices)
-    test_w, test_y, test_spk, test_fg, test_oos, test_dur = build_split(raw_test)
-    holdout_w, holdout_y, holdout_spk, holdout_fg, holdout_oos, holdout_dur = build_split(raw_holdout)
+    train_w, train_y, train_spk, train_fg, train_oos, train_vt, train_dur = build_split(raw_train, train_indices)
+    val_w, val_y, val_spk, val_fg, val_oos, val_vt, val_dur = build_split(raw_train, val_indices)
+    test_w, test_y, test_spk, test_fg, test_oos, test_vt, test_dur = build_split(raw_test)
+    holdout_w, holdout_y, holdout_spk, holdout_fg, holdout_oos, holdout_vt, holdout_dur = build_split(raw_holdout)
 
     # 5. Add G-Mark USB Ambient Room Noise to Train (OUT_OF_SCOPE class 19)
     print("[5/6] Incorporating physical G-Mark USB mic ambient room noise...")
@@ -210,6 +254,7 @@ def main():
     train_spk = train_spk + ["gmark_user_mic"] * len(user_bg_train)
     train_fg = np.concatenate([train_fg, np.zeros(len(user_bg_train), dtype=np.int64)], axis=0)
     train_oos = np.concatenate([train_oos, np.zeros(len(user_bg_train), dtype=np.int64)], axis=0)
+    train_vt = train_vt + ["mic_ambient_noise"] * len(user_bg_train)
     train_dur = train_dur + [2.0] * len(user_bg_train)
 
     # 6. Save Caches & Label JSON
@@ -217,22 +262,26 @@ def main():
     np.savez_compressed(
         os.path.join(CACHE_DIR, "train_data.npz"),
         wavs=train_w, labels=train_y, speakers=np.array(train_spk),
-        is_filipino_group=train_fg, is_oos_speech=train_oos
+        is_filipino_group=train_fg, is_oos_speech=train_oos,
+        voice_types=np.array(train_vt)
     )
     np.savez_compressed(
         os.path.join(CACHE_DIR, "val_data.npz"),
         wavs=val_w, labels=val_y, speakers=np.array(val_spk),
-        is_filipino_group=val_fg, is_oos_speech=val_oos
+        is_filipino_group=val_fg, is_oos_speech=val_oos,
+        voice_types=np.array(val_vt)
     )
     np.savez_compressed(
         os.path.join(CACHE_DIR, "test_data.npz"),
         wavs=test_w, labels=test_y, speakers=np.array(test_spk),
-        is_filipino_group=test_fg, is_oos_speech=test_oos
+        is_filipino_group=test_fg, is_oos_speech=test_oos,
+        voice_types=np.array(test_vt)
     )
     np.savez_compressed(
         os.path.join(CACHE_DIR, "holdout_data.npz"),
         wavs=holdout_w, labels=holdout_y, speakers=np.array(holdout_spk),
-        is_filipino_group=holdout_fg, is_oos_speech=holdout_oos
+        is_filipino_group=holdout_fg, is_oos_speech=holdout_oos,
+        voice_types=np.array(holdout_vt)
     )
     np.save(os.path.join(CACHE_DIR, "user_ambient_noise.npy"), user_noise_np)
 
@@ -254,7 +303,9 @@ def main():
             "hours": round(float(sum(train_dur) / 3600.0), 3),
             "speakers": len(set(train_spk)),
             "oos_count": int(np.sum(train_y == 19)),
+            "filipino_in_scope_count": int(np.sum(train_fg)),
             "class_distribution": {IDX2LABEL_20[int(k)]: int(v) for k, v in sorted(Counter(train_y).items())},
+            "voice_type_distribution": dict(Counter(train_vt)),
         },
         "val": {
             "utterances": len(val_y),
@@ -263,6 +314,7 @@ def main():
             "oos_count": int(np.sum(val_y == 19)),
             "filipino_in_scope_count": int(np.sum(val_fg)),
             "class_distribution": {IDX2LABEL_20[int(k)]: int(v) for k, v in sorted(Counter(val_y).items())},
+            "voice_type_distribution": dict(Counter(val_vt)),
         },
         "test": {
             "utterances": len(test_y),
@@ -271,6 +323,7 @@ def main():
             "oos_count": int(np.sum(test_y == 19)),
             "filipino_in_scope_count": int(np.sum(test_fg)),
             "class_distribution": {IDX2LABEL_20[int(k)]: int(v) for k, v in sorted(Counter(test_y).items())},
+            "voice_type_distribution": dict(Counter(test_vt)),
         },
         "holdout": {
             "utterances": len(holdout_y),
@@ -279,15 +332,16 @@ def main():
             "oos_count": int(np.sum(holdout_y == 19)),
             "filipino_in_scope_count": int(np.sum(holdout_fg)),
             "class_distribution": {IDX2LABEL_20[int(k)]: int(v) for k, v in sorted(Counter(holdout_y).items())},
+            "voice_type_distribution": dict(Counter(holdout_vt)),
         },
     }
 
     with open(os.path.join(EXPORTS_DIR, "split_stats_20class.json"), "w") as f:
         json.dump(stats, f, indent=2)
 
-    print("\n" + "=" * 70)
-    print("📊 20-CLASS DATASET SUMMARY:")
-    print("=" * 70)
+    print("\n" + "=" * 75)
+    print("📊 20-CLASS DATASET SUMMARY (BALANCED FILIPINO ALLOCATION):")
+    print("=" * 75)
     for sp_name, s in stats.items():
         oos_str = f"OOS: {s['oos_count']:3d}"
         fg_str = f" | Filipino Group: {s.get('filipino_in_scope_count', 0):3d}" if "filipino_in_scope_count" in s else ""

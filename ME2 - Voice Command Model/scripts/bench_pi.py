@@ -282,9 +282,10 @@ def run_benchmark(model_path, threads, num_warmup, num_runs, eval_holdout=False,
         h_npz = np.load(holdout_file)
         h_wavs = h_npz["wavs"]
         h_labels = h_npz["labels"]
-        h_spk = h_npz["speaker_ids"]
+        h_spk = h_npz["speakers"] if "speakers" in h_npz else h_npz["speaker_ids"]
         h_fg = h_npz["is_filipino_group"]
         h_oos = h_npz["is_oos_speech"]
+        h_vt = h_npz["voice_types"] if "voice_types" in h_npz else None
 
         mic_probs = None
         if os.path.exists(mic_file):
@@ -341,6 +342,14 @@ def run_benchmark(model_path, threads, num_warmup, num_runs, eval_holdout=False,
             mask = (h_spk == spk)
             spk_acc = round(float(np.mean(h_preds[mask] == h_labels[mask]) * 100.0), 2)
             print(f"    Speaker {spk:10s} (n={np.sum(mask):2d}): Acc = {spk_acc}%")
+
+        if h_vt is not None:
+            unique_vts = np.unique(h_vt)
+            print("\n  Per-Voice-Type Breakdown (Holdout):")
+            for vt in unique_vts:
+                mask = (h_vt == vt)
+                vt_acc = round(float(np.mean(h_preds[mask] == h_labels[mask]) * 100.0), 2)
+                print(f"    Voice Type {vt:18s} (n={np.sum(mask):2d}): Acc = {vt_acc}%")
 
         print("\n" + "=" * 75)
         print("📋 COPY & PASTE EXACTLY INTO README.md (Replacing 'REPLACE'):")
