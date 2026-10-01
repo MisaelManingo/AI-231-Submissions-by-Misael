@@ -1,0 +1,26 @@
+{
+  "bcresnet": {
+    "model_name": "bcresnet",
+    "parameter_count_raw": 69696,
+    "parameter_count_m": 0.0697,
+    "fp32_path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2/bcresnet_v2_fp32.onnx",
+    "fp32_size_mb": 0.2726,
+    "fp32_test_acc": 82.93,
+    "int8_path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2/bcresnet_v2_int8.onnx",
+    "int8_size_mb": 0.111,
+    "int8_test_acc": 83.25,
+    "accuracy_drop": -0.32
+  },
+  "dscnn": {
+    "model_name": "dscnn",
+    "parameter_count_raw": 55008,
+    "parameter_count_m": 0.055,
+    "fp32_path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2/dscnn_v2_fp32.onnx",
+    "fp32_size_mb": 0.2108,
+    "fp32_test_acc": 74.56,
+    "int8_path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v2/dscnn_v2_int8.onnx",
+    "int8_size_mb": 0.075,
+    "int8_test_acc": 73.9,
+    "accuracy_drop": 0.66
+  }
+}

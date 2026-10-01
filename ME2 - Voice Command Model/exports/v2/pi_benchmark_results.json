@@ -1,0 +1,24 @@
+{
+  "hardware": {
+    "hardware_model": "Linux x86_64",
+    "os_version": "Ubuntu 24.04.4 LTS",
+    "kernel": "6.8.0-124-generic",
+    "arch": "x86_64",
+    "python_version": "3.13.13"
+  },
+  "onnxruntime_version": "1.30.0",
+  "threads": 4,
+  "model_file": "bcresnet_v2_int8.onnx",
+  "keyword_accuracy": 65.82,
+  "intent_accuracy": 67.35,
+  "false_accept_rate": 10.0,
+  "latency_ms": {
+    "mean": 13.89,
+    "p50": 13.91,
+    "p95": 15.14,
+    "p99": 15.81,
+    "min": 12.09,
+    "max": 17.01
+  },
+  "rtf_p95": 0.00757
+}

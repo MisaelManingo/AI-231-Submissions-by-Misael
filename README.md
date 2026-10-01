@@ -23,8 +23,9 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 - Complete, 100% on-device edge voice assistant deployed on **Raspberry Pi 5** using a **G-Mark Micro Go USB mic/speaker**.
 - Zero PyTorch dependencies on device: pure NumPy Mel-Spectrogram extraction + ONNX Runtime CPU.
 - **Personalized Wake Word Spotter ("Hey Raspberry")**: 27.4 KB INT8, 98.5% confidence on user takes, 0.00% on idle noise.
-- **32-Class Joint Intent & Slot VCM**: 113.6 KB INT8 BC-ResNet, 99.22% top-1 accuracy, 0.9924 Macro F1, 15.75 ms latency.
+- **32-Class Joint Intent & Slot VCM (BC-ResNet-1)**: 113.7 KB INT8, 83.25% test accuracy across 121 unseen speakers on the multi-source Hugging Face benchmark, 15.14 ms CPU latency (p95).
 - Full real-time smart-home state management with continuous ALSA audio capture, adaptive peak normalization, and VAD energy gating.
+- Full multi-seed A100 training logs, DS-CNN baseline comparison, INT8 ONNX export, and one-command reproduction (`./reproduce.sh`).
 
 ---
 

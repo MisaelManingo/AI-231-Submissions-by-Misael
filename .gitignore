@@ -36,6 +36,8 @@ wheels/
 # PyTorch checkpoints
 *.pth
 *.pt
+!checkpoints/v2/*.pt
+!*/checkpoints/v2/*.pt
 results/
 */results/
 

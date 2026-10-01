@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Edge Voice Command Model (BC-ResNet-1) and Personalized Wake Word Spotter on Raspberry Pi 5"
+version: 2.0.0
+date-released: 2026-10-02
+url: "https://github.com/MisaelManingo/AI-231-Submissions-by-Misael"
+repository-code: "https://github.com/MisaelManingo/AI-231-Submissions-by-Misael"
+license: MIT
+authors:
+  - family-names: "Maningo"
+    given-names: "Misael"
+    affiliation: "University of the Philippines Diliman"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Maningo"
+      given-names: "Misael"
+  title: "Edge Voice Command Model (BC-ResNet-1) and Personalized Wake Word Spotter for Embedded Linux"
+  year: 2026
+  conference:
+    name: "AI 231: Advanced Deep Learning"
