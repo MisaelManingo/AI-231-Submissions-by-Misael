@@ -9,7 +9,7 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 | Directory | Topic / Machine Exercise | Key Technologies | Status |
 |---|---|---|---|
 | [`ME1 - Einops/Einsum`](./ME1%20-%20Einops/Einsum/) | Custom 3-Layer CNN for MNIST Classification | PyTorch, `einops`, `torch.einsum`, First-Principles CNN | Completed (Test Acc: 98.99%) |
-| [`ME2 - Voice Command Model`](./ME2%20-%20Voice%20Command%20Model/) | On-Device Tiny Voice Command & Personalized Wake Word Spotter on Raspberry Pi 5 | BC-ResNet-1, RobustWakeNet, ONNX Runtime INT8, Pure NumPy DSP, 32-Class Joint Intent & Slot Recognition | Completed (Test Acc: 99.22%, Latency: 15.75 ms) |
+| [`ME2 - Voice Command Model`](./ME2%20-%20Voice%20Command%20Model/) | On-Device Tiny Voice Command & Personalized Wake Word Spotter on Raspberry Pi 5 | BC-ResNet-1, RobustWakeNet, ONNX Runtime INT8, Pure NumPy DSP, 20-Class Acoustic Intent & OOS Rejection | Completed (Test Acc: 83.62% ± 0.18%, FAR: 4.97%) |
 
 ---
 
@@ -23,7 +23,7 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 - Complete, 100% on-device edge voice assistant deployed on **Raspberry Pi 5** using a **G-Mark Micro Go USB mic/speaker**.
 - Zero PyTorch dependencies on device: pure NumPy Mel-Spectrogram extraction + ONNX Runtime CPU.
 - **Personalized Wake Word Spotter ("Hey Raspberry")**: 27.4 KB INT8, 98.5% confidence on user takes, 0.00% on idle noise.
-- **32-Class Joint Intent & Slot VCM (BC-ResNet-1)**: 113.7 KB INT8, 83.25% test accuracy across 121 unseen speakers on the multi-source Hugging Face benchmark, 15.14 ms CPU latency (p95).
+- **20-Class Voice Command Model (BC-ResNet-1)**: 110 KB INT8 (0.0685 M parameters), 83.62% ± 0.18% test accuracy across 121 unseen speakers on the multi-source Hugging Face benchmark, combined OOS FAR of 4.97% (at tuned $\tau^* = 0.77$).
 - Full real-time smart-home state management with continuous ALSA audio capture, adaptive peak normalization, and VAD energy gating.
 - Full multi-seed A100 training logs, DS-CNN baseline comparison, INT8 ONNX export, and one-command reproduction (`./reproduce.sh`).
 

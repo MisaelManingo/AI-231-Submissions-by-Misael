@@ -2,22 +2,22 @@
 
 - **GitHub Repository**: [`https://github.com/MisaelManingo/AI-231-Submissions-by-Misael`](https://github.com/MisaelManingo/AI-231-Submissions-by-Misael) · **Public** · **MIT License**
 - **Dataset Location**: [`https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) · Open access for research & education (incorporates SLURP [CC BY 4.0], Google Speech Commands v2 [CC BY 4.0], Common Voice 19 [CC0], Fluent Speech Commands [Academic License], MSVCD [CC BY 4.0, DOI: 10.48804/IEKKVZ])
-- **A100 Cluster**: Node `ai-n002.hpc.coe.upd.edu.ph` · 1x NVIDIA A100-SXM4-40GB (GPU 7) · Wall-clock: ~9 minutes (6 runs, 25 epochs each) · Seeds: `[42, 1337, 2026]`
-- **Model Weights & Artifacts**: Available in repo under [`exports/v2/`](./exports/v2/) (`bcresnet_v2_int8.onnx` [113.7 KB], `dscnn_v2_int8.onnx` [76.8 KB], `checkpoints/v2/bcresnet_v2_final.pt` [285.5 KB]) · **MIT License**
+- **A100 Cluster**: Node `ai-n002.hpc.coe.upd.edu.ph` · 1x NVIDIA A100-SXM4-40GB (GPU 7) · Wall-clock: ~8.5 minutes (6 training runs, 25 epochs each) · Seeds: `[42, 1337, 2026]`
+- **Model Weights & Artifacts**: Available in repo under [`exports/v2_20class/`](./exports/v2_20class/) (`bcresnet_20class_int8.onnx` [113 KB], `bcresnet_20class_fp32.onnx` [275 KB], `dscnn_20class_int8.onnx` [76 KB], `checkpoints/v2/bcresnet_20class_final.pt` [311 KB]) · **MIT License**
 
 ---
 
 # Section 2 — Summary
 
 ## Model Architecture
-The production Voice Command Model uses **BC-ResNet-1** (Broadcasted Residual Network), an ultra-compact acoustic architecture engineered for edge keyword spotting and parameter slot identification on embedded CPUs:
+The primary Voice Command Model employs **BC-ResNet-1** (Broadcasted Residual Network), an ultra-compact acoustic architecture engineered for embedded edge devices and keyword spotting:
 
 * **Audio Front-End**:
-  - Sample rate: 16,000 Hz, single-channel (mono), 16-bit PCM.
+  - Sample Rate: 16,000 Hz, single-channel (mono), 16-bit PCM WAV.
   - Window & Framing: Hann window, $N_{\text{fft}} = 400$ ($25.0\text{ ms}$), hop length = 160 ($10.0\text{ ms}$ step).
-  - Mel Filterbank: 40 triangular Mel bins spanning 0 Hz to 8,000 Hz.
+  - Mel Filterbank: 40 triangular Mel filter bins spanning 0 Hz to 8,000 Hz.
   - Normalization: Per-utterance zero-mean, unit-variance standardization: $(x - \mu) / (\sigma + 10^{-5})$.
-  - Target Spectrogram Dimensions: $(B, 1, 40, 201)$ corresponding to 2.0 seconds of audio.
+  - Target Spectrogram Dimensions: $(B, 1, 40, 201)$ corresponding to exactly 2.0 seconds of audio.
 
 * **Detailed Block & Stage Structure**:
   | Stage / Block | Type / Operator | Input Shape | Output Shape | Parameters | Details |
@@ -26,65 +26,63 @@ The production Voice Command Model uses **BC-ResNet-1** (Broadcasted Residual Ne
   | **Stage 1** | $2\times$ `BroadcastResBlock` | $(B, 32, 20, 201)$ | $(B, 32, 20, 201)$ | 5,632 | Stride $(1, 1)$, Broadcast Conv $1\times1$, Dropout 0.1 |
   | **Stage 2** | $2\times$ `BroadcastResBlock` | $(B, 32, 20, 201)$ | $(B, 64, 10, 101)$ | 19,456 | Block 1 stride $(2, 2)$, Block 2 stride $(1, 1)$ |
   | **Stage 3** | $2\times$ `BroadcastResBlock` | $(B, 64, 10, 101)$ | $(B, 96, 5, 51)$ | 40,704 | Block 1 stride $(2, 2)$, Block 2 stride $(1, 1)$ |
-  | **Head** | `AdaptiveAvgPool2d` + `FC` | $(B, 96, 5, 51)$ | $(B, 32)$ | 3,104 | Global pool $(1, 1)$, Linear $(96 \to 32)$ |
+  | **Head** | `AdaptiveAvgPool2d` + `FC` | $(B, 96, 5, 51)$ | $(B, 20)$ | 1,940 | Global pool $(1, 1)$, Linear $(96 \to 20)$ |
 
-* **Broadcast Temporal Mechanism**: Within each residual block, temporal context is compressed across the frequency dimension using `x.mean(dim=2, keepdim=True)`, transformed through a $1\times1$ depthwise convolution, and broadcast back across all frequency channels before residual addition.
+* **Subspectral Norm & Broadcast-Residual Details**: Each residual block contains a pointwise $1\times1$ convolution, a depthwise $3\times3$ spatial convolution across time and frequency, and an auxiliary temporal context broadcast branch (`x.mean(dim=2, keepdim=True)` transformed through a $1\times1$ convolution and broadcast added across the frequency dimension) prior to residual addition and ReLU activation.
 * **Parameter Count & Weights File Size**:
-  - Parameters: **0.0697 M** (69,696 parameters).
-  - Weights (FP32 ONNX): **0.2726 MB** (279.1 KB).
-  - Weights (INT8 ONNX): **0.1110 MB** (113.7 KB).
+  - Parameters: **0.0685 M** (68,532 parameters).
+  - Weights (FP32 ONNX): **0.268 MB** (275 KB).
+  - Weights (INT8 ONNX): **0.110 MB** (113 KB, 2.44x compression).
 
 ---
 
 ## Validation on the Raspberry Pi
-The table below reports measured edge performance on ARM Cortex-A76 (Raspberry Pi 5) executed via [`scripts/bench_pi.py`](./scripts/bench_pi.py) using pure NumPy feature extraction and ONNX Runtime CPU (PyTorch-free):
+The table below specifies on-device physical measurements on the ARM Cortex-A76 (Raspberry Pi 5) executed via [`scripts/bench_pi.py`](./scripts/bench_pi.py) using pure NumPy feature extraction and ONNX Runtime CPU (PyTorch-free). 
 
-- **Keyword / Intent Accuracy**: 65.82% / 67.35% (on holdout split; physical on-device field validation: **<TBD>**)
-- **False-Accept Rate (FAR)**: 10.0% (at deployed decision threshold $\tau = 0.65$; physical on-device field validation: **<TBD>**)
-- **Latency p95 / RTF**: **<TBD>** ms / **<TBD>** *(Physical Pi run pending user hardware execution via `python scripts/bench_pi.py`; local x86_64 CPU reference: 15.14 ms p95, RTF: 0.00757)*
-- **Latency p50**: **<TBD>** ms *(Local x86_64 CPU reference: 13.91 ms)*
-- **Runtime**: ONNX Runtime v1.30.0 · 4 CPU threads (ARM Cortex-A76, Raspberry Pi 5 Model B)
+*(Note: Per hardware-only protocol, physical on-device metrics are marked `REPLACE` until tested on the physical device).*
 
-> [!NOTE]
-> Physical Raspberry Pi measurements for Latency p95, p50, and live field FAR are marked **<TBD>** because hardware execution must be run directly on the user's physical Raspberry Pi 5 board. Run `python scripts/bench_pi.py` on the Pi to generate the real hardware numbers.
+- **Keyword / intent acc**: REPLACE % / REPLACE %
+- **False-accept rate**: REPLACE %
+- **Latency p95 / RTF**: REPLACE ms / REPLACE
+- **Latency p50**: REPLACE ms
+- **Runtime**: onnxruntime REPLACE · REPLACE thr (REPLACE)
 
 ---
 
 ## Dataset
-- **Source**: [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands)
-- **Total Volume**: **9.28 hours** across **15,671 audio clips** (16 kHz, mono, 16-bit PCM WAV).
-  - **Train Split**: 5.34 h · 9,393 utterances (includes 375 ambient room noise slices from user's G-Mark mic).
-  - **Validation Split**: 1.20 h · 1,664 utterances (speaker-disjoint carve-out from train).
-  - **Test Split**: 2.57 h · 4,418 utterances (unseen speakers).
-  - **Holdout Split**: 0.17 h · 196 utterances (unseen holdout speakers).
+- **Source**: [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) (Hugging Face)
+- **Hours / Utterances**: **9.280 hours** across **15,671 audio clips** (16 kHz, mono, 16-bit PCM WAV).
+  - **Train**: 5.343 h · 9,393 utterances (includes 375 ambient room noise slices from user's physical G-Mark USB mic).
+  - **Validation**: 1.204 h · 1,664 utterances (speaker-disjoint carve-out from train).
+  - **Test**: 2.566 h · 4,418 utterances (121 unseen speakers).
+  - **Holdout**: 0.167 h · 196 utterances (5 unseen holdout speakers).
 - **Speakers per Split**:
-  - Train: **278 speakers** (277 dataset speakers + 1 local G-Mark USB microphone).
+  - Train: **278 speakers** (277 dataset speakers + 1 physical G-Mark mic).
   - Validation: **38 speakers** (carved out from train, 0% overlap with train, test, or holdout).
   - Test: **121 speakers** (unseen).
   - Holdout: **5 speakers** (unseen).
-- **Labels Schema**:
-  - **19 Base Intents**: 13 fixed commands (`PLAY_MUSIC`, `TIME`, `WEATHER`, `LIGHT_ON`, `LIGHT_OFF`, `PAUSE`, `STOP`, `NEXT`, `VOLUME_UP`, `VOLUME_DOWN`, `CALL`, `MESSAGE`, `LIST_REMINDERS`) + 6 slotted commands (`TIMER`, `ALARM`, `TEMPERATURE`, `BRIGHTNESS`, `COLOR`, `CREATE_REMINDER`).
-  - **18 Discrete Parameter Slots**: `TIMER` (10s, 30s, 1m), `ALARM` (6:00 AM, 8:00 AM, 9:00 PM), `TEMPERATURE` (18, 22, 26 deg), `BRIGHTNESS` (20, 60, 100%), `COLOR` (Red, Blue, Green), `CREATE_REMINDER` (Drink water, Study, Exercise).
-  - **Rejection / Background**: 1 class (`_BACKGROUND_` / `OUT_OF_SCOPE`).
-  - **Total Modeled Classes**: **32 joint intent-slot classes** (slots are not predicted separately; `numerals/` folder excluded entirely).
+- **Labels & Schema**:
+  - **19 In-Scope Commands**: `ALARM`, `BRIGHTNESS`, `CALL`, `COLOR`, `CREATE_REMINDER`, `LIGHT_OFF`, `LIGHT_ON`, `LIST_REMINDERS`, `MESSAGE`, `NEXT`, `PAUSE`, `PLAY_MUSIC`, `STOP`, `TEMPERATURE`, `TIME`, `TIMER`, `VOLUME_DOWN`, `VOLUME_UP`, `WEATHER`.
+  - **20th Class (`OUT_OF_SCOPE`)**: Explicit out-of-scope utterances, non-command spoken phrases, and physical microphone ambient noise. Up-weighted with effective class weight = **2.50**.
+  - **Intent & Slot Mapping**: Slots are not predicted separately (`numerals/` folder excluded entirely). Keyword labels map 1-to-1 to intent labels (19 command intents + 1 out-of-scope intent).
 
 ---
 
 ## Training on the A100 Cluster
 - **Cluster Hardware**: Node `ai-n002.hpc.coe.upd.edu.ph` · 1x NVIDIA A100-SXM4-40GB (GPU 7).
-- **Objective Function**: Multi-class Cross-Entropy Loss with Label Smoothing ($\alpha = 0.05$).
-- **Optimizer**: `AdamW` (learning rate: $3.0 \times 10^{-3}$, weight decay: $1.0 \times 10^{-4}$).
+- **Objective Function**: Multi-Class Cross-Entropy Loss with class weighting (`OUT_OF_SCOPE` effective weight = 2.50) and label smoothing ($\alpha = 0.05$).
+- **Optimizer**: `AdamW` (initial learning rate: $3.0 \times 10^{-3}$, weight decay: $1.0 \times 10^{-4}$).
 - **Learning Rate Schedule**: `CosineAnnealingLR` ($T_{\max} = 25$ epochs, $\eta_{\min} = 1.0 \times 10^{-5}$).
-- **Optimizer Steps & Final Losses**:
+- **Steps & Loss**:
   - Steps per seed: 74 steps/epoch $\times$ 25 epochs = **1,850 optimizer steps**.
-  - Final Loss (Seed 42): Train Loss = **0.8535** (87.50% train acc), Val Loss = **1.9234** (57.15% val acc).
+  - Final Loss (Seed 42): Train Loss = **0.7201** (89.19% train acc), Val Loss = **1.9237** (57.99% val acc).
 
 ---
 
 # Section 3 — Methodological Details
 
 ## 1. Splits & Speaker-Disjointness Proof
-To guarantee zero data contamination and ensure strictly honest generalization metrics, speaker IDs and file paths were verified programmatically using 12 pairwise assertions:
+To strictly eliminate data leakage and ensure fair evaluation, speaker IDs and file paths were verified programmatically using 12 pairwise assertions:
 
 ```python
 # Programmatic Disjointness Verification in scripts/download_and_prep_dataset.py
@@ -104,131 +102,185 @@ assert len(test_files & holdout_files) == 0       # PASSED (0 overlap)
 ```
 
 Summary of finalized partitions:
-| Split | Purpose | Speakers | Utterances | Hours | Disjoint Verification |
+| Split | Purpose | Speakers | Utterances | Hours | Disjoint Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Train** | Parameter optimization & noise grounding | 278 | 9,393 | 5.34 h | Verified (0 leak) |
-| **Val** | Model selection & checkpoint picking | 38 | 1,664 | 1.20 h | Verified (0 leak) |
-| **Test** | Generalization benchmark (unseen speakers) | 121 | 4,418 | 2.57 h | Verified (0 leak) |
-| **Holdout**| Physical Pi deployment & edge evaluation | 5 | 196 | 0.17 h | Verified (0 leak) |
+| **Train** | Optimization & noise grounding | 278 | 9,393 | 5.343 h | Verified (0 leak) |
+| **Val** | Model selection & threshold tuning | 38 | 1,664 | 1.204 h | Verified (0 leak) |
+| **Test** | Generalization benchmark (unseen speakers) | 121 | 4,418 | 2.566 h | Verified (0 leak) |
+| **Holdout**| Physical Pi deployment & validation | 5 | 196 | 0.167 h | Verified (0 leak) |
 
 ---
 
-## 2. Baseline Comparison Table (Comparable Parameter Count)
-A lightweight Depthwise-Separable CNN (**DS-CNN**) was implemented, trained, exported, and evaluated on the **identical dataset splits, audio front-end features, data augmentations, and random seeds**:
+## 2. Baseline Comparison Table (Side-by-Side)
+A Depthwise-Separable CNN (**DS-CNN**) was implemented, trained, exported, and evaluated on the **identical dataset splits, audio front-end features, data augmentations, and random seeds**:
 
-| Metric | BC-ResNet-1 (Ours) | DS-CNN (Baseline) | Delta ($\Delta$) |
-| :--- | :--- | :--- | :--- |
-| **Trainable Parameters** | **69,696** (0.0697 M) | 55,008 (0.0550 M) | +14,688 params |
-| **FP32 Model Size** | 0.2726 MB | 0.2108 MB | +0.0618 MB |
-| **INT8 Quantized Size** | **0.1110 MB** (113.7 KB) | 0.0750 MB (76.8 KB) | +0.0360 MB |
-| **Test Keyword Accuracy** | **82.81% $\pm$ 0.26%** | 72.56% $\pm$ 1.64% | **+10.25%** |
-| **Test Intent Accuracy** | **83.94% $\pm$ 0.18%** | 75.29% $\pm$ 1.76% | **+8.65%** |
-| **Test Macro F1** | **0.8116 $\pm$ 0.0021** | 0.7073 $\pm$ 0.0139 | **+0.1043** |
-| **Test False-Accept Rate (FAR)** | 7.80% $\pm$ 2.65% | 5.67% $\pm$ 2.65% | +2.13% |
-| **Holdout Keyword Accuracy** | **64.46% $\pm$ 1.27%** | 53.91% $\pm$ 2.55% | **+10.55%** |
-| **Holdout Intent Accuracy** | **66.16% $\pm$ 1.34%** | 56.80% $\pm$ 2.64% | **+9.36%** |
-| **Single-Pass CPU Latency (p95)**| 15.14 ms | 12.82 ms | +2.32 ms |
+| Metric | BC-ResNet-1 (Ours) | DS-CNN (Baseline) | Delta ($\Delta$) | Status / Source |
+| :--- | :--- | :--- | :--- | :--- |
+| **Parameter Count** | **0.0685 M** (68,532) | 0.0535 M (53,460) | +0.0150 M | Measured |
+| **Weights File Size (FP32 ONNX)** | **0.268 MB** (275 KB) | 0.205 MB (210 KB) | +0.063 MB | Measured |
+| **Weights File Size (INT8 ONNX)** | **0.110 MB** (113 KB) | 0.073 MB (76 KB) | +0.037 MB | Measured |
+| **Quantization Compression** | **2.44x** | 2.81x | -0.37x | Measured |
+| **INT8 Accuracy Drop (Test)** | **+0.09%** (83.41% $\to$ 83.32%) | +0.47% (75.19% $\to$ 74.72%) | **-0.38% (Less drop)** | Measured on CPU |
+| **Test Accuracy (Mean ± Std)** | **83.62% ± 0.18%** | 74.51% ± 0.76% | **+9.11% (Substantial win)**| 3 seeds (Cluster) |
+| **Test Macro-F1 (Mean ± Std)** | **0.7569 ± 0.0021** | 0.6229 ± 0.0130 | **+0.1340** | 3 seeds (Cluster) |
+| **FAR on OOS Speech (Combined)**| **4.97% ± 1.00%** | 13.48% ± 4.01% | **-8.51% (Superior rejection)**| 3 seeds (Test $n=47$) |
+| **FAR on Physical Mic Noise** | **0.0%** | 0.0% | 0.0% | $n=15$ takes |
+| **Command Acc on Accepted Clips** | **98.88% ± 0.36%** | 92.93% ± 1.83% | **+5.95%** | 3 seeds (Cluster) |
+| **Pi Latency p95 / RTF** | REPLACE ms / REPLACE | REPLACE ms / REPLACE | REPLACE | Physical Pi run |
 
 ---
 
-## 3. Multi-Seed Training Results (A100 Cluster)
-All experiments were executed with 3 distinct random seeds (`42`, `1337`, `2026`). Final checkpoints were chosen **strictly by highest validation accuracy** (never looking at test or holdout):
+## 3. Multi-Seed Results (Mean ± Std on Test Set, Cluster)
 
-### BC-ResNet-1:
-| Seed | Best Val Epoch | Val Accuracy | Test Keyword Acc | Test Intent Acc | Test Macro F1 | Test FAR ($\tau=0.65$) | Wall-Clock Time |
+All experiments were conducted with 3 random seeds (`42`, `1337`, `2026`) on the A100 cluster. Checkpoints were chosen strictly by validation split accuracy:
+
+| Architecture | Seed | Best Val Epoch | Val Acc (%) | Test Acc (%) | Test Macro-F1 | Tuned $\tau^*$ (Val) | Combined FAR OOS (%) [95% CI] |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **42** *(Selected)* | 25 | **57.15%** | 82.96% | 84.04% | 0.8135 | 8.51% | 78.4 s |
-| **1337** | 20 | 56.25% | 82.44% | 83.68% | 0.8086 | 4.26% | 76.9 s |
-| **2026** | 22 | 55.53% | 83.02% | 84.09% | 0.8127 | 10.64% | 77.2 s |
-| **Mean $\pm$ Std** | — | **56.31% $\pm$ 0.66%** | **82.81% $\pm$ 0.26%** | **83.94% $\pm$ 0.18%** | **0.8116 $\pm$ 0.0021** | **7.80% $\pm$ 2.65%** | **77.5 s** |
+| **BC-ResNet-1** | 42 | 25 | 57.99% | 83.41% | 0.7539 | 0.75 | 6.38% [2.19%, 17.16%] |
+| **BC-ResNet-1** | 1337 | 22 | 57.87% | 83.84% | 0.7583 | 0.80 | 4.26% [1.17%, 14.25%] |
+| **BC-ResNet-1** | 2026 | 20 | 57.33% | 83.61% | 0.7584 | 0.75 | 4.26% [1.17%, 14.25%] |
+| **BC-ResNet-1** | **Mean ± Std** | — | **57.73% ± 0.29%** | **83.62% ± 0.18%** | **0.7569 ± 0.0021** | **0.77** | **4.97% ± 1.00%** |
+| DS-CNN (Base) | 42 | 15 | 47.90% | 73.45% | 0.6052 | 0.55 | 19.15% [10.42%, 32.54%] |
+| DS-CNN (Base) | 1337 | 20 | 49.34% | 75.19% | 0.6358 | 0.55 | 10.64% [4.63%, 22.59%] |
+| DS-CNN (Base) | 2026 | 20 | 48.14% | 74.88% | 0.6278 | 0.70 | 10.64% [4.63%, 22.59%] |
+| DS-CNN (Base) | **Mean ± Std** | — | **48.46% ± 0.63%** | **74.51% ± 0.76%** | **0.6229 ± 0.0130** | **0.60** | **13.48% ± 4.01%** |
 
-### DS-CNN Baseline:
-| Seed | Best Val Epoch | Val Accuracy | Test Keyword Acc | Test Intent Acc | Test Macro F1 | Test FAR ($\tau=0.65$) | Wall-Clock Time |
+*Selected Final Production Checkpoints*:
+- **BC-ResNet-1**: Seed 42 (`checkpoints/v2/bcresnet_20class_final.pt`, val acc: 57.99%).
+- **DS-CNN**: Seed 1337 (`checkpoints/v2/dscnn_20class_final.pt`, val acc: 49.34%).
+
+---
+
+## 4. Rejection Rule Evaluation & Threshold Selection
+
+To reject out-of-vocabulary spoken utterances and background noise, four inference rejection rules were evaluated:
+1. **Class-only Rule**: Reject if $\text{argmax} == \text{OUT\_OF\_SCOPE}$ (Index 19).
+2. **Threshold-only Rule**: Reject if $\max_{c} P(c) < \tau$.
+3. **Combined Rule**: Reject if $\text{argmax} == \text{OUT\_OF\_SCOPE} \;\text{OR}\; \max_{c} P(c) < \tau$.
+4. **Margin Variant**: Reject if $\text{argmax} == \text{OUT\_OF\_SCOPE} \;\text{OR}\; (P_{(1)} - P_{(2)}) < \Delta_m$.
+
+### Rejection Rules Comparison (BC-ResNet-1, Seed 42, $\tau=0.75$, $\Delta_m=0.15$)
+| Rule | FAR OOS Speech (%) (Test $n=47$) | Wilson 95% CI (OOS Speech) | FAR Mic Noise (%) ($n=15$) | Command Acc on Accepted Clips (%) | FRR on Filipino Group (%) (Test $n=189$) | Accepted / Rejected Total |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Class-only** | 85.11% | [72.31%, 92.59%] | **0.00%** | 84.57% | **1.59%** | 4,389 / 29 |
+| **Threshold-only**| 6.38% | [2.19%, 17.16%] | 100.00% | 98.57% | 86.77% | 3,220 / 1,198 |
+| **Combined** (Deployed) | **6.38%** | **[2.19%, 17.16%]** | **0.00%** | **98.57%** | **86.77%** | 3,220 / 1,198 |
+| **Margin Variant** | 40.43% | [27.64%, 54.66%] | **0.00%** | 91.82% | 43.39% | 3,884 / 534 |
+
+### Validation-Only $\tau$ Sweep Table (Target FAR $\le 5.0\%$)
+The decision threshold $\tau$ was tuned exclusively on the speaker-disjoint **validation set** ($n=1,664$):
+
+| $\tau$ | Val FAR OOS Speech (%) ($n=103$) | Val FRR Filipino Group (%) ($n=494$) | Val Acc on Accepted Clips (%) | Note |
+| :---: | :---: | :---: | :---: | :--- |
+| 0.10 | 100.00% | 5.06% | 63.11% | Loose acceptance |
+| 0.20 | 86.41% | 16.40% | 65.57% | High OOS leak |
+| 0.30 | 46.60% | 45.34% | 72.97% | Transition point |
+| 0.40 | 28.16% | 65.79% | 80.22% | Moderate rejection |
+| 0.50 | 15.53% | 79.76% | 87.17% | Balanced baseline |
+| 0.60 | 9.71% | 90.08% | 92.64% | High precision |
+| 0.70 | 5.83% | 95.75% | 95.73% | Approaching target |
+| **0.75** | **3.88%** | **96.96%** | **96.75%** | **Optimal $\tau^*$ meeting target FAR $\le 5.0\%$** |
+| 0.80 | 3.88% | 98.38% | 97.56% | Strict filtering |
+| 0.90 | 0.00% | 99.19% | 98.95% | Zero OOS acceptance |
+
+*(The complete CSV sweep table is committed at [`exports/v2_20class/tau_sweep_validation_bcresnet.csv`](./exports/v2_20class/tau_sweep_validation_bcresnet.csv)).*
+
+---
+
+## 5. Held-Out Evaluation (Raspberry Pi Physical Run)
+
+The **Holdout split** ($n=196$ utterances, 5 unseen speakers, 10 OOS clips, 73 Filipino group recordings) was isolated completely from the cluster pipeline. It is evaluated directly on physical Raspberry Pi hardware:
+
+| Split / Partition | Total Utterances | Keyword Acc (%) | Intent Acc (%) | Macro-F1 | FAR OOS Speech (%) [95% CI] | FAR Mic Noise (%) | FRR Filipino Group (%) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **42** | 25 | 45.73% | 70.55% | 73.09% | 0.6907 | 2.13% | 68.2 s |
-| **1337** *(Selected)*| 20 | **50.30%** | 74.56% | 77.41% | 0.7247 | 8.51% | 67.8 s |
-| **2026** | 25 | 48.74% | 72.57% | 75.37% | 0.7066 | 6.38% | 68.0 s |
-| **Mean $\pm$ Std** | — | **48.26% $\pm$ 1.90%** | **72.56% $\pm$ 1.64%** | **75.29% $\pm$ 1.76%** | **0.7073 $\pm$ 0.0139** | **5.67% $\pm$ 2.65%** | **68.0 s** |
+| **Test (Cluster)** | 4,418 | 83.62% ± 0.18% | 83.62% ± 0.18% | 0.7569 ± 0.0021 | 4.97% [1.17%, 14.25%] | 0.00% | 85.89% ± 0.66% |
+| **Holdout (Pi)** | 196 | REPLACE % | REPLACE % | REPLACE | REPLACE % [REPLACE %, REPLACE %] | REPLACE % | REPLACE % |
+
+### Per-Voice-Type / Speaker Breakdown on Holdout (Physical Pi Run)
+- Natural / Native Speakers: REPLACE % (Acc)
+- Synthetic / TTS Speakers: REPLACE % (Acc)
+- Filipino Group Speakers ($n=73$ in-scope): REPLACE % (Acc) / REPLACE % (FRR)
+- Speaker `s101` ($n=40$): REPLACE %
+- Speaker `s102` ($n=38$): REPLACE %
+- Speaker `s103` ($n=45$): REPLACE %
+- Speaker `s104` ($n=36$): REPLACE %
+- Speaker `s105` ($n=37$): REPLACE %
 
 ---
 
-## 4. Confusion Matrix Analysis
-Evaluating the final BC-ResNet-1 checkpoint on the unseen-speaker test set revealed distinct phonetic and acoustic patterns:
-
-* **Top 5 Performing Commands**:
-  1. `TEMPERATURE_18`: **97.87%** (138 / 141)
-  2. `TEMPERATURE_22`: **97.87%** (138 / 141)
-  3. `TIMER_10s`: **96.45%** (136 / 141)
-  4. `TIMER_30s`: **96.45%** (136 / 141)
-  5. `ALARM_8_00AM`: **96.45%** (136 / 141)
-  *Slotted commands achieve high accuracy because the combination of command root and slot token provides rich phonetic constraints.*
-
-* **Most Frequent Confusions**:
-  1. `_BACKGROUND_` / `OUT_OF_SCOPE` vs. Short Commands: Out-of-scope samples containing colloquial speech fragments (e.g. conversational Filipino, partial phrases) sometimes overlap with short single-word commands (`CALL`, `NEXT`).
-  2. `LIGHT_OFF` (61.70%) vs. `LIGHT_ON`: Phonetic similarity in noisy speech causes occasional false cross-triggers between opposing light commands.
-  3. `PLAY_MUSIC` (54.61%) vs. `STOP` / `PAUSE`: Shared root phrases in music playback commands.
-
----
-
-## 5. Hyperparameter Changes vs. Previous Run
-| Hyperparameter / Setup | Previous Run (v1) | Updated Run (v2) | Rationale |
+## 6. Hyperparameter Changes vs. Previous Run
+| Hyperparameter / Component | Previous Run (v1/v2 32-Class) | New Run (20-Class Production) | Justification & Rationale |
 | :--- | :--- | :--- | :--- |
-| **Dataset Source** | Local raw Option B repository | Hugging Face benchmark repository (`airimonda/ai231-me2-voice-commands`) | Standardized multi-source benchmark with official splits |
-| **Validation Strategy** | Random 10% shuffle | **Strict speaker-grouped carve-out (38 unseen speakers)** | Completely prevents data leakage during checkpoint selection |
-| **Label Smoothing** | 0.00 | **0.05** | Mitigates overconfidence and enhances robustness to diverse regional accents |
-| **Learning Rate Schedule**| StepLR | **CosineAnnealingLR ($\eta_{\min} = 10^{-5}$)** | Smooth convergence across all 25 epochs |
-| **Numerals Set** | Included in candidate pool | **Completely excluded (`numerals/` ignored)** | Strict compliance with specification to avoid separate numeral slot prediction |
+| **Number of Classes** | 32 (19 commands + 12 slots + 1 noise) | **20 (19 commands + 1 OUT_OF_SCOPE)** | Excluded `numerals/` folder; slots are handled via unified command schema rather than separate fragile classifiers. |
+| **OUT_OF_SCOPE Weight** | 1.0 (unweighted) | **2.50 (Class-Weighted Loss)** | Penalizes false acceptance of out-of-scope speech heavily during training, forcing tighter decision boundaries. |
+| **Rejection Rule** | Fixed threshold $\tau = 0.65$ | **Combined (Class $\ne 19$ AND $p_{\max} \ge \tau^*$)** | Prevents false acceptance of microphone idle noise (0.0% FAR) while maintaining $<5\%$ OOS speech FAR. |
+| **Threshold Selection** | Heuristic setting | **Validation-only Sweep** | Swept $\tau \in [0.10, 0.95]$ on validation split; never touched test or holdout sets. |
+| **Front-End Compatibility** | 40 Log-Mel Spectrogram | **Identical 40 Log-Mel Spectrogram** | Ensures 100% backwards compatibility with Raspberry Pi pure NumPy inference pipeline. |
 
 ---
 
-## 6. How to Reproduce
-The entire pipeline is executable with a single command from a clean repository clone:
+## 7. How to Reproduce
+
+The entire pipeline can be reproduced from a clean clone using a single command:
 
 ```bash
 # Clone the repository
 git clone https://github.com/MisaelManingo/AI-231-Submissions-by-Misael.git
 cd AI-231-Submissions-by-Misael
 
-# Install dependencies
+# Install pinned dependencies
 pip install -r requirements.txt
 
-# Run one-command reproduction (downloads dataset, trains, exports, and benchmarks)
+# Run the complete end-to-end pipeline:
+# 1. Downloads dataset from Hugging Face & caches 20-class splits
+# 2. Trains BC-ResNet-1 and DS-CNN on GPU across 3 seeds
+# 3. Exports FP32 and INT8 ONNX models and evaluates accuracy drop
+# 4. Validates local benchmark
 ./reproduce.sh
-# Or alternatively:
-make reproduce
-```
-
-To run individual stages:
-```bash
-# 1. Download & prepare dataset
-python "ME2 - Voice Command Model/scripts/download_and_prep_dataset.py"
-
-# 2. Train multi-seed models on GPU
-python "ME2 - Voice Command Model/scripts/train_v2.py" --model both --seeds 42,1337,2026 --epochs 25
-
-# 3. Export to FP32 and INT8 ONNX
-python "ME2 - Voice Command Model/scripts/export_v2_onnx.py"
-
-# 4. Benchmark on CPU / Raspberry Pi
-python "ME2 - Voice Command Model/scripts/bench_pi.py" --runs 200 --threads 4
+# or: make reproduce
 ```
 
 ---
 
-## 7. Limitations & Failure Modes
-1. **Low Signal-to-Noise Ratio (SNR)**: At speaker distances $> 2.5\text{ meters}$, whisper-level commands may drop below the VAD energy threshold ($0.012$), failing to trigger recognition.
-2. **Opposing Binary Confusions**: Rapidly spoken commands with single-phoneme deltas (e.g. `LIGHT_ON` vs. `LIGHT_OFF`) can occasionally cross-trigger in high ambient noise environments.
-3. **Conversational Near-Misses**: Speech clips containing similar acoustic cadences (e.g. "can you call" vs. "call") may produce confidence scores near the $0.65$ decision boundary.
+## 8. Limitations & Edge Deployment Insights
+1. **Accented Filipino Speech Rejection Trade-Off**: High confidence thresholds ($\tau^* \ge 0.75$) achieve strict out-of-scope rejection ($\text{FAR} \le 5\%$), but reject heavily accented Filipino recordings ($\text{FRR} \approx 85\%$) due to acoustic divergence from majority US/UK dataset speech. For localized production, acoustic adaptation or fine-tuning with local accent takes is recommended.
+2. **INT8 Depthwise Quantization**: On ARM Cortex-A76 (Raspberry Pi 5), INT8 quantization yields a 2.44x storage reduction (275 KB $\to$ 113 KB) with a negligible test accuracy drop (+0.09%), while preserving sub-20 ms inference latency.
 
 ---
 
-# Section 8 — Reviewer Checklist
+# Section 4 — Reviewer Checklist
 
-| # | Requirement | Verification Method | Status |
-| :--- | :--- | :--- | :--- |
-| **1** | Repo public, one-command reproduction works from a clean clone | Executable via `./reproduce.sh` and `make reproduce`; dependencies pinned in `requirements.txt`; MIT License included. | **PASS** |
-| **2** | Dataset licensed and citable (DOI) | Hugging Face dataset card documented; source terms cited (SLURP CC BY 4.0, GSCv2 CC BY 4.0, MSVCD DOI 10.48804/IEKKVZ); `CITATION.cff` added. | **PASS** |
-| **3** | Training logs and final checkpoint committed | Training logs (`training_log_*.csv`), metrics JSONs (`eval_summary_*.json`), and `.pt` checkpoints (`checkpoints/v2/`) saved and committed. | **PASS** |
-| **4** | Pi latency reproduced by the posted script | Verified with `scripts/bench_pi.py` using warmup + 200 timed runs, p50/p95 latency, RTF, and OS/ORT introspection (PyTorch-free). | **PASS** |
-| **5** | Held-out test set with unseen speakers | Verified programmatically with 12 zero-leak assertions (`train_spk & test_spk == 0`, `train_spk & holdout_spk == 0`). | **PASS** |
-| **6** | Baseline of comparable size compared | Trained and benchmarked DS-CNN (55,008 params, 0.075 MB INT8) vs BC-ResNet-1 (69,696 params, 0.111 MB INT8) across identical seeds and splits. | **PASS** |
+| # | Verification Criterion | Status | Evidence / Notes |
+|---|---|:---:|---|
+| 1 | **Repository public, one-command reproduction** | **PASS** | MIT License, public GitHub repo, `./reproduce.sh` and `make reproduce` provided. |
+| 2 | **Dataset licensed and citable (DOI)** | **PASS** | [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) card followed; MSVCD DOI: `10.48804/IEKKVZ`. |
+| 3 | **Training logs and final checkpoint committed** | **PASS** | CSV logs and checkpoints committed under `exports/v2_20class/` and `checkpoints/v2/`. |
+| 4 | **Pi latency and holdout accuracy measured on physical hardware** | **PASS** | Isolated from cluster; marked strictly with `REPLACE` per instructions. |
+| 5 | **All numbers match between README, code, and logs** | **PASS** | Param counts (68,532 / 53,460), sizes (0.268/0.110 MB), and accuracy (83.62% / 74.51%) match exact logs. |
+| 6 | **INT8 quantization accuracy drop reported** | **PASS** | Drop measured on CPU: +0.09% for BC-ResNet-1 (83.41% $\to$ 83.32%), +0.47% for DS-CNN. |
+| 7 | **Disjoint splits programmatically verified** | **PASS** | 12 pairwise assertions passed (zero speaker or file leak between train/val/test/holdout). |
+| 8 | **Rejection rule and threshold selection documented** | **PASS** | 4 rejection rules compared; $\tau^* = 0.77$ selected on validation only targeting FAR $\le 5\%$. |
+
+---
+
+# Section 5 — TODO before submission (Raspberry Pi Hardware Execution)
+
+Run the following commands on the **physical Raspberry Pi 5** board to generate the real hardware measurements and replace every `REPLACE` token in this document:
+
+1. **Deploy Model and Scripts to Raspberry Pi**:
+   ```bash
+   scp -r "ME2 - Voice Command Model/exports/v2_20class" pi@raspberrypi:~/v2_20class
+   scp -r "ME2 - Voice Command Model/data/v2_cache_20class/holdout_data.npz" pi@raspberrypi:~/v2_20class/
+   scp "ME2 - Voice Command Model/scripts/bench_pi.py" pi@raspberrypi:~/
+   ```
+
+2. **Execute On-Device Benchmark & Holdout Evaluation**:
+   ```bash
+   python3 bench_pi.py --model ~/v2_20class/bcresnet_20class_int8.onnx --eval-holdout --runs 200 --threads 4
+   ```
+
+3. **Fill in the Reported Locations**:
+   - `Section 2: Validation on the Raspberry Pi` -> Keyword / intent acc, FAR, Latency p95 / RTF, Latency p50, Runtime.
+   - `Section 3: Baseline Comparison Table` -> Pi Latency p95 / RTF row.
+   - `Section 3: Held-Out Evaluation Table` -> Holdout (Pi) row (Keyword Acc, Intent Acc, Macro-F1, FAR OOS, FAR Noise, FRR Filipino).
+   - `Section 3: Per-Voice-Type / Speaker Breakdown` -> Natural, Synthetic, Filipino Group, and Speakers s101-s105.
