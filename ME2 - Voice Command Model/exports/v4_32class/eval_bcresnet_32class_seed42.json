@@ -1,726 +1,726 @@
 {
   "arch": "bcresnet",
   "seed": 42,
-  "wall_clock_s": 48.88,
-  "final_loss": 1.4163,
-  "total_steps": 2500,
+  "wall_clock_s": 50.42,
+  "final_loss": 0.4945,
+  "total_steps": 2900,
   "strict_op": {
-    "tau": 0.65,
+    "tau": 0.7,
     "n_total": 4443,
-    "accuracy_command_31": 15.96,
+    "accuracy_command_31": 70.43,
     "accuracy_command_31_ci": [
-      14.91,
-      17.06
+      69.07,
+      71.75
     ],
-    "balanced_accuracy_command": 16.05,
-    "macro_precision_command": 16.36,
-    "macro_recall_command": 16.05,
-    "macro_f1_command": 11.23,
-    "macro_f2_command": 16.11,
-    "accuracy_intent_19": 30.09,
+    "balanced_accuracy_command": 69.45,
+    "macro_precision_command": 71.28,
+    "macro_recall_command": 69.45,
+    "macro_f1_command": 68.76,
+    "macro_f2_command": 69.81,
+    "accuracy_intent_19": 74.25,
     "accuracy_intent_19_ci": [
-      28.76,
-      31.46
+      72.95,
+      75.52
     ],
-    "balanced_accuracy_intent": 21.98,
-    "macro_precision_intent": 23.76,
-    "macro_recall_intent": 21.98,
-    "macro_f1_intent": 19.02,
-    "macro_f2_intent": 22.31,
-    "slot_exact_match_pct": 42.86,
-    "slot_eligible_n": 1099,
-    "slot_correct_n": 471,
-    "far_oos_speech": 1.32,
+    "balanced_accuracy_intent": 64.78,
+    "macro_precision_intent": 66.47,
+    "macro_recall_intent": 64.78,
+    "macro_f1_intent": 63.87,
+    "macro_f2_intent": 65.11,
+    "slot_exact_match_pct": 92.33,
+    "slot_eligible_n": 2215,
+    "slot_correct_n": 2045,
+    "far_oos_speech": 25.0,
     "far_oos_speech_ci": [
-      0.23,
-      7.08
+      16.63,
+      35.78
     ],
     "n_oos_speech": 76,
     "far_mic_noise": 0.0,
     "n_mic_noise": 15,
-    "frr": 88.37,
+    "frr": 35.65,
     "frr_ci": [
-      87.38,
-      89.28
+      34.25,
+      37.09
     ],
     "n_in_scope": 4367,
-    "misfire_rate": 6.5,
+    "misfire_rate": 6.25,
     "misfire_ci": [
-      5.81,
-      7.27
+      5.57,
+      7.01
     ],
-    "accuracy_accepted_command": 44.09,
-    "accuracy_accepted_intent": 75.59,
-    "n_accepted_in_scope": 508,
+    "accuracy_accepted_command": 90.28,
+    "accuracy_accepted_intent": 92.46,
+    "n_accepted_in_scope": 2810,
     "by_voice_type": {
       "real_filipino": {
         "n_clips": 189,
-        "raw_command_accuracy": 2.12,
-        "raw_intent_accuracy": 7.41,
-        "frr": 98.41,
+        "raw_command_accuracy": 11.11,
+        "raw_intent_accuracy": 14.29,
+        "frr": 95.24,
         "frr_ci": [
-          95.44,
-          99.46
+          91.2,
+          97.47
         ],
-        "accuracy_on_accepted": 0.0,
-        "n_accepted": 3
+        "accuracy_on_accepted": 33.33,
+        "n_accepted": 9
       },
       "open_source": {
         "n_clips": 635,
-        "raw_command_accuracy": 11.34,
-        "raw_intent_accuracy": 12.13,
-        "frr": 99.49,
+        "raw_command_accuracy": 16.54,
+        "raw_intent_accuracy": 17.64,
+        "frr": 73.81,
         "frr_ci": [
-          98.51,
-          99.83
+          70.11,
+          77.2
         ],
-        "accuracy_on_accepted": 66.67,
-        "n_accepted": 3
+        "accuracy_on_accepted": 31.17,
+        "n_accepted": 154
       },
       "synthetic": {
         "n_clips": 3619,
-        "raw_command_accuracy": 17.49,
-        "raw_intent_accuracy": 34.43,
-        "frr": 86.02,
+        "raw_command_accuracy": 82.98,
+        "raw_intent_accuracy": 87.32,
+        "frr": 26.27,
         "frr_ci": [
-          84.84,
-          87.11
+          24.85,
+          27.73
         ],
-        "accuracy_on_accepted": 44.22,
-        "n_accepted": 502
+        "accuracy_on_accepted": 93.92,
+        "n_accepted": 2647
       }
     },
     "by_script": {
       "on_script": {
         "n_clips": 3899,
-        "raw_command_accuracy": 16.88,
-        "raw_intent_accuracy": 32.78,
-        "frr": 86.84,
+        "raw_command_accuracy": 78.64,
+        "raw_intent_accuracy": 82.76,
+        "frr": 30.08,
         "frr_ci": [
-          85.73,
-          87.88
+          28.65,
+          31.55
         ],
-        "accuracy_on_accepted": 44.14,
-        "n_accepted": 503
+        "accuracy_on_accepted": 93.75,
+        "n_accepted": 2673
       },
       "off_script": {
         "n_clips": 544,
-        "raw_command_accuracy": 9.38,
-        "raw_intent_accuracy": 10.85,
-        "frr": 99.08,
+        "raw_command_accuracy": 11.58,
+        "raw_intent_accuracy": 13.24,
+        "frr": 74.82,
         "frr_ci": [
-          97.87,
-          99.61
+          71.0,
+          78.28
         ],
-        "accuracy_on_accepted": 40.0,
-        "n_accepted": 5
+        "accuracy_on_accepted": 22.63,
+        "n_accepted": 137
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos": 76.32,
-        "frr": 17.47
+        "far_oos": 98.68,
+        "frr": 0.69
       },
       "threshold_only": {
-        "far_oos": 1.32,
-        "frr": 86.31,
-        "tau": 0.65
+        "far_oos": 26.32,
+        "frr": 35.56,
+        "tau": 0.7
       },
       "combined": {
-        "far_oos": 1.32,
-        "frr": 88.37,
-        "tau": 0.65
+        "far_oos": 25.0,
+        "frr": 35.65,
+        "tau": 0.7
       },
       "margin": {
-        "far_oos": 30.26,
-        "frr": 51.68,
+        "far_oos": 69.74,
+        "frr": 14.93,
         "delta_m": 0.15
       }
     },
     "top10_intent_confusions": [
       {
+        "pair": "VOLUME_UP -> VOLUME_DOWN",
+        "count": 41
+      },
+      {
+        "pair": "TIME -> VOLUME_DOWN",
+        "count": 33
+      },
+      {
+        "pair": "STOP -> PLAY_MUSIC",
+        "count": 33
+      },
+      {
+        "pair": "CALL -> STOP",
+        "count": 32
+      },
+      {
+        "pair": "VOLUME_UP -> ALARM",
+        "count": 29
+      },
+      {
+        "pair": "LIGHT_OFF -> LIGHT_ON",
+        "count": 21
+      },
+      {
+        "pair": "VOLUME_DOWN -> ALARM",
+        "count": 21
+      },
+      {
+        "pair": "COLOR -> ALARM",
+        "count": 20
+      },
+      {
+        "pair": "CALL -> VOLUME_DOWN",
+        "count": 19
+      },
+      {
         "pair": "CREATE_REMINDER -> ALARM",
-        "count": 300
-      },
-      {
-        "pair": "TIMER -> ALARM",
-        "count": 289
-      },
-      {
-        "pair": "COLOR -> NEXT",
-        "count": 107
-      },
-      {
-        "pair": "BRIGHTNESS -> ALARM",
-        "count": 85
-      },
-      {
-        "pair": "PLAY_MUSIC -> NEXT",
-        "count": 83
-      },
-      {
-        "pair": "CREATE_REMINDER -> OUT_OF_SCOPE",
-        "count": 83
-      },
-      {
-        "pair": "PAUSE -> NEXT",
-        "count": 76
-      },
-      {
-        "pair": "LIGHT_ON -> TIME",
-        "count": 71
-      },
-      {
-        "pair": "WEATHER -> OUT_OF_SCOPE",
-        "count": 67
-      },
-      {
-        "pair": "LIGHT_OFF -> NEXT",
-        "count": 66
+        "count": 19
       }
     ],
     "top10_command_confusions": [
       {
-        "pair": "CREATE_REMINDER_EXERCISE -> ALARM_6_00AM",
-        "count": 116
+        "pair": "VOLUME_UP -> VOLUME_DOWN",
+        "count": 41
       },
       {
-        "pair": "TIMER_30s -> ALARM_6_00AM",
-        "count": 105
+        "pair": "BRIGHTNESS_20 -> BRIGHTNESS_100",
+        "count": 36
       },
       {
-        "pair": "CREATE_REMINDER_DRINK_WATER -> ALARM_6_00AM",
-        "count": 98
+        "pair": "TIME -> VOLUME_DOWN",
+        "count": 33
       },
       {
-        "pair": "TIMER_10s -> ALARM_6_00AM",
-        "count": 94
+        "pair": "STOP -> PLAY_MUSIC",
+        "count": 33
       },
       {
-        "pair": "TEMPERATURE_22 -> TEMPERATURE_26",
-        "count": 93
+        "pair": "CALL -> STOP",
+        "count": 32
       },
       {
-        "pair": "TIMER_1m -> ALARM_6_00AM",
-        "count": 89
+        "pair": "LIGHT_OFF -> LIGHT_ON",
+        "count": 21
       },
       {
-        "pair": "ALARM_9_00PM -> ALARM_6_00AM",
-        "count": 88
+        "pair": "TEMPERATURE_22 -> TEMPERATURE_18",
+        "count": 21
       },
       {
-        "pair": "CREATE_REMINDER_STUDY -> ALARM_6_00AM",
-        "count": 85
+        "pair": "CALL -> VOLUME_DOWN",
+        "count": 19
       },
       {
-        "pair": "PLAY_MUSIC -> NEXT",
-        "count": 83
+        "pair": "LIGHT_OFF -> STOP",
+        "count": 17
       },
       {
-        "pair": "PAUSE -> NEXT",
-        "count": 76
+        "pair": "TIMER_30s -> TIMER_10s",
+        "count": 17
       }
     ],
     "per_intent_metrics": {
       "ALARM": {
         "support": 423,
-        "precision": 22.07,
-        "recall": 63.59,
-        "f1": 32.76,
-        "f2": 46.2
+        "precision": 73.17,
+        "recall": 92.2,
+        "f1": 81.59,
+        "f2": 87.64
       },
       "BRIGHTNESS": {
         "support": 423,
-        "precision": 83.28,
-        "recall": 56.5,
-        "f1": 67.32,
-        "f2": 60.38
+        "precision": 89.86,
+        "recall": 92.2,
+        "f1": 91.02,
+        "f2": 91.72
       },
       "CALL": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 51.32,
+        "recall": 55.32,
+        "f1": 53.24,
+        "f2": 54.47
       },
       "COLOR": {
         "support": 423,
-        "precision": 75.71,
-        "recall": 44.21,
-        "f1": 55.82,
-        "f2": 48.22
+        "precision": 97.39,
+        "recall": 70.45,
+        "f1": 81.76,
+        "f2": 74.57
       },
       "CREATE_REMINDER": {
         "support": 423,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 94.76,
+        "recall": 85.58,
+        "f1": 89.94,
+        "f2": 87.27
       },
       "LIGHT_OFF": {
         "support": 141,
-        "precision": 30.0,
-        "recall": 2.13,
-        "f1": 3.97,
-        "f2": 2.61
+        "precision": 76.06,
+        "recall": 38.3,
+        "f1": 50.94,
+        "f2": 42.52
       },
       "LIGHT_ON": {
         "support": 141,
-        "precision": 16.0,
-        "recall": 2.84,
-        "f1": 4.82,
-        "f2": 3.4
+        "precision": 59.87,
+        "recall": 64.54,
+        "f1": 62.12,
+        "f2": 63.55
       },
       "LIST_REMINDERS": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 82.03,
+        "recall": 74.47,
+        "f1": 78.07,
+        "f2": 75.87
       },
       "MESSAGE": {
         "support": 137,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 62.56,
+        "recall": 89.05,
+        "f1": 73.49,
+        "f2": 82.1
       },
       "NEXT": {
         "support": 141,
-        "precision": 17.69,
-        "recall": 69.5,
-        "f1": 28.2,
-        "f2": 43.83
+        "precision": 91.26,
+        "recall": 66.67,
+        "f1": 77.05,
+        "f2": 70.46
       },
       "PAUSE": {
         "support": 141,
-        "precision": 27.08,
-        "recall": 9.22,
-        "f1": 13.76,
-        "f2": 10.62
+        "precision": 66.92,
+        "recall": 61.7,
+        "f1": 64.21,
+        "f2": 62.68
       },
       "PLAY_MUSIC": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 51.06,
+        "recall": 85.11,
+        "f1": 63.83,
+        "f2": 75.09
       },
       "STOP": {
         "support": 141,
-        "precision": 31.94,
-        "recall": 16.31,
-        "f1": 21.6,
-        "f2": 18.08
+        "precision": 40.7,
+        "recall": 57.45,
+        "f1": 47.65,
+        "f2": 53.08
       },
       "TEMPERATURE": {
         "support": 423,
-        "precision": 85.57,
-        "recall": 81.32,
-        "f1": 83.39,
-        "f2": 82.14
+        "precision": 98.46,
+        "recall": 90.78,
+        "f1": 94.46,
+        "f2": 92.22
       },
       "TIME": {
         "support": 141,
-        "precision": 10.14,
-        "recall": 31.91,
-        "f1": 15.38,
-        "f2": 22.32
+        "precision": 49.43,
+        "recall": 30.5,
+        "f1": 37.72,
+        "f2": 33.03
       },
       "TIMER": {
         "support": 423,
-        "precision": 38.22,
-        "recall": 14.18,
-        "f1": 20.69,
-        "f2": 16.22
+        "precision": 78.2,
+        "recall": 92.43,
+        "f1": 84.72,
+        "f2": 89.19
       },
       "VOLUME_DOWN": {
         "support": 141,
-        "precision": 18.27,
-        "recall": 13.48,
-        "f1": 15.51,
-        "f2": 14.22
+        "precision": 37.5,
+        "recall": 63.83,
+        "f1": 47.24,
+        "f2": 55.97
       },
       "VOLUME_UP": {
         "support": 141,
-        "precision": 16.85,
-        "recall": 10.64,
-        "f1": 13.04,
-        "f2": 11.49
+        "precision": 52.0,
+        "recall": 18.44,
+        "f1": 27.23,
+        "f2": 21.17
       },
       "WEATHER": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 73.6,
+        "recall": 65.25,
+        "f1": 69.17,
+        "f2": 66.76
       },
       "OUT_OF_SCOPE": {
         "support": 76,
-        "precision": 2.3,
-        "recall": 23.68,
-        "f1": 4.2,
-        "f2": 8.29
+        "precision": 3.23,
+        "recall": 1.32,
+        "f1": 1.87,
+        "f2": 1.49
       }
     }
   },
   "lower_op": {
     "tau": 0.2,
     "n_total": 4443,
-    "accuracy_command_31": 15.96,
+    "accuracy_command_31": 70.43,
     "accuracy_command_31_ci": [
-      14.91,
-      17.06
+      69.07,
+      71.75
     ],
-    "balanced_accuracy_command": 16.05,
-    "macro_precision_command": 16.36,
-    "macro_recall_command": 16.05,
-    "macro_f1_command": 11.23,
-    "macro_f2_command": 16.11,
-    "accuracy_intent_19": 30.09,
+    "balanced_accuracy_command": 69.45,
+    "macro_precision_command": 71.28,
+    "macro_recall_command": 69.45,
+    "macro_f1_command": 68.76,
+    "macro_f2_command": 69.81,
+    "accuracy_intent_19": 74.25,
     "accuracy_intent_19_ci": [
-      28.76,
-      31.46
+      72.95,
+      75.52
     ],
-    "balanced_accuracy_intent": 21.98,
-    "macro_precision_intent": 23.76,
-    "macro_recall_intent": 21.98,
-    "macro_f1_intent": 19.02,
-    "macro_f2_intent": 22.31,
-    "slot_exact_match_pct": 42.86,
-    "slot_eligible_n": 1099,
-    "slot_correct_n": 471,
-    "far_oos_speech": 53.95,
+    "balanced_accuracy_intent": 64.78,
+    "macro_precision_intent": 66.47,
+    "macro_recall_intent": 64.78,
+    "macro_f1_intent": 63.87,
+    "macro_f2_intent": 65.11,
+    "slot_exact_match_pct": 92.33,
+    "slot_eligible_n": 2215,
+    "slot_correct_n": 2045,
+    "far_oos_speech": 96.05,
     "far_oos_speech_ci": [
-      42.82,
-      64.69
+      89.03,
+      98.65
     ],
     "n_oos_speech": 76,
     "far_mic_noise": 100.0,
     "n_mic_noise": 15,
-    "frr": 24.5,
+    "frr": 1.65,
     "frr_ci": [
-      23.25,
-      25.8
+      1.31,
+      2.07
     ],
     "n_in_scope": 4367,
-    "misfire_rate": 60.22,
+    "misfire_rate": 26.81,
     "misfire_ci": [
-      58.76,
-      61.67
+      25.52,
+      28.15
     ],
-    "accuracy_accepted_command": 20.23,
-    "accuracy_accepted_intent": 39.04,
-    "n_accepted_in_scope": 3297,
+    "accuracy_accepted_command": 72.74,
+    "accuracy_accepted_intent": 76.69,
+    "n_accepted_in_scope": 4295,
     "by_voice_type": {
       "real_filipino": {
         "n_clips": 189,
-        "raw_command_accuracy": 2.12,
-        "raw_intent_accuracy": 7.41,
-        "frr": 88.36,
+        "raw_command_accuracy": 11.11,
+        "raw_intent_accuracy": 14.29,
+        "frr": 16.93,
         "frr_ci": [
-          83.01,
-          92.19
+          12.26,
+          22.92
         ],
-        "accuracy_on_accepted": 13.64,
-        "n_accepted": 22
+        "accuracy_on_accepted": 12.74,
+        "n_accepted": 157
       },
       "open_source": {
         "n_clips": 635,
-        "raw_command_accuracy": 11.34,
-        "raw_intent_accuracy": 12.13,
-        "frr": 53.06,
+        "raw_command_accuracy": 16.54,
+        "raw_intent_accuracy": 17.64,
+        "frr": 6.63,
         "frr_ci": [
-          49.02,
-          57.06
+          4.89,
+          8.94
         ],
-        "accuracy_on_accepted": 18.48,
-        "n_accepted": 276
+        "accuracy_on_accepted": 18.58,
+        "n_accepted": 549
       },
       "synthetic": {
         "n_clips": 3619,
-        "raw_command_accuracy": 17.49,
-        "raw_intent_accuracy": 34.43,
-        "frr": 16.46,
+        "raw_command_accuracy": 82.98,
+        "raw_intent_accuracy": 87.32,
+        "frr": 0.03,
         "frr_ci": [
-          15.29,
-          17.71
+          0.0,
+          0.16
         ],
-        "accuracy_on_accepted": 20.44,
-        "n_accepted": 2999
+        "accuracy_on_accepted": 83.64,
+        "n_accepted": 3589
       }
     },
     "by_script": {
       "on_script": {
         "n_clips": 3899,
-        "raw_command_accuracy": 16.88,
-        "raw_intent_accuracy": 32.78,
-        "frr": 20.06,
+        "raw_command_accuracy": 78.64,
+        "raw_intent_accuracy": 82.76,
+        "frr": 0.71,
         "frr_ci": [
-          18.82,
-          21.36
+          0.49,
+          1.03
         ],
-        "accuracy_on_accepted": 20.45,
-        "n_accepted": 3056
+        "accuracy_on_accepted": 80.69,
+        "n_accepted": 3796
       },
       "off_script": {
         "n_clips": 544,
-        "raw_command_accuracy": 9.38,
-        "raw_intent_accuracy": 10.85,
-        "frr": 55.7,
+        "raw_command_accuracy": 11.58,
+        "raw_intent_accuracy": 13.24,
+        "frr": 8.27,
         "frr_ci": [
-          51.5,
-          59.82
+          6.24,
+          10.89
         ],
-        "accuracy_on_accepted": 17.43,
-        "n_accepted": 241
+        "accuracy_on_accepted": 12.22,
+        "n_accepted": 499
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos": 76.32,
-        "frr": 17.47
+        "far_oos": 98.68,
+        "frr": 0.69
       },
       "threshold_only": {
-        "far_oos": 76.32,
-        "frr": 8.86,
+        "far_oos": 97.37,
+        "frr": 0.98,
         "tau": 0.2
       },
       "combined": {
-        "far_oos": 53.95,
-        "frr": 24.5,
+        "far_oos": 96.05,
+        "frr": 1.65,
         "tau": 0.2
       },
       "margin": {
-        "far_oos": 30.26,
-        "frr": 51.68,
+        "far_oos": 69.74,
+        "frr": 14.93,
         "delta_m": 0.15
       }
     },
     "top10_intent_confusions": [
       {
+        "pair": "VOLUME_UP -> VOLUME_DOWN",
+        "count": 41
+      },
+      {
+        "pair": "TIME -> VOLUME_DOWN",
+        "count": 33
+      },
+      {
+        "pair": "STOP -> PLAY_MUSIC",
+        "count": 33
+      },
+      {
+        "pair": "CALL -> STOP",
+        "count": 32
+      },
+      {
+        "pair": "VOLUME_UP -> ALARM",
+        "count": 29
+      },
+      {
+        "pair": "LIGHT_OFF -> LIGHT_ON",
+        "count": 21
+      },
+      {
+        "pair": "VOLUME_DOWN -> ALARM",
+        "count": 21
+      },
+      {
+        "pair": "COLOR -> ALARM",
+        "count": 20
+      },
+      {
+        "pair": "CALL -> VOLUME_DOWN",
+        "count": 19
+      },
+      {
         "pair": "CREATE_REMINDER -> ALARM",
-        "count": 300
-      },
-      {
-        "pair": "TIMER -> ALARM",
-        "count": 289
-      },
-      {
-        "pair": "COLOR -> NEXT",
-        "count": 107
-      },
-      {
-        "pair": "BRIGHTNESS -> ALARM",
-        "count": 85
-      },
-      {
-        "pair": "PLAY_MUSIC -> NEXT",
-        "count": 83
-      },
-      {
-        "pair": "CREATE_REMINDER -> OUT_OF_SCOPE",
-        "count": 83
-      },
-      {
-        "pair": "PAUSE -> NEXT",
-        "count": 76
-      },
-      {
-        "pair": "LIGHT_ON -> TIME",
-        "count": 71
-      },
-      {
-        "pair": "WEATHER -> OUT_OF_SCOPE",
-        "count": 67
-      },
-      {
-        "pair": "LIGHT_OFF -> NEXT",
-        "count": 66
+        "count": 19
       }
     ],
     "top10_command_confusions": [
       {
-        "pair": "CREATE_REMINDER_EXERCISE -> ALARM_6_00AM",
-        "count": 116
+        "pair": "VOLUME_UP -> VOLUME_DOWN",
+        "count": 41
       },
       {
-        "pair": "TIMER_30s -> ALARM_6_00AM",
-        "count": 105
+        "pair": "BRIGHTNESS_20 -> BRIGHTNESS_100",
+        "count": 36
       },
       {
-        "pair": "CREATE_REMINDER_DRINK_WATER -> ALARM_6_00AM",
-        "count": 98
+        "pair": "TIME -> VOLUME_DOWN",
+        "count": 33
       },
       {
-        "pair": "TIMER_10s -> ALARM_6_00AM",
-        "count": 94
+        "pair": "STOP -> PLAY_MUSIC",
+        "count": 33
       },
       {
-        "pair": "TEMPERATURE_22 -> TEMPERATURE_26",
-        "count": 93
+        "pair": "CALL -> STOP",
+        "count": 32
       },
       {
-        "pair": "TIMER_1m -> ALARM_6_00AM",
-        "count": 89
+        "pair": "LIGHT_OFF -> LIGHT_ON",
+        "count": 21
       },
       {
-        "pair": "ALARM_9_00PM -> ALARM_6_00AM",
-        "count": 88
+        "pair": "TEMPERATURE_22 -> TEMPERATURE_18",
+        "count": 21
       },
       {
-        "pair": "CREATE_REMINDER_STUDY -> ALARM_6_00AM",
-        "count": 85
+        "pair": "CALL -> VOLUME_DOWN",
+        "count": 19
       },
       {
-        "pair": "PLAY_MUSIC -> NEXT",
-        "count": 83
+        "pair": "LIGHT_OFF -> STOP",
+        "count": 17
       },
       {
-        "pair": "PAUSE -> NEXT",
-        "count": 76
+        "pair": "TIMER_30s -> TIMER_10s",
+        "count": 17
       }
     ],
     "per_intent_metrics": {
       "ALARM": {
         "support": 423,
-        "precision": 22.07,
-        "recall": 63.59,
-        "f1": 32.76,
-        "f2": 46.2
+        "precision": 73.17,
+        "recall": 92.2,
+        "f1": 81.59,
+        "f2": 87.64
       },
       "BRIGHTNESS": {
         "support": 423,
-        "precision": 83.28,
-        "recall": 56.5,
-        "f1": 67.32,
-        "f2": 60.38
+        "precision": 89.86,
+        "recall": 92.2,
+        "f1": 91.02,
+        "f2": 91.72
       },
       "CALL": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 51.32,
+        "recall": 55.32,
+        "f1": 53.24,
+        "f2": 54.47
       },
       "COLOR": {
         "support": 423,
-        "precision": 75.71,
-        "recall": 44.21,
-        "f1": 55.82,
-        "f2": 48.22
+        "precision": 97.39,
+        "recall": 70.45,
+        "f1": 81.76,
+        "f2": 74.57
       },
       "CREATE_REMINDER": {
         "support": 423,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 94.76,
+        "recall": 85.58,
+        "f1": 89.94,
+        "f2": 87.27
       },
       "LIGHT_OFF": {
         "support": 141,
-        "precision": 30.0,
-        "recall": 2.13,
-        "f1": 3.97,
-        "f2": 2.61
+        "precision": 76.06,
+        "recall": 38.3,
+        "f1": 50.94,
+        "f2": 42.52
       },
       "LIGHT_ON": {
         "support": 141,
-        "precision": 16.0,
-        "recall": 2.84,
-        "f1": 4.82,
-        "f2": 3.4
+        "precision": 59.87,
+        "recall": 64.54,
+        "f1": 62.12,
+        "f2": 63.55
       },
       "LIST_REMINDERS": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 82.03,
+        "recall": 74.47,
+        "f1": 78.07,
+        "f2": 75.87
       },
       "MESSAGE": {
         "support": 137,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 62.56,
+        "recall": 89.05,
+        "f1": 73.49,
+        "f2": 82.1
       },
       "NEXT": {
         "support": 141,
-        "precision": 17.69,
-        "recall": 69.5,
-        "f1": 28.2,
-        "f2": 43.83
+        "precision": 91.26,
+        "recall": 66.67,
+        "f1": 77.05,
+        "f2": 70.46
       },
       "PAUSE": {
         "support": 141,
-        "precision": 27.08,
-        "recall": 9.22,
-        "f1": 13.76,
-        "f2": 10.62
+        "precision": 66.92,
+        "recall": 61.7,
+        "f1": 64.21,
+        "f2": 62.68
       },
       "PLAY_MUSIC": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 51.06,
+        "recall": 85.11,
+        "f1": 63.83,
+        "f2": 75.09
       },
       "STOP": {
         "support": 141,
-        "precision": 31.94,
-        "recall": 16.31,
-        "f1": 21.6,
-        "f2": 18.08
+        "precision": 40.7,
+        "recall": 57.45,
+        "f1": 47.65,
+        "f2": 53.08
       },
       "TEMPERATURE": {
         "support": 423,
-        "precision": 85.57,
-        "recall": 81.32,
-        "f1": 83.39,
-        "f2": 82.14
+        "precision": 98.46,
+        "recall": 90.78,
+        "f1": 94.46,
+        "f2": 92.22
       },
       "TIME": {
         "support": 141,
-        "precision": 10.14,
-        "recall": 31.91,
-        "f1": 15.38,
-        "f2": 22.32
+        "precision": 49.43,
+        "recall": 30.5,
+        "f1": 37.72,
+        "f2": 33.03
       },
       "TIMER": {
         "support": 423,
-        "precision": 38.22,
-        "recall": 14.18,
-        "f1": 20.69,
-        "f2": 16.22
+        "precision": 78.2,
+        "recall": 92.43,
+        "f1": 84.72,
+        "f2": 89.19
       },
       "VOLUME_DOWN": {
         "support": 141,
-        "precision": 18.27,
-        "recall": 13.48,
-        "f1": 15.51,
-        "f2": 14.22
+        "precision": 37.5,
+        "recall": 63.83,
+        "f1": 47.24,
+        "f2": 55.97
       },
       "VOLUME_UP": {
         "support": 141,
-        "precision": 16.85,
-        "recall": 10.64,
-        "f1": 13.04,
-        "f2": 11.49
+        "precision": 52.0,
+        "recall": 18.44,
+        "f1": 27.23,
+        "f2": 21.17
       },
       "WEATHER": {
         "support": 141,
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "f2": 0.0
+        "precision": 73.6,
+        "recall": 65.25,
+        "f1": 69.17,
+        "f2": 66.76
       },
       "OUT_OF_SCOPE": {
         "support": 76,
-        "precision": 2.3,
-        "recall": 23.68,
-        "f1": 4.2,
-        "f2": 8.29
+        "precision": 3.23,
+        "recall": 1.32,
+        "f1": 1.87,
+        "f2": 1.49
       }
     }
   }

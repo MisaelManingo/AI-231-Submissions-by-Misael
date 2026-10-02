@@ -1,5 +1,5 @@
 {
-  "tau_strict": 0.65,
+  "tau_strict": 0.7,
   "tau_lower": 0.2,
   "training_records": [
     {
@@ -7,242 +7,242 @@
       "seed": 42,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 48.88,
+      "wall_clock_s": 50.42,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.4163
+      "steps": 2900,
+      "final_loss": 0.4945
     },
     {
       "arch": "bcresnet",
       "seed": 1337,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 53.27,
+      "wall_clock_s": 50.26,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.4566
+      "steps": 2900,
+      "final_loss": 0.5377
     },
     {
       "arch": "bcresnet",
       "seed": 2026,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 53.72,
+      "wall_clock_s": 50.27,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.4336
+      "steps": 2900,
+      "final_loss": 0.4136
     },
     {
       "arch": "dscnn",
       "seed": 42,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 46.15,
+      "wall_clock_s": 42.56,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.6613
+      "steps": 2900,
+      "final_loss": 1.031
     },
     {
       "arch": "dscnn",
       "seed": 1337,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 45.84,
+      "wall_clock_s": 42.52,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.6367
+      "steps": 2900,
+      "final_loss": 1.1288
     },
     {
       "arch": "dscnn",
       "seed": 2026,
       "node": "A100-SXM4-40GB Node",
       "gpu": "NVIDIA A100-SXM4-40GB",
-      "wall_clock_s": 42.92,
+      "wall_clock_s": 42.58,
       "objective": "CrossEntropyLoss with OOS class weight 4.0",
       "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
       "schedule": "CosineAnnealingLR(T_max=20)",
-      "steps": 2500,
-      "final_loss": 1.6348
+      "steps": 2900,
+      "final_loss": 1.02
     }
   ],
   "bcresnet_strict": {
     "accuracy_command_31": {
-      "mean": 16.43,
-      "std": 1.86
+      "mean": 69.71,
+      "std": 1.51
     },
     "accuracy_intent_19": {
-      "mean": 31.22,
-      "std": 1.64
+      "mean": 73.36,
+      "std": 1.12
     },
     "slot_exact_match_pct": {
-      "mean": 42.22,
-      "std": 3.02
+      "mean": 92.39,
+      "std": 1.11
     },
     "balanced_accuracy_command": {
-      "mean": 16.48,
-      "std": 1.81
+      "mean": 68.8,
+      "std": 1.48
     },
     "macro_f1_command": {
-      "mean": 11.63,
-      "std": 2.22
+      "mean": 68.48,
+      "std": 1.44
     },
     "macro_f2_command": {
-      "mean": 15.99,
-      "std": 2.28
+      "mean": 69.29,
+      "std": 1.37
     },
     "far_oos_speech": {
-      "mean": 1.76,
-      "std": 1.64
+      "mean": 27.63,
+      "std": 3.72
     },
     "far_mic_noise": {
       "mean": 0.0,
       "std": 0.0
     },
     "frr": {
-      "mean": 87.83,
-      "std": 4.55
+      "mean": 36.55,
+      "std": 0.69
     },
     "misfire_rate": {
-      "mean": 7.77,
-      "std": 4.12
+      "mean": 6.37,
+      "std": 0.76
     },
     "accuracy_accepted_command": {
-      "mean": 39.85,
-      "std": 10.07
+      "mean": 89.97,
+      "std": 1.18
     },
     "filipino_command_acc": {
-      "mean": 3.88,
-      "std": 1.52
+      "mean": 9.17,
+      "std": 1.74
     },
     "filipino_frr": {
-      "mean": 99.12,
-      "std": 0.5
+      "mean": 93.3,
+      "std": 1.52
     },
     "filipino_accuracy_on_accepted": {
-      "mean": 33.33,
-      "std": 47.14
+      "mean": 31.3,
+      "std": 6.06
     }
   },
   "bcresnet_lower": {
     "accuracy_command_31": {
-      "mean": 16.43,
-      "std": 1.86
+      "mean": 69.71,
+      "std": 1.51
     },
     "accuracy_intent_19": {
-      "mean": 31.22,
-      "std": 1.64
+      "mean": 73.36,
+      "std": 1.12
     },
     "slot_exact_match_pct": {
-      "mean": 42.22,
-      "std": 3.02
+      "mean": 92.39,
+      "std": 1.11
     },
     "balanced_accuracy_command": {
-      "mean": 16.48,
-      "std": 1.81
+      "mean": 68.8,
+      "std": 1.48
     },
     "macro_f1_command": {
-      "mean": 11.63,
-      "std": 2.22
+      "mean": 68.48,
+      "std": 1.44
     },
     "macro_f2_command": {
-      "mean": 15.99,
-      "std": 2.28
+      "mean": 69.29,
+      "std": 1.37
     },
     "far_oos_speech": {
-      "mean": 57.9,
-      "std": 5.58
+      "mean": 92.1,
+      "std": 2.84
     },
     "far_mic_noise": {
-      "mean": 84.44,
-      "std": 22.0
+      "mean": 35.56,
+      "std": 45.65
     },
     "frr": {
-      "mean": 26.03,
-      "std": 3.95
+      "mean": 1.6,
+      "std": 0.09
     },
     "misfire_rate": {
-      "mean": 58.66,
-      "std": 4.99
+      "mean": 27.62,
+      "std": 1.46
     },
     "accuracy_accepted_command": {
-      "mean": 20.83,
-      "std": 2.59
+      "mean": 71.93,
+      "std": 1.51
     },
     "filipino_command_acc": {
-      "mean": 3.88,
-      "std": 1.52
+      "mean": 9.17,
+      "std": 1.74
     },
     "filipino_frr": {
-      "mean": 68.78,
-      "std": 13.86
+      "mean": 7.76,
+      "std": 6.5
     },
     "filipino_accuracy_on_accepted": {
-      "mean": 11.41,
-      "std": 1.81
+      "mean": 9.9,
+      "std": 2.31
     }
   },
   "dscnn_strict": {
     "accuracy_command_31": {
-      "mean": 12.53,
-      "std": 0.99
+      "mean": 48.04,
+      "std": 1.2
     },
     "accuracy_intent_19": {
-      "mean": 27.25,
-      "std": 0.47
+      "mean": 59.32,
+      "std": 2.64
     },
     "slot_exact_match_pct": {
-      "mean": 33.12,
-      "std": 0.63
+      "mean": 75.48,
+      "std": 3.13
     },
     "balanced_accuracy_command": {
-      "mean": 12.5,
-      "std": 0.9
+      "mean": 47.4,
+      "std": 1.2
     },
     "macro_f1_command": {
-      "mean": 6.9,
-      "std": 0.55
+      "mean": 43.81,
+      "std": 1.35
     },
     "macro_f2_command": {
-      "mean": 10.81,
-      "std": 0.43
+      "mean": 48.14,
+      "std": 1.21
     },
     "far_oos_speech": {
-      "mean": 0.0,
-      "std": 0.0
+      "mean": 12.28,
+      "std": 3.78
     },
     "far_mic_noise": {
       "mean": 0.0,
       "std": 0.0
     },
     "frr": {
-      "mean": 96.23,
-      "std": 1.95
+      "mean": 74.01,
+      "std": 1.73
     },
     "misfire_rate": {
-      "mean": 2.85,
-      "std": 1.52
+      "mean": 3.85,
+      "std": 0.85
     },
     "accuracy_accepted_command": {
-      "mean": 25.85,
-      "std": 3.36
+      "mean": 85.24,
+      "std": 2.81
     },
     "filipino_command_acc": {
-      "mean": 4.94,
-      "std": 1.39
+      "mean": 6.7,
+      "std": 0.9
     },
     "filipino_frr": {
-      "mean": 97.35,
-      "std": 0.0
+      "mean": 99.82,
+      "std": 0.25
     },
     "filipino_accuracy_on_accepted": {
       "mean": 0.0,
@@ -251,60 +251,60 @@
   },
   "dscnn_lower": {
     "accuracy_command_31": {
-      "mean": 12.53,
-      "std": 0.99
+      "mean": 48.04,
+      "std": 1.2
     },
     "accuracy_intent_19": {
-      "mean": 27.25,
-      "std": 0.47
+      "mean": 59.32,
+      "std": 2.64
     },
     "slot_exact_match_pct": {
-      "mean": 33.12,
-      "std": 0.63
+      "mean": 75.48,
+      "std": 3.13
     },
     "balanced_accuracy_command": {
-      "mean": 12.5,
-      "std": 0.9
+      "mean": 47.4,
+      "std": 1.2
     },
     "macro_f1_command": {
-      "mean": 6.9,
-      "std": 0.55
+      "mean": 43.81,
+      "std": 1.35
     },
     "macro_f2_command": {
-      "mean": 10.81,
-      "std": 0.43
+      "mean": 48.14,
+      "std": 1.21
     },
     "far_oos_speech": {
-      "mean": 60.09,
-      "std": 7.16
+      "mean": 86.4,
+      "std": 4.47
     },
     "far_mic_noise": {
-      "mean": 0.0,
-      "std": 0.0
+      "mean": 2.22,
+      "std": 3.14
     },
     "frr": {
-      "mean": 28.66,
-      "std": 3.41
+      "mean": 9.49,
+      "std": 0.56
     },
     "misfire_rate": {
-      "mean": 60.25,
-      "std": 2.62
+      "mean": 42.67,
+      "std": 1.53
     },
     "accuracy_accepted_command": {
-      "mean": 15.53,
-      "std": 0.35
+      "mean": 52.87,
+      "std": 1.45
     },
     "filipino_command_acc": {
-      "mean": 4.94,
-      "std": 1.39
+      "mean": 6.7,
+      "std": 0.9
     },
     "filipino_frr": {
-      "mean": 48.68,
-      "std": 28.59
+      "mean": 60.67,
+      "std": 18.19
     },
     "filipino_accuracy_on_accepted": {
-      "mean": 6.64,
-      "std": 2.05
+      "mean": 12.48,
+      "std": 4.8
     }
   }
 }

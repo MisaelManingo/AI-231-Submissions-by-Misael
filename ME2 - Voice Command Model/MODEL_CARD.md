@@ -59,10 +59,10 @@
 - **Source**: [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands)
 - **Pinned Hugging Face Revision**: `6947f13073e57eb6ae67e7e2fc3680700b82aa13`
 - **Split Breakdown**:
-  - **Train**: 11,108 utterances (10,733 clean + 375 G-Mark ambient room noise slices; 273 speakers). Includes 680 real Filipino group speech clips across 5 speakers (4x oversampled, 34.21% effective epoch share), 245 out-of-scope speech clips (class weight 4.0), and 375 ambient room noise slices from physical G-Mark USB microphone.
-  - **Synthetic Capping**: 1:1 synthetic:real ratio per class (selected on validation over 2:1 and 4:1 to prevent real-speech phoneme starvation).
+  - **Train**: 9,266 canonical utterances (8,374 synthetic + 294 open-source + 223 real Filipino + 375 ambient room noise slices from physical G-Mark USB mic; strictly filtered to the 93 canonical phrasings of the 31 command buckets).
+  - **Synthetic Capping**: Canonical synthetic audio unconstrained (16:1) selected on validation over 1:1, 2:1, and 4:1 to prevent synthetic phrasing under-representation and boost general accuracy.
   - **Cross-Validation**: 4-Fold Leave-One-Speaker-Out (LOSO) cross-validation across the Filipino training speakers.
-  - **Test**: 4,443 utterances (115 speakers). Completely disjoint speakers and files. 189 real Filipino clips, 76 out-of-scope clips, 635 open-source clips, 3,619 synthetic clips. Tagged 3,899 on-script and 544 off-script.
+  - **Test**: 4,443 utterances (115 speakers). Completely disjoint speakers and files. 189 real Filipino clips, 76 out-of-scope clips, 15 mic noise clips, 635 open-source clips, 3,619 synthetic clips. Tagged 3,899 on-script and 544 off-script.
   - **Holdout**: 202 utterances (5 speakers). Untouched; evaluated exclusively on physical hardware.
 - **Disjointness Verification**: 12/12 speaker and file disjointness assertions passed cleanly.
 - **Data Licensing**:
@@ -84,6 +84,7 @@
 - **Weights Size**:
   - FP32 ONNX: **0.273 MB** (279 KB)
   - INT8 ONNX: **0.111 MB** (114 KB, 2.46x compression)
+- **INT8 Quantization Drop**: **+0.42%** on test 31-command accuracy (70.43% FP32 $\to$ 70.85% INT8)
 
 ---
 
@@ -94,15 +95,15 @@ $$\mathrm{Decision}(x) = \begin{cases} \mathrm{REJECT}, & \text{if } \operatorna
 
 where $c_{\mathrm{OOS}} = 31$ (`OUT_OF_SCOPE`).
 
-Threshold $\tau$ was swept on pooled held-out validation predictions (710 clips: 680 Filipino + 30 OOS speech). Under the dual constraint ($\mathrm{FAR}_{\mathrm{OOS}} \le 5\%$ and real-Filipino $\mathrm{FRR} \le 30\%$), the cap was **not achievable** simultaneously on validation. Thus, two distinct operating points are reported:
-1. **Strict Operating Point ($\tau^* = 0.65$)**: Enforces $\mathrm{FAR}_{\mathrm{OOS}} \le 5\%$ ($\mathrm{Val\ FAR} = 3.33\%$). On test: 31-Command Acc = $16.43\% \pm 1.86\%$, 19-Intent Acc = $31.22\% \pm 1.64\%$, Slot Match = $42.22\% \pm 3.02\%$, OOS FAR = $1.76\% \pm 1.64\%$, Filipino FRR = $99.12\% \pm 0.50\%$, Filipino Acc on Accepted = $33.33\% \pm 47.14\%$.
-2. **Lower Operating Point ($\tau_{\mathrm{bal}} = 0.20$)**: Enforces real-Filipino $\mathrm{FRR} \le 30\%$ ($\mathrm{Val\ FRR} = 23.73\%$). On test: 31-Command Acc = $16.43\% \pm 1.86\%$, 19-Intent Acc = $31.22\% \pm 1.64\%$, Slot Match = $42.22\% \pm 3.02\%$, OOS FAR = $57.90\% \pm 5.58\%$, Filipino FRR = $68.78\% \pm 13.86\%$, Filipino Acc on Accepted = $11.41\% \pm 1.81\%$.
+Threshold $\tau$ was swept on pooled held-out validation predictions (253 clips: 223 Filipino + 30 OOS speech). Under the dual constraint ($\mathrm{FAR}_{\mathrm{OOS}} \le 5\%$ and real-Filipino $\mathrm{FRR} \le 30\%$), the cap was **not achievable** simultaneously on validation. Thus, two distinct operating points are reported:
+1. **Strict Operating Point ($\tau^* = 0.70$)**: Enforces high confidence OOS rejection. On test: 31-Command Acc = $69.71\% \pm 1.51\%$, 19-Intent Acc = $73.36\% \pm 1.12\%$, Slot Match = $92.39\% \pm 1.11\%$, OOS FAR = $27.63\% \pm 3.72\%$, Mic Noise FAR = $0.00\%$, Overall FRR = $36.55\% \pm 0.69\%$, Filipino FRR = $93.30\% \pm 1.52\%$, Accuracy on Accepted Commands = $89.97\% \pm 1.18\%$.
+2. **Lower Operating Point ($\tau_{\mathrm{bal}} = 0.20$)**: Enforces low false rejection rate ($\mathrm{FRR} \le 30\%$). On test: 31-Command Acc = $69.71\% \pm 1.51\%$, 19-Intent Acc = $73.36\% \pm 1.12\%$, Slot Match = $92.39\% \pm 1.11\%$, OOS FAR = $92.10\% \pm 2.84\%$, Mic Noise FAR = $0.00\%$, Overall FRR = $1.60\% \pm 0.09\%$, Filipino FRR = $7.76\% \pm 6.50\%$, Accuracy on Accepted Commands = $71.93\% \pm 1.51\%$.
 
 ---
 
 ## Limitations & Ethical Considerations
 - **Synthetic Speech Bias**: The test set is mostly synthetic (3,619 of 4,443 clips, 81.5%), which skews synthetic-dominated aggregate metrics away from real-speech behavior.
-- **Limited Phrases & Natural Off-Script Wording**: The 31 command classes reflect fixed templates. Natural off-script phrasing appears in both train and test sets, yielding lower accuracy ($9.38\%$ vs $16.88\%$ on-script).
-- **Scarce Real Filipino Speech**: Real Filipino training speech is limited to 680 clips across 5 speakers (and 189 test clips across 3 speakers), making cross-speaker acoustic generalization challenging without synthetic data balancing.
-- **Few Out-Of-Scope Clips**: With only 245 train and 76 test OOS clips, rejection calibration confidence intervals are wider than in-scope metrics.
-- **Physical Microphone Matching**: Variations between studio condenser microphones and small USB array microphones affect high-frequency acoustic response and background SNR.
+- **Limited Phrases & Natural Off-Script Wording**: The 31 command classes reflect fixed templates. Natural off-script phrasing appears in both train and test sets, yielding lower accuracy ($11.58\%$ vs $78.64\%$ on-script).
+- **Scarce Real Filipino Speech**: Real Filipino training speech is limited to 223 clips across 5 speakers (and 189 test clips across 3 speakers), making cross-speaker acoustic generalization challenging without synthetic data balancing.
+- **Few Out-Of-Scope Clips**: With only 76 test OOS clips, rejection calibration confidence intervals are wider than in-scope metrics.
+- **Physical Microphone Matching**: Variations between studio condenser microphones and small USB array microphones affect high-frequency acoustic response and background SNR. Idle noise profile injection helps bridge this gap.

@@ -102,7 +102,7 @@ COMMAND_WINDOW_SAMPLES = 32000  # 2.0 seconds @ 16kHz
 def parse_args():
     parser = argparse.ArgumentParser(description="Real-Time Voice Command Pipeline on RPi5 (PyTorch-Free)")
     parser.add_argument("--wake_thresh", type=float, default=0.20, help="Wake word detection threshold (default: 0.20)")
-    parser.add_argument("--vcm_thresh", type=float, default=0.65, help="Voice command acceptance threshold (default: 0.65)")
+    parser.add_argument("--vcm_thresh", type=float, default=0.40, help="Voice command acceptance threshold (default: 0.40)")
     parser.add_argument("--device", type=int, default=None, help="Input microphone device ID")
     parser.add_argument("--samplerate", type=int, default=None, help="Hardware sample rate (e.g. 48000, 44100, 16000)")
     parser.add_argument("--no-meter", action="store_true", help="Disable the live terminal RMS meter")
@@ -209,7 +209,7 @@ class PureNumpyFeatureExtractor:
 
 
 class RPi5VoiceAssistant:
-    def __init__(self, wake_thresh=0.20, vcm_thresh=0.65, hw_samplerate=None, no_meter=False):
+    def __init__(self, wake_thresh=0.20, vcm_thresh=0.40, hw_samplerate=None, no_meter=False):
         self.wake_thresh = wake_thresh
         self.vcm_thresh = vcm_thresh
         self.hw_sr = hw_samplerate

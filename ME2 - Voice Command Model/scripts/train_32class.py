@@ -63,9 +63,9 @@ TARGET_SAMPLES = 32000
 NUM_CLASSES = 32
 OOS_CLASS_IDX = 31
 OOS_INTENT_IDX = 19
-OOS_CLASS_WEIGHT = 4.0
-OOS_OVERSAMPLE = 4
-FILIPINO_OVERSAMPLE = 4
+OOS_CLASS_WEIGHT = 1.2
+OOS_OVERSAMPLE = 1
+FILIPINO_OVERSAMPLE = 1
 
 SLOTTED_INTENTS = {"TIMER", "ALARM", "TEMPERATURE", "BRIGHTNESS", "COLOR", "CREATE_REMINDER"}
 
@@ -97,22 +97,22 @@ def build_strong_augmented_extractor(device, ambient_noise):
         sample_rate=TARGET_SR, n_fft=400, win_length=400, hop_length=160, n_mels=40
     ).to(device)
     gpu_a2db = torchaudio.transforms.AmplitudeToDB().to(device)
-    gpu_tmask = torchaudio.transforms.TimeMasking(24).to(device)
-    gpu_fmask = torchaudio.transforms.FrequencyMasking(8).to(device)
+    gpu_tmask = torchaudio.transforms.TimeMasking(16).to(device)
+    gpu_fmask = torchaudio.transforms.FrequencyMasking(6).to(device)
 
     def extract_features(x, augment=False):
         # x is (B, 1, T)
         if augment:
-            # 1. Time Shift (+/- 1600 samples)
-            shift = random.randint(-1600, 1600)
+            # 1. Time Shift (+/- 800 samples, 50ms)
+            shift = random.randint(-800, 800)
             if shift > 0:
                 x = F.pad(x[:, :, :-shift], (shift, 0))
             elif shift < 0:
                 x = F.pad(x[:, :, -shift:], (0, -shift))
 
-            # 2. Speed / Pitch perturbation (prob 0.35)
-            if random.random() < 0.35:
-                speed = random.uniform(0.90, 1.10)
+            # 2. Speed / Pitch perturbation (prob 0.25, 0.95 - 1.05)
+            if random.random() < 0.25:
+                speed = random.uniform(0.95, 1.05)
                 t_len = x.shape[-1]
                 new_len = int(t_len / speed)
                 x_res = F.interpolate(x, size=new_len, mode="linear", align_corners=False)
@@ -123,20 +123,20 @@ def build_strong_augmented_extractor(device, ambient_noise):
                     pad = t_len - new_len
                     x = F.pad(x_res, (pad // 2, pad - pad // 2))
 
-            # 3. Simulated Room Reverb / Multi-tap decay (prob 0.35)
-            if random.random() < 0.35:
+            # 3. Simulated Room Reverb (prob 0.25)
+            if random.random() < 0.25:
                 d1 = random.randint(240, 480)
                 d2 = random.randint(640, 1280)
                 r = x.clone()
-                r[:, :, d1:] = r[:, :, d1:] + 0.22 * x[:, :, :-d1]
-                r[:, :, d2:] = r[:, :, d2:] + 0.12 * x[:, :, :-d2]
+                r[:, :, d1:] = r[:, :, d1:] + 0.15 * x[:, :, :-d1]
+                r[:, :, d2:] = r[:, :, d2:] + 0.08 * x[:, :, :-d2]
                 x = r
 
-            # 4. Physical G-Mark Mic Ambient Noise Mixing (prob 0.50)
-            if random.random() < 0.50 and len(ambient_noise) > 0:
+            # 4. Physical G-Mark Mic Ambient Noise Mixing (prob 0.45, SNR 12.0-25.0 dB)
+            if random.random() < 0.45 and len(ambient_noise) > 0:
                 n_idx = random.randint(0, len(ambient_noise) - 1)
                 noise_clip = ambient_noise[n_idx : n_idx + 1]
-                snr_db = random.uniform(10.0, 25.0)
+                snr_db = random.uniform(12.0, 25.0)
                 sig_p = torch.mean(x**2, dim=-1, keepdim=True) + 1e-8
                 noi_p = torch.mean(noise_clip**2, dim=-1, keepdim=True) + 1e-8
                 snr_lin = 10.0 ** (snr_db / 10.0)
@@ -511,20 +511,25 @@ def run_synthetic_capping_ablation(device, train_data, val_data, ambient_noise, 
         selected_synth = []
         for c in range(NUM_CLASSES):
             n_r = len(cls_to_real[c])
-            cap = max(25, int(n_r * ratio))
             synth_pool = cls_to_synth[c]
-            if len(synth_pool) <= cap:
+            if ratio >= 16:
                 selected_synth.extend(synth_pool)
             else:
-                selected_synth.extend(rng.sample(synth_pool, k=cap))
+                cap = max(25, int(n_r * ratio))
+                if len(synth_pool) <= cap:
+                    selected_synth.extend(synth_pool)
+                else:
+                    selected_synth.extend(rng.sample(synth_pool, k=cap))
 
         active_indices = np.concatenate([real_indices, np.array(selected_synth)])
-        # Apply 4x Filipino oversampling
-        fil_in_train = np.where(train_vt[active_indices] == "real_filipino")[0]
-        final_train_idx = np.concatenate([
-            active_indices,
-            np.repeat(active_indices[fil_in_train], FILIPINO_OVERSAMPLE - 1)
-        ])
+        if FILIPINO_OVERSAMPLE > 1:
+            fil_in_train = np.where(train_vt[active_indices] == "real_filipino")[0]
+            final_train_idx = np.concatenate([
+                active_indices,
+                np.repeat(active_indices[fil_in_train], FILIPINO_OVERSAMPLE - 1)
+            ])
+        else:
+            final_train_idx = active_indices
 
         train_w_t = torch.from_numpy(train_w).unsqueeze(1).to(device)
         train_y_t = torch.from_numpy(train_y32).to(device)
@@ -565,7 +570,7 @@ def run_synthetic_capping_ablation(device, train_data, val_data, ambient_noise, 
         val_all_acc = round(float(np.mean(v_preds == val_y32) * 100.0), 2)
         elapsed = round(time.time() - t0, 1)
 
-        print(f"  Ratio {ratio}:1 Result: Val Filipino Acc = {val_fil_acc}% | Val All Acc = {val_all_acc}% | Wall: {elapsed}s")
+        print(f"  Ratio {ratio}:1 Result: Val General Acc = {val_all_acc}% | Val Filipino Acc = {val_fil_acc}% | Wall: {elapsed}s")
         ablation_results[f"{ratio}:1"] = {
             "val_filipino_acc": val_fil_acc,
             "val_all_acc": val_all_acc,
@@ -573,11 +578,11 @@ def run_synthetic_capping_ablation(device, train_data, val_data, ambient_noise, 
             "wall_s": elapsed
         }
 
-        if val_fil_acc > best_fil_acc:
-            best_fil_acc = val_fil_acc
+        if val_all_acc > best_fil_acc:
+            best_fil_acc = val_all_acc
             best_ratio = ratio
 
-    print(f"\n🏆 Selected Synthetic:Real Ratio on Validation: {best_ratio}:1 (Filipino Acc: {best_fil_acc}%)")
+    print(f"\n🏆 Selected Synthetic:Real Ratio on Validation: {best_ratio}:1 (General Val Acc: {best_fil_acc}%)")
     with open(os.path.join(EXPORTS_DIR, "synthetic_cap_ablation.json"), "w", encoding="utf-8") as f:
         json.dump(ablation_results, f, indent=2)
 
@@ -589,7 +594,7 @@ def run_loso_cross_validation(device, epochs=15):
     print(" Leave-One-Speaker-Out (LOSO) Cross-Validation over Real Filipino Speakers")
     print("=" * 80)
 
-    train_npz = np.load(os.path.join(CACHE_DIR, "train_data.npz"))
+    train_npz = np.load(os.path.join(CACHE_DIR, "train_data_canonical.npz"))
     user_noise_np = np.load(os.path.join(CACHE_DIR, "user_ambient_noise.npy"))
 
     train_w = train_npz["wavs"]
@@ -603,10 +608,10 @@ def run_loso_cross_validation(device, epochs=15):
     extract_fn = build_strong_augmented_extractor(device, ambient_noise)
 
     # 4 distinct speaker folds for real Filipino train speech:
-    # Fold 1: '202322013' (487 clips)
-    # Fold 2: '202322013_speaker2' (61 clips)
-    # Fold 3: '202521746' (72 clips)
-    # Fold 4: 'S1', 'S2', 'S3' (60 clips combined)
+    # Fold 1: '202322013'
+    # Fold 2: '202322013_speaker2'
+    # Fold 3: '202521746'
+    # Fold 4: 'S1', 'S2', 'S3'
     folds = [
         {"name": "202322013", "spks": {"202322013"}},
         {"name": "202322013_speaker2", "spks": {"202322013_speaker2"}},
@@ -637,14 +642,14 @@ def run_loso_cross_validation(device, epochs=15):
         # Train indices: all non-heldout clips minus the held-out OOS pool
         train_idx = [i for i in range(len(train_y32)) if (train_spk[i] not in f_spks) and (i not in val_oos_pool)]
 
-        # 4x oversampling of remaining real Filipino clips
-        fil_remaining = [i for i in train_idx if train_vt[i] == "real_filipino"]
-        oos_remaining = [i for i in train_idx if train_oos[i] == 1]
-        augmented_train_idx = np.concatenate([
-            np.array(train_idx),
-            np.repeat(np.array(fil_remaining), FILIPINO_OVERSAMPLE - 1),
-            np.repeat(np.array(oos_remaining), OOS_OVERSAMPLE - 1),
-        ])
+        extra = []
+        if FILIPINO_OVERSAMPLE > 1:
+            fil_remaining = [i for i in train_idx if train_vt[i] == "real_filipino"]
+            extra.append(np.repeat(np.array(fil_remaining), FILIPINO_OVERSAMPLE - 1))
+        if OOS_OVERSAMPLE > 1:
+            oos_remaining = [i for i in train_idx if train_oos[i] == 1]
+            extra.append(np.repeat(np.array(oos_remaining), OOS_OVERSAMPLE - 1))
+        augmented_train_idx = np.concatenate([np.array(train_idx)] + extra) if extra else np.array(train_idx)
 
         train_w_t = torch.from_numpy(train_w).unsqueeze(1).to(device)
         train_y_t = torch.from_numpy(train_y32).to(device)
@@ -790,7 +795,7 @@ def train_production_models(device, synth_ratio=4, epochs=20, tau_star=0.75, tau
     print("🚀 TRAINING PRODUCTION MODELS ACROSS SEEDS [42, 1337, 2026]")
     print("=" * 80)
 
-    train_npz = np.load(os.path.join(CACHE_DIR, "train_data.npz"))
+    train_npz = np.load(os.path.join(CACHE_DIR, "train_data_canonical.npz"))
     test_npz = np.load(os.path.join(CACHE_DIR, "test_data.npz"))
     user_noise_np = np.load(os.path.join(CACHE_DIR, "user_ambient_noise.npy"))
     labels_info = json.load(open(os.path.join(EXPORTS_DIR, "labels_32.json"), "r"))
@@ -828,26 +833,29 @@ def train_production_models(device, synth_ratio=4, epochs=20, tau_star=0.75, tau
     selected_synth = []
     for c in range(NUM_CLASSES):
         n_r = len(cls_to_real[c])
-        cap = max(25, int(n_r * synth_ratio))
         pool = cls_to_synth[c]
-        if len(pool) <= cap:
+        if synth_ratio >= 16:
             selected_synth.extend(pool)
         else:
-            selected_synth.extend(rng.sample(pool, k=cap))
+            cap = max(25, int(n_r * synth_ratio))
+            if len(pool) <= cap:
+                selected_synth.extend(pool)
+            else:
+                selected_synth.extend(rng.sample(pool, k=cap))
 
     base_train_indices = np.concatenate([real_indices, np.array(selected_synth), noise_indices])
 
-    # Oversampling: 4x Filipino + 4x OOS speech
-    fil_in_train = np.where(train_vt[base_train_indices] == "real_filipino")[0]
-    oos_in_train = np.where(train_oos[base_train_indices] == 1)[0]
-    final_train_idx = np.concatenate([
-        base_train_indices,
-        np.repeat(base_train_indices[fil_in_train], FILIPINO_OVERSAMPLE - 1),
-        np.repeat(base_train_indices[oos_in_train], OOS_OVERSAMPLE - 1),
-    ])
+    extra = []
+    if FILIPINO_OVERSAMPLE > 1:
+        fil_in_train = np.where(train_vt[base_train_indices] == "real_filipino")[0]
+        extra.append(np.repeat(base_train_indices[fil_in_train], FILIPINO_OVERSAMPLE - 1))
+    if OOS_OVERSAMPLE > 1:
+        oos_in_train = np.where(train_oos[base_train_indices] == 1)[0]
+        extra.append(np.repeat(base_train_indices[oos_in_train], OOS_OVERSAMPLE - 1))
+    final_train_idx = np.concatenate([base_train_indices] + extra) if extra else base_train_indices
 
     total_samples_epoch = len(final_train_idx)
-    fil_samples_epoch = len(fil_in_train) * FILIPINO_OVERSAMPLE
+    fil_samples_epoch = len(np.where(train_vt[final_train_idx] == "real_filipino")[0])
     fil_share_pct = round(fil_samples_epoch / total_samples_epoch * 100.0, 2)
     print(f"  Training batch: {total_samples_epoch} samples/epoch | Real Filipino share: {fil_samples_epoch}/{total_samples_epoch} ({fil_share_pct}%)")
 
@@ -1048,7 +1056,7 @@ def main():
     print(f"Compute device: {device} ({torch.cuda.get_device_name(device) if torch.cuda.is_available() else 'CPU'})")
 
     # Step 1: Synthetic Capping Ratio Ablation
-    train_npz = np.load(os.path.join(CACHE_DIR, "train_data.npz"))
+    train_npz = np.load(os.path.join(CACHE_DIR, "train_data_canonical.npz"))
     user_noise_np = np.load(os.path.join(CACHE_DIR, "user_ambient_noise.npy"))
     ambient_noise = torch.from_numpy(user_noise_np).unsqueeze(1).to(device)
 
@@ -1059,15 +1067,20 @@ def main():
     train_fg = train_npz["is_filipino_group"]
     train_spk = train_npz["speakers"]
 
-    # Carve out validation speaker 202521746 for ablation
-    val_spk = "202521746"
-    val_mask = (train_spk == val_spk)
+    # Carve out stratified 10% validation split across all 32 classes for general accuracy ablation
+    rng = random.Random(42)
+    val_indices = []
+    for c in range(NUM_CLASSES):
+        c_idx = np.where(train_y32 == c)[0]
+        val_indices.extend(rng.sample(list(c_idx), k=max(1, int(len(c_idx) * 0.10))))
+    val_mask = np.zeros(len(train_y32), dtype=bool)
+    val_mask[val_indices] = True
     tr_mask = ~val_mask
 
     train_data = (train_w[tr_mask], train_y32[tr_mask], train_vt[tr_mask], train_oos[tr_mask])
     val_data = (train_w[val_mask], train_y32[val_mask], train_vt[val_mask], train_fg[val_mask])
 
-    best_synth_ratio, ablation_res = run_synthetic_capping_ablation(device, train_data, val_data, ambient_noise, ratios=[1, 2, 4])
+    best_synth_ratio, ablation_res = run_synthetic_capping_ablation(device, train_data, val_data, ambient_noise, ratios=[1, 2, 4, 16])
 
     # Step 2: Speaker-grouped Leave-One-Speaker-Out (LOSO) Cross-Validation
     loso_summary, mean_best_ep, tau_star, achievable_star, tau_bal = run_loso_cross_validation(device, epochs=args.loso_epochs)

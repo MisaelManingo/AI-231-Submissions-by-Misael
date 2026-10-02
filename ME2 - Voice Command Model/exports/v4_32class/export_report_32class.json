@@ -11,8 +11,8 @@
       "macs_si": "42.1 M",
       "flops": 86818688,
       "flops_si": "86.8 M",
-      "command_acc_31": 15.98,
-      "intent_acc_19": 30.11
+      "command_acc_31": 70.43,
+      "intent_acc_19": 74.25
     },
     "int8": {
       "path": "exports/v4_32class/bcresnet_32class_int8.onnx",
@@ -22,10 +22,10 @@
       "macs_si": "42.1 M",
       "flops": 89562198,
       "flops_si": "89.6 M",
-      "command_acc_31": 15.69,
-      "intent_acc_19": 30.02,
-      "drop_command_31_pct": 0.29,
-      "drop_intent_19_pct": 0.09
+      "command_acc_31": 70.85,
+      "intent_acc_19": 74.7,
+      "drop_command_31_pct": -0.42,
+      "drop_intent_19_pct": -0.45
     }
   },
   "dscnn": {
@@ -40,8 +40,8 @@
       "macs_si": "99.2 M",
       "flops": 200392192,
       "flops_si": "200 M",
-      "command_acc_31": 13.93,
-      "intent_acc_19": 27.68
+      "command_acc_31": 47.36,
+      "intent_acc_19": 59.01
     },
     "int8": {
       "path": "exports/v4_32class/dscnn_32class_int8.onnx",
@@ -51,10 +51,10 @@
       "macs_si": "99.2 M",
       "flops": 204012106,
       "flops_si": "204 M",
-      "command_acc_31": 13.91,
-      "intent_acc_19": 27.8,
-      "drop_command_31_pct": 0.02,
-      "drop_intent_19_pct": -0.12
+      "command_acc_31": 45.94,
+      "intent_acc_19": 57.8,
+      "drop_command_31_pct": 1.42,
+      "drop_intent_19_pct": 1.21
     }
   }
 }

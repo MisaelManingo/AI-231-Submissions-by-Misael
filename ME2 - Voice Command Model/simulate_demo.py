@@ -80,7 +80,7 @@ class PureNumpyFeatureExtractor:
 
 
 class PipelineSimulator:
-    def __init__(self, wake_model_path, vcm_model_path, labels_path, wake_thresh=0.20, vcm_thresh=0.70):
+    def __init__(self, wake_model_path, vcm_model_path, labels_path, wake_thresh=0.20, vcm_thresh=0.40):
         self.wake_thresh = wake_thresh
         self.vcm_thresh = vcm_thresh
         self.extractor = PureNumpyFeatureExtractor(MEL_FILTER_PATH, HANN_WIN_PATH)

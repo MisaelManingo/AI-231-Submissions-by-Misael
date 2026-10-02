@@ -1,20 +1,26 @@
 {
   "1:1": {
-    "val_filipino_acc": 11.11,
-    "val_all_acc": 11.11,
-    "train_samples": 6419,
-    "wall_s": 32.9
+    "val_filipino_acc": 6.67,
+    "val_all_acc": 13.28,
+    "train_samples": 1372,
+    "wall_s": 5.7
   },
   "2:1": {
-    "val_filipino_acc": 2.78,
-    "val_all_acc": 2.78,
-    "train_samples": 7888,
-    "wall_s": 32.1
+    "val_filipino_acc": 13.33,
+    "val_all_acc": 11.96,
+    "train_samples": 1606,
+    "wall_s": 5.5
   },
   "4:1": {
-    "val_filipino_acc": 0.0,
-    "val_all_acc": 0.0,
-    "train_samples": 9053,
-    "wall_s": 36.8
+    "val_filipino_acc": 6.67,
+    "val_all_acc": 12.95,
+    "train_samples": 2033,
+    "wall_s": 6.8
+  },
+  "16:1": {
+    "val_filipino_acc": 6.67,
+    "val_all_acc": 57.85,
+    "train_samples": 8017,
+    "wall_s": 26.6
   }
 }

@@ -7,6 +7,7 @@ specifically:
 2. Unbalanced math delimiters ($ or $$)
 3. Invalid LaTeX macros in math mode
 """
+import os
 import re
 import sys
 from pathlib import Path
@@ -65,6 +66,11 @@ def verify_math(file_path):
         return True
 
 if __name__ == "__main__":
-    target = sys.argv[1] if len(sys.argv) > 1 else "ME2 - Voice Command Model/README.md"
+    if len(sys.argv) > 1:
+        target = sys.argv[1]
+    elif os.path.exists("README.md"):
+        target = "README.md"
+    else:
+        target = "ME2 - Voice Command Model/README.md"
     success = verify_math(target)
     sys.exit(0 if success else 1)

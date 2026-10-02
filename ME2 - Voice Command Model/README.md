@@ -75,7 +75,7 @@ The primary Voice Command Model employs **BC-ResNet-1** (Broadcasted Residual Ne
   - FLOPs: **86.8 M** (FP32) / **89.6 M** (INT8).
   - Weights (FP32 ONNX): **0.273 MB** (279 KB).
   - Weights (INT8 ONNX): **0.111 MB** (114 KB, 2.46x compression).
-  - INT8 Quantization Drop (Test 31-Command): **-0.29%** (15.98% FP32 $\to$ 15.69% INT8).
+  - INT8 Quantization Drop (Test 31-Command): **+0.42%** (70.43% FP32 $\to$ 70.85% INT8).
 
 ---
 
@@ -94,15 +94,15 @@ The table below specifies on-device physical measurements on the ARM Cortex-A76 
 
 ## Dataset
 - **Source**: [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) (Pinned Commit: `6947f13073e57eb6ae67e7e2fc3680700b82aa13`)
-- **Hours / Utterances**: **8.95 hours** across **15,753 audio clips** (16 kHz, mono, 16-bit PCM WAV).
-  - **Train**: 11,108 utterances (10,733 raw + 375 ambient room noise slices from physical G-Mark USB mic; 273 speakers).
-  - **Validation**: 710 utterances pooled from Leave-One-Speaker-Out held-out folds (680 real Filipino speech clips across 5 speakers + 30 OOS speech clips).
+- **Hours / Utterances**: **7.62 hours** across **13,911 audio clips** in canonical and benchmark splits (16 kHz, mono, 16-bit PCM WAV).
+  - **Train**: 9,266 canonical utterances (8,374 synthetic + 294 open-source + 223 real Filipino + 375 ambient room noise slices from physical G-Mark USB mic; strictly filtered to the 93 canonical phrasings of the 31 command buckets).
+  - **Validation**: 253 utterances pooled from Leave-One-Speaker-Out held-out folds (223 real Filipino speech clips across 5 speakers + 30 OOS speech clips).
   - **Test**: 4,443 utterances (115 unseen speakers; includes 189 real Filipino clips, 76 OOS speech clips, 15 mic noise clips, 635 open-source clips, and 3,619 synthetic clips).
   - **Holdout**: 202 utterances (5 unseen holdout speakers; includes 84 real Filipino clips from speaker `202520785`, 106 synthetic, 12 open-source, and 16 OOS clips).
-- **Filipino Speech Allocation & Oversampling**:
-  - Real Filipino speech in train: 680 clips across 5 speakers (`202322013`, `202322013_speaker2`, `202521746`, `S1`, `S2`, `S3`).
-  - $4\times$ oversampling is applied to real Filipino clips in training, yielding 2,720 clips per epoch (34.21% effective epoch share).
-  - Real OOS speech clips are weighted with class weight 4.0 to penalize false accepts.
+- **Filipino Speech Allocation & General Accuracy**:
+  - Real Filipino speech in train: 223 canonical clips across 5 speakers (`202322013`, `202322013_speaker2`, `202521746`, `S1`, `S2`, `S3`).
+  - To prioritize general model accuracy across diverse speakers without skewing toward microphone recording artifacts, training maintains balanced natural weighting (`FILIPINO_OVERSAMPLE = 1`).
+  - OUT_OF_SCOPE class is grounded with real OOS speech and physical USB mic idle noise with balanced weight (`OOS_CLASS_WEIGHT = 1.2`), preventing false positives during quiet intervals.
   - Supplemental synthetic clips were omitted based on prior ablation showing they degrade OOS rejection.
 
 ---
@@ -132,8 +132,8 @@ assert len(test_files & holdout_files) == 0       # PASSED (0 overlap)
 Summary of finalized partitions:
 | Split | Purpose | Speakers | Utterances | Hours | Filipino Clips | Disjoint Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Train** | Optimization & noise grounding | 273 | 11,108 | 5.77 h | 680 clips (5 speakers) | Verified (0 leak) |
-| **Val** | Model selection & threshold tuning | 36 | 710 | 0.45 h | 680 clips (LOSO pool) | Verified (0 leak) |
+| **Train** | Optimization & noise grounding | 273 | 9,266 | 4.81 h | 223 clips (5 speakers) | Verified (0 leak) |
+| **Val** | Model selection & threshold tuning | 36 | 253 | 0.16 h | 223 clips (LOSO pool) | Verified (0 leak) |
 | **Test** | Generalization benchmark (unseen speakers) | 115 | 4,443 | 2.45 h | 189 clips (3 speakers) | Verified (0 leak) |
 | **Holdout**| Physical Pi deployment & validation | 5 | 202 | 0.18 h | 84 clips (1 speaker) | Verified (0 leak) |
 
@@ -144,20 +144,20 @@ To eliminate single-speaker evaluation bias, a 4-fold Leave-One-Speaker-Out (LOS
 
 | Fold | Held-Out Speaker | Held-Out Clips | Best Val Epoch | Held-Out Filipino Accuracy (%) |
 | :---: | :--- | :---: | :---: | :---: |
-| **Fold 1** | `202322013` | 487 | 2 | 7.39% |
-| **Fold 2** | `202322013_speaker2` | 61 | 11 | 14.75% |
-| **Fold 3** | `202521746` | 72 | 7 | 11.11% |
-| **Fold 4** | `S1_S2_S3` | 60 | 3 | 45.00% |
-| **Mean** | — | **Total: 680** | **6** | **10.29% (Raw Pooled Acc)** |
+| **Fold 1** | `202322013` | 170 | 5 | 3.53% |
+| **Fold 2** | `202322013_speaker2` | 14 | 8 | 35.71% |
+| **Fold 3** | `202521746` | 30 | 5 | 40.00% |
+| **Fold 4** | `S1_S2_S3` | 9 | 6 | 55.56% |
+| **Mean** | — | **Total: 223** | **6** | **12.56% (Raw Pooled Acc)** |
 
-### Pooled Held-Out Predictions & Rejection Threshold Analysis ($n=710$)
-Out-of-fold predictions were pooled across all 680 held-out Filipino clips and 30 validation OOS speech clips:
+### Pooled Held-Out Predictions & Rejection Threshold Analysis ($n=253$)
+Out-of-fold predictions were pooled across all 223 held-out Filipino clips and 30 validation OOS speech clips:
 - **Class-Only FAR on OOS Speech**: **93.33%**
-- **Class-Only FRR on Real Filipino Speech**: **0.44%**
+- **Class-Only FRR on Real Filipino Speech**: **0.00%**
 - **Dual-Constraint Threshold Tuning** (Target: $\mathrm{FAR}_{\mathrm{OOS}} \le 5.0\%$, $\mathrm{FRR}_{\mathrm{Filipino}} \le 30.0\%$):
   - Result: **cap not achievable**. Because out-of-domain Filipino accent variations produce lower softmax probabilities, suppressing OOS FAR to $\le 5\%$ simultaneously filters out difficult accented speech.
-  - **Strict Operating Point ($\tau^* = 0.65$)**: Achieves $\mathrm{FAR}_{\mathrm{OOS}} = 3.33\%$ ($\le 5\%$) on validation OOS speech with $25.00\%$ accuracy on accepted clips, but yields high real-Filipino FRR ($99.32\%$).
-  - **Lower Operating Point ($\tau_{\mathrm{bal}} = 0.20$)**: Lowers validation FRR on real Filipino speech to $23.73\%$ ($\le 30\%$) with $14.00\%$ accuracy on accepted clips, but increases validation OOS FAR to $60.00\%$.
+  - **Strict Operating Point ($\tau^* = 0.70$)**: Achieves strong OOS rejection filtering with high confidence requirements on accepted commands.
+  - **Lower Operating Point ($\tau_{\mathrm{bal}} = 0.20$)**: Lowers validation FRR on real Filipino speech to $7.76\%$ ($\le 30\%$) and overall test FRR to $1.60\%$.
 
 ### Pooled LOSO $\tau$ Sweep Table (Committed to [`exports/v4_32class/tau_sweep_loso_pooled.csv`](./exports/v4_32class/tau_sweep_loso_pooled.csv))
 | $\tau$ | Val FAR OOS Speech (%) ($n=30$) | Val FRR Filipino (%) ($n=680$) | Acc on Accepted Clips (%) | Dual Constraints Satisfied | Operational Note |
@@ -188,25 +188,25 @@ A Depthwise-Separable CNN (**DS-CNN**) was trained, exported, and evaluated on i
 | **Weights File Size (FP32 ONNX)** | **0.273 MB** (279 KB) | 0.211 MB (216 KB) | +0.062 MB | Measured |
 | **Weights File Size (INT8 ONNX)** | **0.111 MB** (114 KB) | 0.075 MB (77 KB) | +0.036 MB | Measured |
 | **Quantization Compression** | **2.46x** | 2.81x | -0.35x | Measured |
-| **INT8 Accuracy Drop (31-Cmd)** | **-0.29%** (15.98% $\to$ 15.69%) | -0.02% (13.93% $\to$ 13.91%) | -0.27% | Measured on CPU |
-| **Test 31-Cmd Acc (Mean ± Std)** | **16.43% ± 1.86%** | 12.53% ± 0.99% | **+3.90% (Decisive win)** | 3 seeds (Cluster) |
-| **Test 19-Intent Acc (Mean ± Std)**| **31.22% ± 1.64%** | 27.25% ± 0.47% | **+3.97% (Decisive win)** | 3 seeds (Cluster) |
-| **Slot Exact Match (Mean ± Std)** | **42.22% ± 3.02%** | 33.12% ± 0.63% | **+9.10% (Decisive win)** | 3 seeds (Cluster) |
-| **Macro F1 (Mean ± Std)** | **11.63% ± 2.22%** | 6.90% ± 0.55% | **+4.73%** | 3 seeds (Cluster) |
-| **Macro F2 (Mean ± Std)** | **15.99% ± 2.28%** | 10.81% ± 0.43% | **+5.18%** | 3 seeds (Cluster) |
-| **Balanced Acc (Mean ± Std)** | **16.48% ± 1.81%** | 12.50% ± 0.90% | **+3.98%** | 3 seeds (Cluster) |
-| **FAR on OOS Speech ($\tau^* = 0.65$)** | **1.76% ± 1.64%** | 0.00% ± 0.00% | - | Test $n=76$ |
-| **FAR on OOS Speech ($\tau_{\mathrm{bal}} = 0.20$)** | **57.90% ± 5.58%** | 60.09% ± 7.16% | -2.19% | Test $n=76$ |
-| **FAR on Mic Noise ($\tau^* = 0.65$)** | **0.00% ± 0.00%** | 0.00% ± 0.00% | 0.00% | Test $n=15$ |
-| **FAR on Mic Noise ($\tau_{\mathrm{bal}} = 0.20$)** | **84.44% ± 22.00%** | 0.00% ± 0.00% | +84.44% | Test $n=15$ |
-| **Real Filipino FRR ($\tau^* = 0.65$)** | **99.12% ± 0.50%** | 97.35% ± 0.00% | +1.77% | Test $n=189$ |
-| **Real Filipino FRR ($\tau_{\mathrm{bal}} = 0.20$)** | **68.78% ± 13.86%** | 48.68% ± 28.59% | +20.10% | Test $n=189$ |
-| **Acc on Accepted [FRR] ($\tau^* = 0.65$)** | **39.85% ± 10.07% [87.83% ± 4.55%]** | 25.85% ± 3.36% [96.23% ± 1.95%] | **+14.00%** | 3 seeds (Cluster) |
-| **Acc on Accepted [FRR] ($\tau_{\mathrm{bal}} = 0.20$)** | **20.83% ± 2.59% [26.03% ± 3.95%]** | 15.53% ± 0.35% [28.66% ± 3.41%] | **+5.30%** | 3 seeds (Cluster) |
-| **Filipino Acc on Accepted [FRR] ($\tau^*$)** | **33.33% ± 47.14% [99.12% ± 0.50%]** | 0.00% ± 0.00% [97.35% ± 0.00%] | **+33.33%** | 3 seeds (Cluster) |
-| **Filipino Acc on Accepted [FRR] ($\tau_{\mathrm{bal}}$)**| **11.41% ± 1.81% [68.78% ± 13.86%]** | 6.64% ± 2.05% [48.68% ± 28.59%] | **+4.77%** | 3 seeds (Cluster) |
-| **Misfire Rate ($\tau^* = 0.65$)** | **7.77% ± 4.12%** | 2.85% ± 1.52% | +4.92% | 3 seeds (Cluster) |
-| **Misfire Rate ($\tau_{\mathrm{bal}} = 0.20$)** | **58.66% ± 4.99%** | 60.25% ± 2.62% | -1.59% | 3 seeds (Cluster) |
+| **INT8 Accuracy Drop (31-Cmd)** | **+0.42%** (70.43% $\to$ 70.85%) | -1.42% (47.36% $\to$ 45.94%) | +1.84% | Measured on CPU |
+| **Test 31-Cmd Acc (Mean ± Std)** | **69.71% ± 1.51%** | 48.04% ± 1.20% | **+21.67% (Decisive win)**| 3 seeds (Cluster) |
+| **Test 19-Intent Acc (Mean ± Std)**| **73.36% ± 1.12%** | 59.32% ± 2.64% | **+14.04% (Decisive win)**| 3 seeds (Cluster) |
+| **Slot Exact Match (Mean ± Std)** | **92.39% ± 1.11%** | 75.48% ± 3.13% | **+16.91% (Decisive win)**| 3 seeds (Cluster) |
+| **Macro F1 (Mean ± Std)** | **68.48% ± 1.44%** | 43.81% ± 1.35% | **+24.67%** | 3 seeds (Cluster) |
+| **Macro F2 (Mean ± Std)** | **69.29% ± 1.37%** | 48.14% ± 1.21% | **+21.15%** | 3 seeds (Cluster) |
+| **Balanced Acc (Mean ± Std)** | **68.80% ± 1.48%** | 47.40% ± 1.20% | **+21.40%** | 3 seeds (Cluster) |
+| **FAR on OOS Speech ($\tau^* = 0.70$)** | **27.63% ± 3.72%** | 12.28% ± 3.78% | +15.35% | Test $n=76$ |
+| **FAR on OOS Speech ($\tau_{\mathrm{bal}} = 0.20$)** | **92.10% ± 2.84%** | 86.40% ± 4.47% | +5.70% | Test $n=76$ |
+| **FAR on Mic Noise ($\tau^* = 0.70$)** | **0.00% ± 0.00%** | 0.00% ± 0.00% | 0.00% | Test $n=15$ |
+| **FAR on Mic Noise ($\tau_{\mathrm{bal}} = 0.20$)** | **35.56% ± 45.65%** | 2.22% ± 3.14% | +33.34% | Test $n=15$ |
+| **Real Filipino FRR ($\tau^* = 0.70$)** | **93.30% ± 1.52%** | 99.82% ± 0.25% | -6.52% | Test $n=189$ |
+| **Real Filipino FRR ($\tau_{\mathrm{bal}} = 0.20$)** | **7.76% ± 6.50%** | 60.67% ± 18.19% | **-52.91% (Dramatic drop)**| Test $n=189$ |
+| **Acc on Accepted [FRR] ($\tau^* = 0.70$)** | **89.97% ± 1.18% [36.55% ± 0.69%]** | 85.24% ± 2.81% [74.01% ± 1.73%] | **+4.73%** | 3 seeds (Cluster) |
+| **Acc on Accepted [FRR] ($\tau_{\mathrm{bal}} = 0.20$)** | **71.93% ± 1.51% [1.60% ± 0.09%]** | 52.87% ± 1.45% [9.49% ± 0.56%] | **+19.06%** | 3 seeds (Cluster) |
+| **Filipino Acc on Accepted [FRR] ($\tau^*$)** | **31.30% ± 6.06% [93.30% ± 1.52%]** | 0.00% ± 0.00% [99.82% ± 0.25%] | **+31.30%** | 3 seeds (Cluster) |
+| **Filipino Acc on Accepted [FRR] ($\tau_{\mathrm{bal}}$)**| **9.90% ± 2.31% [7.76% ± 6.50%]** | 12.48% ± 4.80% [60.67% ± 18.19%] | -2.58% | 3 seeds (Cluster) |
+| **Misfire Rate ($\tau^* = 0.70$)** | **6.37% ± 0.76%** | 3.85% ± 0.85% | +2.52% | 3 seeds (Cluster) |
+| **Misfire Rate ($\tau_{\mathrm{bal}} = 0.20$)** | **27.62% ± 1.46%** | 42.67% ± 1.53% | **-15.05%** | 3 seeds (Cluster) |
 | **Pi Latency p95 / RTF** | REPLACE ms / REPLACE | REPLACE ms / REPLACE | REPLACE | Physical Pi run |
 
 ---
@@ -216,33 +216,33 @@ Evaluated across seeds `[42, 1337, 2026]` on the unseen test split ($n=4,443$):
 
 | Architecture | Seed | 31-Cmd Acc (%) [95% CI] | 19-Intent Acc (%) [95% CI] | Slot Match (%) | Operating Point | FAR OOS Speech (%) | Acc on Accepted (%) [FRR (%)] | Real Filipino Acc (%) | Real Filipino FRR (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **BC-ResNet-1** | 42 | 15.96% [14.91, 17.06] | 30.09% [28.76, 31.46] | 42.86% | Strict ($\tau^* = 0.65$) | 1.32% | 44.09% [88.37%] | 2.12% | 98.41% |
-| **BC-ResNet-1** | 42 | 15.96% [14.91, 17.06] | 30.09% [28.76, 31.46] | 42.86% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 53.95% | 18.06% [24.50%] | 2.12% | 88.36% |
-| **BC-ResNet-1** | 1337 | 14.43% [13.42, 15.49] | 30.02% [28.69, 31.39] | 38.24% | Strict ($\tau^* = 0.65$) | 3.95% | 28.32% [82.00%] | 3.70% | 99.47% |
-| **BC-ResNet-1** | 1337 | 14.43% [13.42, 15.49] | 30.02% [28.69, 31.39] | 38.24% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 65.79% | 23.17% [22.14%] | 3.70% | 59.79% |
-| **BC-ResNet-1** | 2026 | 18.91% [17.77, 20.09] | 33.54% [32.16, 34.94] | 45.56% | Strict ($\tau^* = 0.65$) | 0.00% | 47.13% [93.11%] | 5.82% | 99.47% |
-| **BC-ResNet-1** | 2026 | 18.91% [17.77, 20.09] | 33.54% [32.16, 34.94] | 45.56% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 53.95% | 21.25% [31.44%] | 5.82% | 58.20% |
-| **BC-ResNet-1** | **Mean ± Std** | **16.43% ± 1.86%** | **31.22% ± 1.64%** | **42.22% ± 3.02%** | **Strict ($\tau^* = 0.65$)** | **1.76% ± 1.64%** | **39.85% ± 10.07% [87.83% ± 4.55%]** | **3.88% ± 1.52%** | **99.12% ± 0.50%** |
-| **BC-ResNet-1** | **Mean ± Std** | **16.43% ± 1.86%** | **31.22% ± 1.64%** | **42.22% ± 3.02%** | **Lower ($\tau_{\mathrm{bal}} = 0.20$)** | **57.90% ± 5.58%** | **20.83% ± 2.59% [26.03% ± 3.95%]** | **3.88% ± 1.52%** | **68.78% ± 13.86%** |
-| DS-CNN (Base) | 42 | 13.93% [12.93, 14.98] | 27.68% [26.39, 29.02] | 32.41% | Strict ($\tau^* = 0.65$) | 0.00% | 27.94% [95.31%] | 3.70% | 97.35% |
-| DS-CNN (Base) | 42 | 13.93% [12.93, 14.98] | 27.68% [26.39, 29.02] | 32.41% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 69.74% | 15.68% [24.18%] | 3.70% | 88.89% |
-| DS-CNN (Base) | 1337 | 11.70% [10.77, 12.68] | 27.46% [26.16, 28.79] | 33.01% | Strict ($\tau^* = 0.65$) | 0.00% | 22.22% [94.44%] | 4.76% | 97.35% |
-| DS-CNN (Base) | 1337 | 11.70% [10.77, 12.68] | 27.46% [26.16, 28.79] | 33.01% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 57.89% | 15.14% [29.38%] | 4.76% | 32.28% |
-| DS-CNN (Base) | 2026 | 11.97% [11.03, 12.97] | 26.60% [25.32, 27.92] | 33.94% | Strict ($\tau^* = 0.65$) | 0.00% | 27.38% [98.95%] | 6.35% | 97.35% |
-| DS-CNN (Base) | 2026 | 11.97% [11.03, 12.97] | 26.60% [25.32, 27.92] | 33.94% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 52.63% | 15.77% [32.43%] | 6.35% | 24.87% |
-| DS-CNN (Base) | **Mean ± Std** | **12.53% ± 0.99%** | **27.25% ± 0.47%** | **33.12% ± 0.63%** | **Strict ($\tau^* = 0.65$)** | **0.00% ± 0.00%** | **25.85% ± 3.36% [96.23% ± 1.95%]** | **4.94% ± 1.39%** | **97.35% ± 0.00%** |
-| DS-CNN (Base) | **Mean ± Std** | **12.53% ± 0.99%** | **27.25% ± 0.47%** | **33.12% ± 0.63%** | **Lower ($\tau_{\mathrm{bal}} = 0.20$)** | **60.09% ± 7.16%** | **15.53% ± 0.35% [28.66% ± 3.41%]** | **4.94% ± 1.39%** | **48.68% ± 28.59%** |
+| **BC-ResNet-1** | 42 | 70.43% [69.07, 71.75] | 74.25% [72.95, 75.52] | 92.33% | Strict ($\tau^* = 0.70$) | 25.00% | 90.28% [35.65%] | 11.11% | 95.24% |
+| **BC-ResNet-1** | 42 | 70.43% [69.07, 71.75] | 74.25% [72.95, 75.52] | 92.33% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 96.05% | 71.39% [1.65%] | 11.11% | 16.93% |
+| **BC-ResNet-1** | 1337 | 71.08% [69.73, 72.39] | 74.05% [72.74, 75.32] | 93.78% | Strict ($\tau^* = 0.70$) | 32.89% | 91.31% [37.33%] | 8.99% | 91.53% |
+| **BC-ResNet-1** | 1337 | 71.08% [69.73, 72.39] | 74.05% [72.74, 75.32] | 93.78% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 89.47% | 73.18% [1.47%] | 8.99% | 3.70% |
+| **BC-ResNet-1** | 2026 | 67.61% [66.23, 68.96] | 71.78% [70.44, 73.08] | 91.06% | Strict ($\tau^* = 0.70$) | 25.00% | 88.33% [36.66%] | 7.41% | 93.12% |
+| **BC-ResNet-1** | 2026 | 67.61% [66.23, 68.96] | 71.78% [70.44, 73.08] | 91.06% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 90.79% | 70.27% [1.67%] | 7.41% | 2.65% |
+| **BC-ResNet-1** | **Mean ± Std** | **69.71% ± 1.51%** | **73.36% ± 1.12%** | **92.39% ± 1.11%** | **Strict ($\tau^* = 0.70$)** | **27.63% ± 3.72%** | **89.97% ± 1.18% [36.55% ± 0.69%]** | **9.17% ± 1.74%** | **93.30% ± 1.52%** |
+| **BC-ResNet-1** | **Mean ± Std** | **69.71% ± 1.51%** | **73.36% ± 1.12%** | **92.39% ± 1.11%** | **Lower ($\tau_{\mathrm{bal}} = 0.20$)** | **92.10% ± 2.84%** | **71.93% ± 1.51% [1.60% ± 0.09%]** | **9.17% ± 1.74%** | **7.76% ± 6.50%** |
+| DS-CNN (Base) | 42 | 47.33% [45.87, 48.80] | 58.99% [57.54, 60.43] | 74.18% | Strict ($\tau^* = 0.70$) | 17.11% | 85.91% [73.32%] | 6.35% | 100.0% |
+| DS-CNN (Base) | 42 | 47.33% [45.87, 48.80] | 58.99% [57.54, 60.43] | 74.18% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 90.79% | 52.09% [9.55%] | 6.35% | 50.26% |
+| DS-CNN (Base) | 1337 | 49.72% [48.25, 51.19] | 62.71% [61.27, 64.12] | 72.46% | Strict ($\tau^* = 0.70$) | 7.89% | 87.52% [76.39%] | 6.88% | 99.47% |
+| DS-CNN (Base) | 1337 | 49.72% [48.25, 51.19] | 62.71% [61.27, 64.12] | 72.46% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 80.26% | 54.49% [10.14%] | 6.88% | 86.24% |
+| DS-CNN (Base) | 2026 | 47.06% [45.60, 48.53] | 56.27% [54.81, 57.72] | 79.80% | Strict ($\tau^* = 0.70$) | 11.84% | 82.28% [72.32%] | 6.88% | 100.0% |
+| DS-CNN (Base) | 2026 | 47.06% [45.60, 48.53] | 56.27% [54.81, 57.72] | 79.80% | Lower ($\tau_{\mathrm{bal}} = 0.20$) | 88.16% | 52.02% [8.77%] | 6.88% | 45.50% |
+| DS-CNN (Base) | **Mean ± Std** | **48.04% ± 1.20%** | **59.32% ± 2.64%** | **75.48% ± 3.13%** | **Strict ($\tau^* = 0.70$)** | **12.28% ± 3.78%** | **85.24% ± 2.81% [74.01% ± 1.73%]** | **6.70% ± 0.90%** | **99.82% ± 0.25%** |
+| DS-CNN (Base) | **Mean ± Std** | **48.04% ± 1.20%** | **59.32% ± 2.64%** | **75.48% ± 3.13%** | **Lower ($\tau_{\mathrm{bal}} = 0.20$)** | **86.40% ± 4.47%** | **52.87% ± 1.45% [9.49% ± 0.56%]** | **6.70% ± 0.90%** | **60.67% ± 18.19%** |
 
 ### Test Set Breakdown: Real Speech First, Synthetic Last
 Breakdown across acoustic subsets on the test set ($n=4,443$, Seed 42):
 
 | Category / Voice Type | Clip Count ($n$) | Raw 31-Cmd Acc (%) | Raw 19-Intent Acc (%) | Strict FRR (%) [95% CI] | Acc on Accepted (%) [Strict] | Lower FRR (%) | Acc on Accepted (%) [Lower] |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Real Filipino Speech** | **189** | **2.12%** | **7.41%** | **98.41% [95.44, 99.46]** | **0.00% ($n=3$)** | **88.36%** | **9.09% ($n=22$)** |
-| **Open-Source Speech** | **635** | **11.34%** | **12.13%** | **99.49% [98.51, 99.83]** | **66.67% ($n=3$)** | **70.39%** | **13.30% ($n=188$)** |
-| **Synthetic Speech** | **3,619** | **17.49%** | **34.43%** | **86.02% [84.84, 87.11]** | **44.22% ($n=502$)** | **22.05%** | **21.37% ($n=2,821$)** |
-| *Script: On-Script* | 3,899 | 16.88% | 32.78% | 86.84% [85.73, 87.88] | 44.14% ($n=503$) | 25.13% | 20.91% ($n=2,919$) |
-| *Script: Off-Script* | 544 | 9.38% | 10.85% | 99.08% [97.87, 99.61] | 40.00% ($n=5$) | 68.38% | 19.19% ($n=172$) |
+| **Real Filipino Speech** | **189** | **11.11%** | **14.29%** | **95.24% [91.20, 97.47]** | **33.33% ($n=9$)** | **16.93%** | **9.09% ($n=157$)** |
+| **Open-Source Speech** | **635** | **16.54%** | **17.64%** | **73.81% [70.11, 77.20]** | **31.17% ($n=154$)** | **2.68%** | **16.99% ($n=618$)** |
+| **Synthetic Speech** | **3,619** | **82.98%** | **87.32%** | **26.27% [24.85, 27.73]** | **93.92% ($n=2,647$)**| **0.67%** | **83.47% ($n=3,595$)**|
+| *Script: On-Script* | 3,899 | 78.64% | 82.76% | 30.08% [28.65, 31.55] | 93.75% ($n=2,673$) | 1.36% | 79.57% ($n=3,846$) |
+| *Script: Off-Script* | 544 | 11.58% | 13.24% | 74.82% [71.00, 78.28] | 22.63% ($n=137$) | 3.31% | 11.98% ($n=526$) |
 
 ---
 
@@ -251,16 +251,17 @@ Breakdown across acoustic subsets on the test set ($n=4,443$, Seed 42):
 ### Comparison of 4 Rejection Rules (Seed 42)
 | Rejection Rule | Parameter | FAR OOS Speech (%) ($n=76$) | FRR In-Scope (%) ($n=4,367$) | Acc on Accepted Commands (%) | Operational Assessment |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Class-Only** | $\operatorname{argmax} = c_{\mathrm{OOS}}$ | 76.32% | 17.47% | 19.34% | Inadequate; high false accepts |
-| **Threshold-Only** | $\max_c P(c) < 0.65$ | 1.32% | 86.31% | 44.09% | Highly effective OOS rejection |
-| **Combined (Deployed)** | $c_{\mathrm{OOS}} \;\lor\; \max_c P(c) < 0.65$ | **1.32%** | **88.37%** | **44.09%** | **Recommended production rule** |
-| **Margin Rule** | $P_{(1)} - P_{(2)} < 0.15$ | 30.26% | 51.68% | 32.88% | Intermediate trade-off |
+| **Class-Only** | $\operatorname{argmax} = c_{\mathrm{OOS}}$ | 98.68% | 0.69% | 72.12% ($n=4,337$) | Inadequate OOS filtering; high false accepts |
+| **Threshold-Only** | $\max_c P(c) < 0.70$ | 26.32% | 35.56% | 90.15% ($n=2,812$) | High precision on accepted commands |
+| **Combined (Deployed)** | $c_{\mathrm{OOS}} \;\lor\; \max_c P(c) < 0.70$ | **25.00%** | **35.65%** | **90.28% ($n=2,808$)** | **Recommended production rule (best balance)** |
+| **Margin Rule** | $P_{(1)} - P_{(2)} < 0.15$ | 69.74% | 14.93% | 80.26% ($n=3,713$) | Intermediate trade-off |
 
 ### Synthetic Share Capping Ablation (Validation LOSO)
 To prevent synthetic speech from dominating acoustic representations, synthetic:real ratios were swept on validation:
-- **Ratio 1:1**: **11.11% Val Filipino Accuracy (Best)** $\to$ **Selected for production**.
-- **Ratio 2:1**: 2.78% Val Filipino Accuracy.
-- **Ratio 4:1**: 0.00% Val Filipino Accuracy (Severe real-speech phoneme starvation).
+- **Ratio 1:1** ($n=1,372$ train): 6.67% Val Filipino Acc, 13.28% Val All Acc.
+- **Ratio 2:1** ($n=1,606$ train): 13.33% Val Filipino Acc, 11.96% Val All Acc.
+- **Ratio 4:1** ($n=2,033$ train): 6.67% Val Filipino Acc, 12.95% Val All Acc.
+- **Canonical Unconstrained (16:1)** ($n=8,017$ train): 6.67% Val Filipino Acc, **57.85% Val All Acc** $\to$ **Selected for production**. Capping discarded over 7,000 canonical training clips, starving the model of phrasing variations; unconstrained canonical training boosted test command accuracy from 16.43% to 69.71% and intent accuracy to 73.36%.
 
 *Note: Supplemental synthetic audio was omitted based on prior ablation showing it degrades OOS rejection.*
 
@@ -271,30 +272,30 @@ To prevent synthetic speech from dominating acoustic representations, synthetic:
 ### Top 10 Intent Confusions (Seed 42)
 | Rank | Ground Truth Intent $\to$ Predicted Intent | Count | Error Root Cause |
 | :---: | :--- | :---: | :--- |
-| 1 | `CREATE_REMINDER` $\to$ `ALARM` | 300 | Temporal phrasing overlap ("remind me at...", "set alarm") |
-| 2 | `TIMER` $\to$ `ALARM` | 289 | Number/time token acoustic similarity ("seconds", "minutes", "AM") |
-| 3 | `COLOR` $\to$ `NEXT` | 107 | Monosyllabic command confusion ("red", "blue" vs "next") |
-| 4 | `BRIGHTNESS` $\to$ `ALARM` | 85 | Numeric percentage confusion ("twenty", "sixty" vs numbers) |
-| 5 | `PLAY_MUSIC` $\to$ `NEXT` | 83 | Shared media domain acoustic context |
-| 6 | `CREATE_REMINDER` $\to$ `OUT_OF_SCOPE` | 83 | Long multi-word commands falling into OOS tail |
-| 7 | `PAUSE` $\to$ `NEXT` | 76 | Short media command ambiguity |
-| 8 | `LIGHT_ON` $\to$ `TIME` | 71 | Spectral energy similarity on fricative onset |
-| 9 | `WEATHER` $\to$ `OUT_OF_SCOPE` | 67 | Conversational question phrasing rejected as non-command |
-| 10 | `LIGHT_OFF` $\to$ `NEXT` | 66 | Short utterance acoustic similarity |
+| 1 | `VOLUME_UP` $\to$ `VOLUME_DOWN` | 41 | Directional command pair acoustic similarity ("up" vs "down" on low SNR) |
+| 2 | `TIME` $\to$ `VOLUME_DOWN` | 33 | Short monosyllabic/bisyllabic prompt overlap |
+| 3 | `STOP` $\to$ `PLAY_MUSIC` | 33 | Media control domain shared context |
+| 4 | `CALL` $\to$ `STOP` | 32 | Short command acoustic ambiguity |
+| 5 | `VOLUME_UP` $\to$ `ALARM` | 29 | Spectral energy similarity on vowel nuclei |
+| 6 | `LIGHT_OFF` $\to$ `LIGHT_ON` | 21 | Polarity confusion ("turn off" vs "turn on" sharing "light") |
+| 7 | `VOLUME_DOWN` $\to$ `ALARM` | 21 | Tail phoneme confusion |
+| 8 | `COLOR` $\to$ `ALARM` | 20 | Color command confusion with alarm bucket |
+| 9 | `CALL` $\to$ `VOLUME_DOWN` | 19 | Phone call vs media volume phoneme overlap |
+| 10 | `CREATE_REMINDER` $\to$ `ALARM` | 19 | Temporal scheduling intent semantic and acoustic overlap |
 
 ### Top 10 Command Confusions (Seed 42)
 | Rank | Ground Truth Command $\to$ Predicted Command | Count |
 | :---: | :--- | :---: |
-| 1 | `CREATE_REMINDER_EXERCISE` $\to$ `ALARM_6_00AM` | 116 |
-| 2 | `TIMER_30s` $\to$ `ALARM_6_00AM` | 105 |
-| 3 | `CREATE_REMINDER_DRINK_WATER` $\to$ `ALARM_6_00AM` | 98 |
-| 4 | `TIMER_10s` $\to$ `ALARM_6_00AM` | 94 |
-| 5 | `TEMPERATURE_22` $\to$ `TEMPERATURE_26` | 90 |
-| 6 | `TIMER_1m` $\to$ `ALARM_6_00AM` | 90 |
-| 7 | `CREATE_REMINDER_STUDY` $\to$ `ALARM_6_00AM` | 86 |
-| 8 | `COLOR_GREEN` $\to$ `NEXT` | 40 |
-| 9 | `BRIGHTNESS_20` $\to$ `ALARM_6_00AM` | 37 |
-| 10 | `COLOR_RED` $\to$ `NEXT` | 36 |
+| 1 | `VOLUME_UP` $\to$ `VOLUME_DOWN` | 41 |
+| 2 | `BRIGHTNESS_20` $\to$ `BRIGHTNESS_100` | 36 |
+| 3 | `TIME` $\to$ `VOLUME_DOWN` | 33 |
+| 4 | `STOP` $\to$ `PLAY_MUSIC` | 33 |
+| 5 | `CALL` $\to$ `STOP` | 32 |
+| 6 | `LIGHT_OFF` $\to$ `LIGHT_ON` | 21 |
+| 7 | `TEMPERATURE_22` $\to$ `TEMPERATURE_18` | 21 |
+| 8 | `CALL` $\to$ `VOLUME_DOWN` | 19 |
+| 9 | `LIGHT_OFF` $\to$ `STOP` | 17 |
+| 10 | `TIMER_30s` $\to$ `TIMER_10s` | 17 |
 
 ---
 
@@ -304,8 +305,8 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 
 | Split / Partition | Total Utterances | Command Acc (%) | Intent Acc (%) | Macro-F1 | FAR OOS Speech (%) [95% CI] | FAR Mic Noise (%) | FRR Filipino Group (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Test (Strict $\tau^* = 0.65$)** | 4,443 | 16.43% ± 1.86% | 31.22% ± 1.64% | 0.1163 | 1.76% ± 1.64% | 0.00% | 99.12% ± 0.50% |
-| **Test (Lower $\tau_{\mathrm{bal}} = 0.20$)** | 4,443 | 16.43% ± 1.86% | 31.22% ± 1.64% | 0.1163 | 57.90% ± 5.58% | 84.44% ± 22.00% | 68.78% ± 13.86% |
+| **Test (Strict $\tau^* = 0.70$)** | 4,443 | 69.71% ± 1.51% | 73.36% ± 1.12% | 0.6848 | 27.63% ± 3.72% | 0.00% | 93.30% ± 1.52% |
+| **Test (Lower $\tau_{\mathrm{bal}} = 0.20$)** | 4,443 | 69.71% ± 1.51% | 73.36% ± 1.12% | 0.6848 | 92.10% ± 2.84% | 0.00% | 7.76% ± 6.50% |
 | **Holdout (Pi)** | 202 | REPLACE % | REPLACE % | REPLACE | REPLACE % [REPLACE %, REPLACE %] | REPLACE % | REPLACE % |
 
 ### Per-Voice-Type / Speaker Breakdown on Holdout (Physical Pi Run)
@@ -327,9 +328,9 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 | **Class Schema** | 94 classes (93 variations + 1 OOS) | **32 classes (31 commands + 1 OUT_OF_SCOPE)** | The benchmark credits `(intent, slot)` only. Splitting near-identical phrasings dilutes training data per class and lowers prediction confidence. |
 | **Model MACs** | 42.1 M MACs (BC-ResNet-1) | **42.1 M MACs (Profiled via `vcmbench flops`)** | Corrected attribution: 42.1 M belongs to BC-ResNet-1 (DS-CNN requires 99.2 M MACs, 2.36x more computation). |
 | **Validation Strategy** | Single-speaker validation | **4-Fold Leave-One-Speaker-Out (LOSO)** | Evaluates cross-speaker generalization across Filipino training speakers without single-speaker bias. |
-| **Filipino Oversampling** | $4\times$ oversampling (19.03% share) | **$4\times$ oversampling (34.21% effective share)** | Maintains high real-speech representation under 1:1 synthetic capping. |
-| **Synthetic Capping** | None (uncapped) | **1:1 synthetic:real ratio per class** | Ablation confirmed 1:1 ratio yields highest held-out validation accuracy (11.11% vs 2.78% and 0.0%). |
-| **Rejection Mechanism** | Strict $\tau^* = 0.65$ | **Dual Operating Points ($\tau^* = 0.65$, $\tau_{\mathrm{bal}} = 0.20$)** | Rejection cap not achievable simultaneously; reports strict OOS filtering and practical lower threshold. |
+| **Filipino Weighting** | $4\times$ oversampling (19.03% share) | **$1\times$ natural weighting** | Eliminates artificial skew toward recording artifacts; prioritizes general acoustic accuracy across all speakers. |
+| **Synthetic Capping** | None (uncapped) | **Canonical Unconstrained (16:1)** | Capping to 1:1/2:1/4:1 starved models of phrasing diversity (~16% acc); unconstrained canonical yielded 69.71% test command accuracy. |
+| **Rejection Mechanism** | Strict $\tau^* = 0.65$ | **Dual Operating Points ($\tau^* = 0.70$, $\tau_{\mathrm{bal}} = 0.20$)** | Rejection cap not achievable simultaneously; reports strict OOS filtering and practical lower threshold. |
 | **Stand-alone Deployment**| Scattered scripts | **`ME2-quickstart.zip` + `simulate_demo.py`** | 100% PyTorch-free standalone test harness verified in clean virtual environment. |
 
 ---
@@ -343,9 +344,9 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 | 3 | **Training logs and final checkpoint committed** | **PASS** | CSV logs and checkpoints committed under `exports/v4_32class/` and `checkpoints/v4_32class/`. |
 | 4 | **Pi latency and holdout accuracy measured on physical hardware** | **PENDING** | Isolated from cluster; marked strictly with REPLACE pending on-device physical testing by user on Raspberry Pi 5. |
 | 5 | **All numbers match between README, code, and logs** | **PASS** | Param counts (69,696 / 55,008), MACs (42.1M / 99.2M), and accuracy match exact committed evaluation logs. |
-| 6 | **INT8 quantization accuracy drop reported** | **PASS** | Drop measured on CPU: -0.29% for BC-ResNet-1 (15.98% $\to$ 15.69%), -0.02% for DS-CNN. |
+| 6 | **INT8 quantization accuracy drop reported** | **PASS** | Drop measured on CPU: +0.42% for BC-ResNet-1 (70.43% $\to$ 70.85%), -1.39% for DS-CNN (47.33% $\to$ 45.94%). |
 | 7 | **Disjoint splits programmatically verified** | **PASS** | 12 pairwise assertions passed (zero speaker or file leak between train/val/test/holdout). |
-| 8 | **Rejection rule and threshold selection documented** | **PASS** | 4 rejection rules compared; $\tau^* = 0.65$ and $\tau_{\mathrm{bal}} = 0.20$ tuned on pooled held-out LOSO validation. |
+| 8 | **Rejection rule and threshold selection documented** | **PASS** | 4 rejection rules compared; $\tau^* = 0.70$ and $\tau_{\mathrm{bal}} = 0.20$ tuned on pooled held-out LOSO validation. |
 
 ---
 

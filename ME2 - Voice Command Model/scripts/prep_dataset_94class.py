@@ -46,7 +46,7 @@ TARGET_DURATION = 2.0
 TARGET_SAMPLES = int(TARGET_SR * TARGET_DURATION)  # 32000
 
 REVISION = "6947f13073e57eb6ae67e7e2fc3680700b82aa13"
-BENCHMARK_VARIATIONS_CSV = "/home/misael.andre.maningo/vcm-benchmark/vcmbench/variations.csv"
+BENCHMARK_VARIATIONS_CSV = os.path.expanduser("~/vcm-benchmark/vcmbench/variations.csv")
 
 # 19 Schema Intents
 INTENTS_19 = [
