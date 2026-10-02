@@ -1,0 +1,54 @@
+{
+  "bcresnet": {
+    "command_accuracy_mean": 56.2,
+    "command_accuracy_std": 3.59,
+    "intent_accuracy_mean": 73.12,
+    "intent_accuracy_std": 1.32,
+    "slot_exact_match_mean": 81.06,
+    "slot_exact_match_std": 4.29,
+    "far_oos_mean": 4.83,
+    "far_oos_std": 1.24,
+    "frr_in_scope_mean": 68.74,
+    "frr_in_scope_std": 9.26,
+    "filipino_command_acc_mean": 7.94,
+    "filipino_command_acc_std": 0.86,
+    "filipino_frr_mean": 96.82,
+    "filipino_frr_std": 1.14,
+    "seeds": [
+      42,
+      1337,
+      2026
+    ]
+  },
+  "dscnn": {
+    "command_accuracy_mean": 24.95,
+    "command_accuracy_std": 4.4,
+    "intent_accuracy_mean": 48.93,
+    "intent_accuracy_std": 4.22,
+    "slot_exact_match_mean": 57.62,
+    "slot_exact_match_std": 8.36,
+    "far_oos_mean": 31.14,
+    "far_oos_std": 5.3,
+    "frr_in_scope_mean": 61.74,
+    "frr_in_scope_std": 10.72,
+    "filipino_command_acc_mean": 5.29,
+    "filipino_command_acc_std": 0.75,
+    "filipino_frr_mean": 85.89,
+    "filipino_frr_std": 6.93,
+    "seeds": [
+      42,
+      1337,
+      2026
+    ]
+  },
+  "ablation_supp_synth_seed42": {
+    "command_accuracy": 51.36,
+    "intent_accuracy": 67.84,
+    "slot_exact_match": 82.26,
+    "far_oos": 19.74,
+    "frr_in_scope": 45.39,
+    "filipino_command_acc": 8.47,
+    "filipino_frr": 96.3,
+    "seed": 42
+  }
+}

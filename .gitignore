@@ -38,6 +38,8 @@ wheels/
 *.pt
 !checkpoints/v2/*.pt
 !*/checkpoints/v2/*.pt
+!checkpoints/v3_94class/*.pt
+!*/checkpoints/v3_94class/*.pt
 results/
 */results/
 

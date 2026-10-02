@@ -1,0 +1,4 @@
+# PyTorch-free dependencies for Raspberry Pi 5 runtime and smoke testing
+numpy>=1.24.0,<2.0.0
+onnxruntime>=1.15.0
+sounddevice>=0.4.6

@@ -1,0 +1,60 @@
+{
+  "bcresnet": {
+    "model_name": "bcresnet",
+    "checkpoint": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v3_94class/best_bcresnet_94class_seed42.pt",
+    "parameters": 75710,
+    "parameters_m": 0.0757,
+    "fp32": {
+      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/bcresnet_94class_fp32.onnx",
+      "size_mb": 0.296,
+      "macs": 42117376,
+      "macs_si": "42.1 M",
+      "flops": 86830592,
+      "flops_si": "86.8 M",
+      "command_acc_94": 51.27,
+      "intent_acc_19": 67.81
+    },
+    "int8": {
+      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/bcresnet_94class_int8.onnx",
+      "size_mb": 0.117,
+      "compression_ratio": 2.53,
+      "macs": 42117376,
+      "macs_si": "42.1 M",
+      "flops": 89574226,
+      "flops_si": "89.6 M",
+      "command_acc_94": 52.87,
+      "intent_acc_19": 68.89,
+      "drop_command_94_pct": -1.6,
+      "drop_intent_19_pct": -1.08
+    }
+  },
+  "dscnn": {
+    "model_name": "dscnn",
+    "checkpoint": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v3_94class/best_dscnn_94class_seed42.pt",
+    "parameters": 63006,
+    "parameters_m": 0.063,
+    "fp32": {
+      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/dscnn_94class_fp32.onnx",
+      "size_mb": 0.241,
+      "macs": 99169792,
+      "macs_si": "99.2 M",
+      "flops": 200408064,
+      "flops_si": "200 M",
+      "command_acc_94": 18.73,
+      "intent_acc_19": 42.97
+    },
+    "int8": {
+      "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/dscnn_94class_int8.onnx",
+      "size_mb": 0.083,
+      "compression_ratio": 2.9,
+      "macs": 99169792,
+      "macs_si": "99.2 M",
+      "flops": 204028102,
+      "flops_si": "204 M",
+      "command_acc_94": 18.93,
+      "intent_acc_19": 43.55,
+      "drop_command_94_pct": -0.2,
+      "drop_intent_19_pct": -0.58
+    }
+  }
+}

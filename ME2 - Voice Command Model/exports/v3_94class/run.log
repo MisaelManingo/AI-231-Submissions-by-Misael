@@ -1,0 +1,318 @@
+================================================================================
+🎯 STARTING CONSOLIDATED 94-CLASS VOICE COMMAND TRAINING & BENCHMARK PIPELINE
+Device: NVIDIA A100-SXM4-40GB (GPU 7)
+Pinned HF Revision: 6947f13073e57eb6ae67e7e2fc3680700b82aa13
+================================================================================
+[1/4] Training BC-ResNet-1 across 3 seeds (42, 1337, 2026)...
+Using compute device: cuda:7 (NVIDIA A100-SXM4-40GB)
+
+================================================================================
+🚀 Training BCRESNET (94 Classes) | Seed: 42 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.8136 | Val Acc (All):  4.06% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.1733 | Val Acc (All):  7.45% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 2.9268 | Val Acc (All): 11.29% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 2.7509 | Val Acc (All): 11.40% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  5/25 | Loss: 2.4866 | Val Acc (All): 21.44% | Val Filipino Acc:  0.00%
+  Epoch  6/25 | Loss: 2.3114 | Val Acc (All): 24.60% | Val Filipino Acc:  8.33% ★ (Best Filipino Acc)
+  Epoch  7/25 | Loss: 2.1322 | Val Acc (All): 19.53% | Val Filipino Acc:  0.00%
+  Epoch  8/25 | Loss: 1.9893 | Val Acc (All): 30.36% | Val Filipino Acc:  4.17%
+  Epoch  9/25 | Loss: 1.8552 | Val Acc (All): 34.99% | Val Filipino Acc:  4.17%
+  Epoch 10/25 | Loss: 1.7410 | Val Acc (All): 36.79% | Val Filipino Acc:  4.17%
+  Epoch 11/25 | Loss: 1.6478 | Val Acc (All): 37.81% | Val Filipino Acc:  4.17%
+  Epoch 12/25 | Loss: 1.5681 | Val Acc (All): 39.39% | Val Filipino Acc:  4.17%
+  Epoch 13/25 | Loss: 1.4945 | Val Acc (All): 32.51% | Val Filipino Acc:  2.78%
+  Epoch 14/25 | Loss: 1.4447 | Val Acc (All): 46.39% | Val Filipino Acc:  8.33% ★ (Best Filipino Acc)
+  Epoch 15/25 | Loss: 1.3691 | Val Acc (All): 46.05% | Val Filipino Acc:  4.17%
+  Epoch 16/25 | Loss: 1.3231 | Val Acc (All): 46.05% | Val Filipino Acc:  5.56%
+  Epoch 17/25 | Loss: 1.3125 | Val Acc (All): 47.63% | Val Filipino Acc:  4.17%
+  Epoch 18/25 | Loss: 1.2692 | Val Acc (All): 52.03% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 1.2428 | Val Acc (All): 49.89% | Val Filipino Acc:  4.17%
+  Epoch 20/25 | Loss: 1.2076 | Val Acc (All): 48.08% | Val Filipino Acc:  4.17%
+  Epoch 21/25 | Loss: 1.1921 | Val Acc (All): 37.70% | Val Filipino Acc:  4.17%
+  Epoch 22/25 | Loss: 1.1593 | Val Acc (All): 45.03% | Val Filipino Acc:  4.17%
+  Epoch 23/25 | Loss: 1.1527 | Val Acc (All): 47.18% | Val Filipino Acc:  4.17%
+  Epoch 24/25 | Loss: 1.1685 | Val Acc (All): 44.92% | Val Filipino Acc:  4.17%
+  Epoch 25/25 | Loss: 1.1621 | Val Acc (All): 53.39% | Val Filipino Acc:  4.17%
+  Training finished in 155.76s. Best Filipino Val Acc:  8.33%
+  [Rejection Tuning] Optimal Tau (Raw): 0.85 (Achievable: False) | Temperature: 1.6960 | Optimal Tau (Calibrated): 0.55
+
+================================================================================
+🚀 Training BCRESNET (94 Classes) | Seed: 1337 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.7344 | Val Acc (All):  3.84% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.1484 | Val Acc (All):  8.13% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 2.9184 | Val Acc (All): 11.29% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 2.7992 | Val Acc (All): 11.51% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  5/25 | Loss: 2.6351 | Val Acc (All): 13.54% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  6/25 | Loss: 2.4530 | Val Acc (All): 16.70% | Val Filipino Acc:  0.00%
+  Epoch  7/25 | Loss: 2.2664 | Val Acc (All): 17.61% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  8/25 | Loss: 2.1430 | Val Acc (All): 18.51% | Val Filipino Acc:  2.78%
+  Epoch  9/25 | Loss: 2.0003 | Val Acc (All): 23.14% | Val Filipino Acc:  0.00%
+  Epoch 10/25 | Loss: 1.8775 | Val Acc (All): 32.05% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 11/25 | Loss: 1.7847 | Val Acc (All): 40.07% | Val Filipino Acc:  2.78%
+  Epoch 12/25 | Loss: 1.6836 | Val Acc (All): 40.63% | Val Filipino Acc:  5.56% ★ (Best Filipino Acc)
+  Epoch 13/25 | Loss: 1.6288 | Val Acc (All): 37.58% | Val Filipino Acc:  4.17%
+  Epoch 14/25 | Loss: 1.5843 | Val Acc (All): 34.54% | Val Filipino Acc:  2.78%
+  Epoch 15/25 | Loss: 1.5221 | Val Acc (All): 37.25% | Val Filipino Acc:  2.78%
+  Epoch 16/25 | Loss: 1.4713 | Val Acc (All): 45.26% | Val Filipino Acc:  4.17%
+  Epoch 17/25 | Loss: 1.4399 | Val Acc (All): 43.57% | Val Filipino Acc:  4.17%
+  Epoch 18/25 | Loss: 1.3666 | Val Acc (All): 43.57% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 1.3597 | Val Acc (All): 42.10% | Val Filipino Acc:  4.17%
+  Epoch 20/25 | Loss: 1.3523 | Val Acc (All): 47.74% | Val Filipino Acc:  4.17%
+  Epoch 21/25 | Loss: 1.3198 | Val Acc (All): 44.81% | Val Filipino Acc:  4.17%
+  Epoch 22/25 | Loss: 1.3041 | Val Acc (All): 46.28% | Val Filipino Acc:  4.17%
+  Epoch 23/25 | Loss: 1.2885 | Val Acc (All): 45.49% | Val Filipino Acc:  4.17%
+  Epoch 24/25 | Loss: 1.2791 | Val Acc (All): 49.10% | Val Filipino Acc:  8.33% ★ (Best Filipino Acc)
+  Epoch 25/25 | Loss: 1.2852 | Val Acc (All): 45.49% | Val Filipino Acc:  4.17%
+  Training finished in 143.71s. Best Filipino Val Acc:  8.33%
+  [Rejection Tuning] Optimal Tau (Raw): 0.70 (Achievable: False) | Temperature: 1.5432 | Optimal Tau (Calibrated): 0.50
+
+================================================================================
+🚀 Training BCRESNET (94 Classes) | Seed: 2026 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.7609 | Val Acc (All):  5.08% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.1687 | Val Acc (All): 10.16% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 2.9550 | Val Acc (All): 10.27% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 2.7883 | Val Acc (All):  8.92% | Val Filipino Acc:  2.78% ★ (Best Filipino Acc)
+  Epoch  5/25 | Loss: 2.5454 | Val Acc (All): 20.09% | Val Filipino Acc:  0.00%
+  Epoch  6/25 | Loss: 2.3834 | Val Acc (All): 20.43% | Val Filipino Acc:  0.00%
+  Epoch  7/25 | Loss: 2.2005 | Val Acc (All): 24.38% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  8/25 | Loss: 2.0579 | Val Acc (All): 28.22% | Val Filipino Acc:  6.94% ★ (Best Filipino Acc)
+  Epoch  9/25 | Loss: 1.9320 | Val Acc (All): 29.12% | Val Filipino Acc:  6.94% ★ (Best Filipino Acc)
+  Epoch 10/25 | Loss: 1.8167 | Val Acc (All): 27.65% | Val Filipino Acc:  1.39%
+  Epoch 11/25 | Loss: 1.7241 | Val Acc (All): 38.60% | Val Filipino Acc:  6.94% ★ (Best Filipino Acc)
+  Epoch 12/25 | Loss: 1.6431 | Val Acc (All): 33.97% | Val Filipino Acc:  4.17%
+  Epoch 13/25 | Loss: 1.5904 | Val Acc (All): 24.72% | Val Filipino Acc:  4.17%
+  Epoch 14/25 | Loss: 1.5381 | Val Acc (All): 28.33% | Val Filipino Acc:  2.78%
+  Epoch 15/25 | Loss: 1.4636 | Val Acc (All): 41.53% | Val Filipino Acc:  4.17%
+  Epoch 16/25 | Loss: 1.4299 | Val Acc (All): 43.91% | Val Filipino Acc:  2.78%
+  Epoch 17/25 | Loss: 1.3781 | Val Acc (All): 45.26% | Val Filipino Acc:  4.17%
+  Epoch 18/25 | Loss: 1.3122 | Val Acc (All): 44.58% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 1.2990 | Val Acc (All): 42.21% | Val Filipino Acc:  8.33% ★ (Best Filipino Acc)
+  Epoch 20/25 | Loss: 1.2817 | Val Acc (All): 45.26% | Val Filipino Acc:  4.17%
+  Epoch 21/25 | Loss: 1.2378 | Val Acc (All): 41.53% | Val Filipino Acc:  6.94%
+  Epoch 22/25 | Loss: 1.2443 | Val Acc (All): 50.23% | Val Filipino Acc:  4.17%
+  Epoch 23/25 | Loss: 1.2259 | Val Acc (All): 50.90% | Val Filipino Acc:  4.17%
+  Epoch 24/25 | Loss: 1.2484 | Val Acc (All): 42.21% | Val Filipino Acc:  1.39%
+  Epoch 25/25 | Loss: 1.2405 | Val Acc (All): 41.20% | Val Filipino Acc:  2.78%
+  Training finished in 127.01s. Best Filipino Val Acc:  8.33%
+  [Rejection Tuning] Optimal Tau (Raw): 0.80 (Achievable: False) | Temperature: 1.7126 | Optimal Tau (Calibrated): 0.50
+
+================================================================================
+🏆 MULTI-SEED SUMMARY RESULTS (TEST SET, 3 SEEDS)
+================================================================================
+[BCRESNET]
+  94-Command Acc:  56.2 ± 3.59%
+  19-Intent Acc:   73.12 ± 1.32%
+  Slot Match Acc:  81.06 ± 4.29%
+  FAR OOS Speech:  4.83 ± 1.24%
+  Real Filipino Acc: 7.94 ± 0.86% (FRR: 96.82 ± 1.14%)
+================================================================================
+[2/4] Training DS-CNN baseline across 3 seeds (42, 1337, 2026)...
+Using compute device: cuda:7 (NVIDIA A100-SXM4-40GB)
+
+================================================================================
+🚀 Training DSCNN (94 Classes) | Seed: 42 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.9892 | Val Acc (All):  3.05% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.6619 | Val Acc (All):  3.95% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 3.3875 | Val Acc (All):  6.88% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 3.1910 | Val Acc (All):  7.22% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  5/25 | Loss: 3.0344 | Val Acc (All):  9.14% | Val Filipino Acc:  2.78% ★ (Best Filipino Acc)
+  Epoch  6/25 | Loss: 2.9208 | Val Acc (All):  8.47% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  7/25 | Loss: 2.8422 | Val Acc (All): 11.74% | Val Filipino Acc:  0.00%
+  Epoch  8/25 | Loss: 2.7550 | Val Acc (All):  9.82% | Val Filipino Acc:  0.00%
+  Epoch  9/25 | Loss: 2.6614 | Val Acc (All): 12.98% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 10/25 | Loss: 2.6034 | Val Acc (All): 12.98% | Val Filipino Acc:  5.56% ★ (Best Filipino Acc)
+  Epoch 11/25 | Loss: 2.5202 | Val Acc (All):  8.47% | Val Filipino Acc:  4.17%
+  Epoch 12/25 | Loss: 2.4641 | Val Acc (All): 11.29% | Val Filipino Acc:  4.17%
+  Epoch 13/25 | Loss: 2.4091 | Val Acc (All):  8.01% | Val Filipino Acc:  4.17%
+  Epoch 14/25 | Loss: 2.3597 | Val Acc (All): 12.98% | Val Filipino Acc:  5.56%
+  Epoch 15/25 | Loss: 2.3112 | Val Acc (All): 13.66% | Val Filipino Acc:  4.17%
+  Epoch 16/25 | Loss: 2.2646 | Val Acc (All): 13.66% | Val Filipino Acc:  4.17%
+  Epoch 17/25 | Loss: 2.2677 | Val Acc (All): 15.91% | Val Filipino Acc:  4.17%
+  Epoch 18/25 | Loss: 2.2204 | Val Acc (All): 15.91% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 2.2081 | Val Acc (All): 16.59% | Val Filipino Acc:  4.17%
+  Epoch 20/25 | Loss: 2.1741 | Val Acc (All): 17.16% | Val Filipino Acc:  4.17%
+  Epoch 21/25 | Loss: 2.1716 | Val Acc (All): 11.29% | Val Filipino Acc:  4.17%
+  Epoch 22/25 | Loss: 2.1337 | Val Acc (All): 16.48% | Val Filipino Acc:  4.17%
+  Epoch 23/25 | Loss: 2.1509 | Val Acc (All): 16.37% | Val Filipino Acc:  4.17%
+  Epoch 24/25 | Loss: 2.1324 | Val Acc (All): 14.67% | Val Filipino Acc:  4.17%
+  Epoch 25/25 | Loss: 2.1307 | Val Acc (All): 18.74% | Val Filipino Acc:  4.17%
+  Training finished in 115.78s. Best Filipino Val Acc:  5.56%
+  [Rejection Tuning] Optimal Tau (Raw): 0.25 (Achievable: False) | Temperature: 1.6748 | Optimal Tau (Calibrated): 0.15
+
+================================================================================
+🚀 Training DSCNN (94 Classes) | Seed: 1337 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.9271 | Val Acc (All):  3.61% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.5249 | Val Acc (All):  5.53% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 3.2619 | Val Acc (All):  6.66% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 3.1289 | Val Acc (All):  6.55% | Val Filipino Acc:  0.00%
+  Epoch  5/25 | Loss: 2.9958 | Val Acc (All): 10.50% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  6/25 | Loss: 2.9009 | Val Acc (All):  8.69% | Val Filipino Acc:  0.00%
+  Epoch  7/25 | Loss: 2.8010 | Val Acc (All): 10.50% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  8/25 | Loss: 2.7395 | Val Acc (All): 10.27% | Val Filipino Acc:  4.17%
+  Epoch  9/25 | Loss: 2.6361 | Val Acc (All): 10.38% | Val Filipino Acc:  0.00%
+  Epoch 10/25 | Loss: 2.5688 | Val Acc (All):  9.48% | Val Filipino Acc:  0.00%
+  Epoch 11/25 | Loss: 2.5127 | Val Acc (All): 12.64% | Val Filipino Acc:  2.78%
+  Epoch 12/25 | Loss: 2.4474 | Val Acc (All): 11.17% | Val Filipino Acc:  0.00%
+  Epoch 13/25 | Loss: 2.3921 | Val Acc (All): 14.11% | Val Filipino Acc:  0.00%
+  Epoch 14/25 | Loss: 2.3464 | Val Acc (All): 12.42% | Val Filipino Acc:  1.39%
+  Epoch 15/25 | Loss: 2.3052 | Val Acc (All): 12.98% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 16/25 | Loss: 2.2504 | Val Acc (All): 16.70% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 17/25 | Loss: 2.2347 | Val Acc (All): 16.59% | Val Filipino Acc:  1.39%
+  Epoch 18/25 | Loss: 2.1930 | Val Acc (All): 15.91% | Val Filipino Acc:  1.39%
+  Epoch 19/25 | Loss: 2.1774 | Val Acc (All): 18.74% | Val Filipino Acc:  0.00%
+  Epoch 20/25 | Loss: 2.1423 | Val Acc (All): 17.61% | Val Filipino Acc:  2.78%
+  Epoch 21/25 | Loss: 2.1437 | Val Acc (All): 17.72% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 22/25 | Loss: 2.1266 | Val Acc (All): 18.17% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 23/25 | Loss: 2.1180 | Val Acc (All): 16.93% | Val Filipino Acc:  2.78%
+  Epoch 24/25 | Loss: 2.1041 | Val Acc (All): 17.38% | Val Filipino Acc:  0.00%
+  Epoch 25/25 | Loss: 2.1210 | Val Acc (All): 17.16% | Val Filipino Acc:  2.78%
+  Training finished in 114.05s. Best Filipino Val Acc:  4.17%
+  [Rejection Tuning] Optimal Tau (Raw): 0.25 (Achievable: False) | Temperature: 1.7850 | Optimal Tau (Calibrated): 0.15
+
+================================================================================
+🚀 Training DSCNN (94 Classes) | Seed: 2026 | Device: cuda:7
+================================================================================
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/12046 (20.19% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.9581 | Val Acc (All):  4.29% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.5535 | Val Acc (All):  5.19% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  3/25 | Loss: 3.2990 | Val Acc (All):  5.30% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 3.1286 | Val Acc (All):  4.85% | Val Filipino Acc:  0.00%
+  Epoch  5/25 | Loss: 2.9902 | Val Acc (All): 10.38% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  6/25 | Loss: 2.9014 | Val Acc (All):  6.09% | Val Filipino Acc:  0.00%
+  Epoch  7/25 | Loss: 2.7819 | Val Acc (All): 11.06% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  8/25 | Loss: 2.7118 | Val Acc (All): 11.51% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  9/25 | Loss: 2.6336 | Val Acc (All):  6.55% | Val Filipino Acc:  4.17%
+  Epoch 10/25 | Loss: 2.5313 | Val Acc (All): 14.79% | Val Filipino Acc:  2.78%
+  Epoch 11/25 | Loss: 2.4571 | Val Acc (All): 10.38% | Val Filipino Acc:  0.00%
+  Epoch 12/25 | Loss: 2.3862 | Val Acc (All):  9.71% | Val Filipino Acc:  4.17%
+  Epoch 13/25 | Loss: 2.3428 | Val Acc (All): 11.51% | Val Filipino Acc:  4.17%
+  Epoch 14/25 | Loss: 2.2889 | Val Acc (All): 14.00% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 15/25 | Loss: 2.2460 | Val Acc (All): 15.58% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 16/25 | Loss: 2.1713 | Val Acc (All): 17.95% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 17/25 | Loss: 2.1570 | Val Acc (All): 17.04% | Val Filipino Acc:  0.00%
+  Epoch 18/25 | Loss: 2.1238 | Val Acc (All): 17.95% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 2.0912 | Val Acc (All): 18.28% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 20/25 | Loss: 2.0789 | Val Acc (All): 18.96% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 21/25 | Loss: 2.0515 | Val Acc (All): 16.25% | Val Filipino Acc:  4.17%
+  Epoch 22/25 | Loss: 2.0519 | Val Acc (All): 25.40% | Val Filipino Acc:  2.78%
+  Epoch 23/25 | Loss: 2.0521 | Val Acc (All): 22.01% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch 24/25 | Loss: 2.0473 | Val Acc (All): 16.82% | Val Filipino Acc:  4.17%
+  Epoch 25/25 | Loss: 2.0457 | Val Acc (All): 18.74% | Val Filipino Acc:  4.17%
+  Training finished in 115.58s. Best Filipino Val Acc:  4.17%
+  [Rejection Tuning] Optimal Tau (Raw): 0.35 (Achievable: False) | Temperature: 1.6387 | Optimal Tau (Calibrated): 0.20
+
+================================================================================
+🏆 MULTI-SEED SUMMARY RESULTS (TEST SET, 3 SEEDS)
+================================================================================
+[DSCNN]
+  94-Command Acc:  24.95 ± 4.4%
+  19-Intent Acc:   48.93 ± 4.22%
+  Slot Match Acc:  57.62 ± 8.36%
+  FAR OOS Speech:  31.14 ± 5.3%
+  Real Filipino Acc: 5.29 ± 0.75% (FRR: 85.89 ± 6.93%)
+================================================================================
+[3/4] Running Supplemental Synth Ablation (Seed 42)...
+Using compute device: cuda:7 (NVIDIA A100-SXM4-40GB)
+
+================================================================================
+🚀 Training BCRESNET (94 Classes) | Seed: 42 | Device: cuda:7
+================================================================================
+  [Ablation] Including supplemental_synth (train split only)...
+  [Filipino Oversampling] Factor: 4x | Unique clips: 608 | Per epoch: 2432/16029 (15.17% effective share)
+  Starting 25 epochs of training...
+  Epoch  1/25 | Loss: 3.7556 | Val Acc (All):  6.43% | Val Filipino Acc:  0.00% ★ (Best Filipino Acc)
+  Epoch  2/25 | Loss: 3.0742 | Val Acc (All):  5.87% | Val Filipino Acc:  0.00%
+  Epoch  3/25 | Loss: 2.7844 | Val Acc (All): 18.96% | Val Filipino Acc:  4.17% ★ (Best Filipino Acc)
+  Epoch  4/25 | Loss: 2.4291 | Val Acc (All): 25.62% | Val Filipino Acc:  0.00%
+  Epoch  5/25 | Loss: 2.1274 | Val Acc (All): 18.40% | Val Filipino Acc:  2.78%
+  Epoch  6/25 | Loss: 1.8812 | Val Acc (All): 26.41% | Val Filipino Acc:  5.56% ★ (Best Filipino Acc)
+  Epoch  7/25 | Loss: 1.7105 | Val Acc (All): 20.20% | Val Filipino Acc:  2.78%
+  Epoch  8/25 | Loss: 1.5722 | Val Acc (All): 48.76% | Val Filipino Acc:  4.17%
+  Epoch  9/25 | Loss: 1.4372 | Val Acc (All): 39.16% | Val Filipino Acc:  2.78%
+  Epoch 10/25 | Loss: 1.3434 | Val Acc (All): 47.29% | Val Filipino Acc:  8.33% ★ (Best Filipino Acc)
+  Epoch 11/25 | Loss: 1.2594 | Val Acc (All): 41.65% | Val Filipino Acc: 12.50% ★ (Best Filipino Acc)
+  Epoch 12/25 | Loss: 1.1816 | Val Acc (All): 48.31% | Val Filipino Acc:  6.94%
+  Epoch 13/25 | Loss: 1.1413 | Val Acc (All): 37.58% | Val Filipino Acc:  5.56%
+  Epoch 14/25 | Loss: 1.0775 | Val Acc (All): 51.58% | Val Filipino Acc:  8.33%
+  Epoch 15/25 | Loss: 1.0246 | Val Acc (All): 54.97% | Val Filipino Acc:  9.72%
+  Epoch 16/25 | Loss: 0.9788 | Val Acc (All): 49.89% | Val Filipino Acc:  4.17%
+  Epoch 17/25 | Loss: 0.9479 | Val Acc (All): 58.13% | Val Filipino Acc:  2.78%
+  Epoch 18/25 | Loss: 0.9394 | Val Acc (All): 50.23% | Val Filipino Acc:  4.17%
+  Epoch 19/25 | Loss: 0.8984 | Val Acc (All): 51.13% | Val Filipino Acc:  6.94%
+  Epoch 20/25 | Loss: 0.8740 | Val Acc (All): 57.67% | Val Filipino Acc: 11.11%
+  Epoch 21/25 | Loss: 0.8679 | Val Acc (All): 59.71% | Val Filipino Acc: 11.11%
+  Epoch 22/25 | Loss: 0.8705 | Val Acc (All): 58.24% | Val Filipino Acc:  5.56%
+  Epoch 23/25 | Loss: 0.8478 | Val Acc (All): 52.14% | Val Filipino Acc:  5.56%
+  Epoch 24/25 | Loss: 0.8371 | Val Acc (All): 59.14% | Val Filipino Acc:  8.33%
+  Epoch 25/25 | Loss: 0.8315 | Val Acc (All): 58.24% | Val Filipino Acc:  6.94%
+  Training finished in 174.54s. Best Filipino Val Acc: 12.50%
+  [Rejection Tuning] Optimal Tau (Raw): 0.60 (Achievable: False) | Temperature: 2.0092 | Optimal Tau (Calibrated): 0.45
+
+================================================================================
+🏆 MULTI-SEED SUMMARY RESULTS (TEST SET, 3 SEEDS)
+================================================================================
+[BCRESNET]
+  94-Command Acc:  51.36 ± 0.0%
+  19-Intent Acc:   67.84 ± 0.0%
+  Slot Match Acc:  82.26 ± 0.0%
+  FAR OOS Speech:  19.74 ± 0.0%
+  Real Filipino Acc: 8.47 ± 0.0% (FRR: 96.3 ± 0.0%)
+================================================================================
+[4/4] Exporting FP32/INT8 ONNX and profiling FLOPs/MACs...
+/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/scripts/export_94class_onnx.py:112: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/scripts/export_94class_onnx.py:112: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+=================================================================
+🚀 EXPORT & QUANTIZE 94-CLASS MODELS TO ONNX
+=================================================================
+Extracting CPU log-mel features for test split...
+
+=======================================================
+📦 Exporting BCRESNET (94 Classes) to ONNX
+=======================================================
+  Checkpoint: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v3_94class/best_bcresnet_94class_seed42.pt
+  Parameters: 75,710 (0.0757 M)
+  ✓ FP32 ONNX Exported: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/bcresnet_94class_fp32.onnx (0.296 MB)
+  ✓ INT8 ONNX Quantized: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/bcresnet_94class_int8.onnx (0.117 MB, 2.53x compression)
+  [vcmbench flops] FP32 MACs: 42.1 M, FLOPs: 86.8 M
+  [vcmbench flops] INT8 MACs: 42.1 M, FLOPs: 89.6 M
+  FP32 Test: 94-Command Acc=51.27%, 19-Intent Acc=67.81%
+  INT8 Test: 94-Command Acc=52.87%, 19-Intent Acc=68.89%
+  Accuracy Drop (FP32 -> INT8): 94-Command: -1.60%, 19-Intent: -1.08%
+
+=======================================================
+📦 Exporting DSCNN (94 Classes) to ONNX
+=======================================================
+  Checkpoint: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/checkpoints/v3_94class/best_dscnn_94class_seed42.pt
+  Parameters: 63,006 (0.063 M)
+  ✓ FP32 ONNX Exported: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/dscnn_94class_fp32.onnx (0.241 MB)
+  ✓ INT8 ONNX Quantized: /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/dscnn_94class_int8.onnx (0.083 MB, 2.9x compression)
+  [vcmbench flops] FP32 MACs: 99.2 M, FLOPs: 200 M
+  [vcmbench flops] INT8 MACs: 99.2 M, FLOPs: 204 M
+  FP32 Test: 94-Command Acc=18.73%, 19-Intent Acc=42.97%
+  INT8 Test: 94-Command Acc=18.93%, 19-Intent Acc=43.55%
+  Accuracy Drop (FP32 -> INT8): 94-Command: -0.20%, 19-Intent: -0.58%
+
+Saved export report to /mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/export_report_94class.json
+================================================================================
+✅ ALL TRAINING, EVALUATION, AND EXPORTS COMPLETED SUCCESSFULLY!
+================================================================================

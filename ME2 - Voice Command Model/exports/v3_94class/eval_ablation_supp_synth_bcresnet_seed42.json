@@ -1,0 +1,519 @@
+{
+  "model_name": "bcresnet",
+  "seed": 42,
+  "epochs": 25,
+  "train_time_seconds": 174.54,
+  "best_epoch": 11,
+  "val_best_filipino_acc_pct": 12.5,
+  "temperature": 2.0092,
+  "tau_raw": 0.6,
+  "tau_raw_achievable": false,
+  "tau_calibrated": 0.45,
+  "tau_calibrated_achievable": false,
+  "test_metrics_raw": {
+    "command_level_94": {
+      "accuracy_pct": 51.36,
+      "accuracy_ci_95": [
+        49.89,
+        52.83
+      ],
+      "balanced_accuracy_pct": 51.72,
+      "macro_precision_pct": 62.89,
+      "macro_recall_pct": 51.72,
+      "macro_f1_pct": 50.43,
+      "macro_f2_pct": 53.62
+    },
+    "intent_level_19": {
+      "accuracy_pct": 67.84,
+      "accuracy_ci_95": [
+        66.45,
+        69.19
+      ],
+      "balanced_accuracy_pct": 61.68,
+      "macro_precision_pct": 66.44,
+      "macro_recall_pct": 61.68,
+      "macro_f1_pct": 61.25,
+      "macro_f2_pct": 62.58
+    },
+    "pipeline_rates": {
+      "far_oos_speech_pct": 19.74,
+      "far_oos_ci_95": [
+        12.34,
+        30.04
+      ],
+      "far_oos_accepted_count": 15,
+      "far_oos_total_count": 76,
+      "frr_in_scope_pct": 45.39,
+      "frr_in_scope_ci_95": [
+        43.91,
+        46.87
+      ],
+      "frr_rejected_count": 1982,
+      "frr_total_count": 4367,
+      "misfire_rate_pct": 15.89,
+      "misfire_ci_95": [
+        14.84,
+        17.01
+      ],
+      "misfire_count": 694,
+      "command_acc_on_accepted_pct": 70.9,
+      "intent_acc_on_accepted_pct": 83.98,
+      "total_accepted": 2400,
+      "total_rejected": 2043
+    },
+    "slot_exact_match": {
+      "eligible_clips": 1917,
+      "exact_matches": 1577,
+      "exact_match_pct": 82.26
+    },
+    "voice_type_breakdown": {
+      "real_filipino": {
+        "total_clips": 189,
+        "in_scope_clips": 189,
+        "raw_command_acc_pct": 8.47,
+        "raw_intent_acc_pct": 24.34,
+        "accepted_in_scope_clips": 7,
+        "command_acc_on_accepted_pct": 14.29,
+        "intent_acc_on_accepted_pct": 71.43,
+        "frr_pct": 96.3
+      },
+      "open_source": {
+        "total_clips": 635,
+        "in_scope_clips": 588,
+        "raw_command_acc_pct": 14.49,
+        "raw_intent_acc_pct": 18.11,
+        "accepted_in_scope_clips": 132,
+        "command_acc_on_accepted_pct": 22.73,
+        "intent_acc_on_accepted_pct": 27.27,
+        "frr_pct": 77.55
+      },
+      "synthetic": {
+        "total_clips": 3619,
+        "in_scope_clips": 3590,
+        "raw_command_acc_pct": 60.07,
+        "raw_intent_acc_pct": 78.83,
+        "accepted_in_scope_clips": 2246,
+        "command_acc_on_accepted_pct": 73.91,
+        "intent_acc_on_accepted_pct": 87.36,
+        "frr_pct": 37.44
+      }
+    },
+    "script_adherence_breakdown": {
+      "on_script": {
+        "total_clips": 4443,
+        "in_scope_clips": 4367,
+        "raw_command_acc_pct": 51.36,
+        "raw_intent_acc_pct": 67.84,
+        "command_acc_on_accepted_pct": 70.9,
+        "frr_pct": 45.39
+      }
+    },
+    "rejection_rules": {
+      "class_only": {
+        "far_oos_speech_pct": 100.0,
+        "far_oos_ci_95": [
+          95.19,
+          100.0
+        ],
+        "far_mic_noise_pct": 46.67,
+        "command_acc_accepted_pct": 52.45,
+        "frr_filipino_group_pct": 5.29,
+        "accepted_total": 4427,
+        "rejected_total": 16
+      },
+      "threshold_only": {
+        "far_oos_speech_pct": 19.74,
+        "far_oos_ci_95": [
+          12.34,
+          30.04
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 70.87,
+        "frr_filipino_group_pct": 96.3,
+        "accepted_total": 2401,
+        "rejected_total": 2042
+      },
+      "combined": {
+        "far_oos_speech_pct": 19.74,
+        "far_oos_ci_95": [
+          12.34,
+          30.04
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 70.9,
+        "frr_filipino_group_pct": 96.3,
+        "accepted_total": 2400,
+        "rejected_total": 2043
+      },
+      "margin_variant": {
+        "far_oos_speech_pct": 56.58,
+        "far_oos_ci_95": [
+          45.39,
+          67.14
+        ],
+        "far_mic_noise_pct": 26.67,
+        "command_acc_accepted_pct": 61.34,
+        "frr_filipino_group_pct": 74.6,
+        "accepted_total": 3346,
+        "rejected_total": 1097
+      }
+    },
+    "top10_intent_confusions": [
+      {
+        "true_intent": "CREATE_REMINDER",
+        "pred_intent": "ALARM",
+        "count": 96
+      },
+      {
+        "true_intent": "TEMPERATURE",
+        "pred_intent": "TIMER",
+        "count": 70
+      },
+      {
+        "true_intent": "COLOR",
+        "pred_intent": "BRIGHTNESS",
+        "count": 57
+      },
+      {
+        "true_intent": "CREATE_REMINDER",
+        "pred_intent": "LIST_REMINDERS",
+        "count": 48
+      },
+      {
+        "true_intent": "VOLUME_UP",
+        "pred_intent": "ALARM",
+        "count": 47
+      },
+      {
+        "true_intent": "VOLUME_DOWN",
+        "pred_intent": "ALARM",
+        "count": 45
+      },
+      {
+        "true_intent": "COLOR",
+        "pred_intent": "ALARM",
+        "count": 41
+      },
+      {
+        "true_intent": "TIMER",
+        "pred_intent": "ALARM",
+        "count": 41
+      },
+      {
+        "true_intent": "TIME",
+        "pred_intent": "LIGHT_ON",
+        "count": 29
+      },
+      {
+        "true_intent": "OUT_OF_SCOPE",
+        "pred_intent": "ALARM",
+        "count": 27
+      }
+    ],
+    "top10_command_confusions": [
+      {
+        "true_command": "Switch color to Red",
+        "pred_command": "Brightness level 100 percent",
+        "count": 36
+      },
+      {
+        "true_command": "Wake me up at 6:00 AM",
+        "pred_command": "Set an alarm for 6:00 AM",
+        "count": 32
+      },
+      {
+        "true_command": "Set an alarm for 8:00 AM",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 31
+      },
+      {
+        "true_command": "Change the temperature to 18 degrees",
+        "pred_command": "Set the temperature to 18 degrees",
+        "count": 31
+      },
+      {
+        "true_command": "Adjust brightness to 20 percent",
+        "pred_command": "Adjust brightness to 100 percent",
+        "count": 30
+      },
+      {
+        "true_command": "Turn on the lights",
+        "pred_command": "Power on the lights",
+        "count": 26
+      },
+      {
+        "true_command": "Brightness level 20 percent",
+        "pred_command": "Brightness level 100 percent",
+        "count": 22
+      },
+      {
+        "true_command": "Turn the volume down",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 21
+      },
+      {
+        "true_command": "Turn the volume up",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 20
+      },
+      {
+        "true_command": "Change the temperature to 22 degrees",
+        "pred_command": "Set the temperature to 26 degrees",
+        "count": 19
+      }
+    ]
+  },
+  "test_metrics_calibrated": {
+    "command_level_94": {
+      "accuracy_pct": 51.36,
+      "accuracy_ci_95": [
+        49.89,
+        52.83
+      ],
+      "balanced_accuracy_pct": 51.72,
+      "macro_precision_pct": 62.89,
+      "macro_recall_pct": 51.72,
+      "macro_f1_pct": 50.43,
+      "macro_f2_pct": 53.62
+    },
+    "intent_level_19": {
+      "accuracy_pct": 67.84,
+      "accuracy_ci_95": [
+        66.45,
+        69.19
+      ],
+      "balanced_accuracy_pct": 61.68,
+      "macro_precision_pct": 66.44,
+      "macro_recall_pct": 61.68,
+      "macro_f1_pct": 61.25,
+      "macro_f2_pct": 62.58
+    },
+    "pipeline_rates": {
+      "far_oos_speech_pct": 7.89,
+      "far_oos_ci_95": [
+        3.67,
+        16.17
+      ],
+      "far_oos_accepted_count": 6,
+      "far_oos_total_count": 76,
+      "frr_in_scope_pct": 62.83,
+      "frr_in_scope_ci_95": [
+        61.39,
+        64.26
+      ],
+      "frr_rejected_count": 2744,
+      "frr_total_count": 4367,
+      "misfire_rate_pct": 7.97,
+      "misfire_ci_95": [
+        7.2,
+        8.81
+      ],
+      "misfire_count": 348,
+      "command_acc_on_accepted_pct": 78.56,
+      "intent_acc_on_accepted_pct": 91.62,
+      "total_accepted": 1629,
+      "total_rejected": 2814
+    },
+    "slot_exact_match": {
+      "eligible_clips": 1917,
+      "exact_matches": 1577,
+      "exact_match_pct": 82.26
+    },
+    "voice_type_breakdown": {
+      "real_filipino": {
+        "total_clips": 189,
+        "in_scope_clips": 189,
+        "raw_command_acc_pct": 8.47,
+        "raw_intent_acc_pct": 24.34,
+        "accepted_in_scope_clips": 0,
+        "command_acc_on_accepted_pct": 0.0,
+        "intent_acc_on_accepted_pct": 0.0,
+        "frr_pct": 100.0
+      },
+      "open_source": {
+        "total_clips": 635,
+        "in_scope_clips": 588,
+        "raw_command_acc_pct": 14.49,
+        "raw_intent_acc_pct": 18.11,
+        "accepted_in_scope_clips": 44,
+        "command_acc_on_accepted_pct": 31.82,
+        "intent_acc_on_accepted_pct": 40.91,
+        "frr_pct": 92.52
+      },
+      "synthetic": {
+        "total_clips": 3619,
+        "in_scope_clips": 3590,
+        "raw_command_acc_pct": 60.07,
+        "raw_intent_acc_pct": 78.83,
+        "accepted_in_scope_clips": 1579,
+        "command_acc_on_accepted_pct": 79.86,
+        "intent_acc_on_accepted_pct": 93.03,
+        "frr_pct": 56.02
+      }
+    },
+    "script_adherence_breakdown": {
+      "on_script": {
+        "total_clips": 4443,
+        "in_scope_clips": 4367,
+        "raw_command_acc_pct": 51.36,
+        "raw_intent_acc_pct": 67.84,
+        "command_acc_on_accepted_pct": 78.56,
+        "frr_pct": 62.83
+      }
+    },
+    "rejection_rules": {
+      "class_only": {
+        "far_oos_speech_pct": 100.0,
+        "far_oos_ci_95": [
+          95.19,
+          100.0
+        ],
+        "far_mic_noise_pct": 46.67,
+        "command_acc_accepted_pct": 52.45,
+        "frr_filipino_group_pct": 5.29,
+        "accepted_total": 4427,
+        "rejected_total": 16
+      },
+      "threshold_only": {
+        "far_oos_speech_pct": 7.89,
+        "far_oos_ci_95": [
+          3.67,
+          16.17
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 78.56,
+        "frr_filipino_group_pct": 100.0,
+        "accepted_total": 1629,
+        "rejected_total": 2814
+      },
+      "combined": {
+        "far_oos_speech_pct": 7.89,
+        "far_oos_ci_95": [
+          3.67,
+          16.17
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 78.56,
+        "frr_filipino_group_pct": 100.0,
+        "accepted_total": 1629,
+        "rejected_total": 2814
+      },
+      "margin_variant": {
+        "far_oos_speech_pct": 15.79,
+        "far_oos_ci_95": [
+          9.27,
+          25.6
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 72.84,
+        "frr_filipino_group_pct": 97.35,
+        "accepted_total": 2184,
+        "rejected_total": 2259
+      }
+    },
+    "top10_intent_confusions": [
+      {
+        "true_intent": "CREATE_REMINDER",
+        "pred_intent": "ALARM",
+        "count": 96
+      },
+      {
+        "true_intent": "TEMPERATURE",
+        "pred_intent": "TIMER",
+        "count": 70
+      },
+      {
+        "true_intent": "COLOR",
+        "pred_intent": "BRIGHTNESS",
+        "count": 57
+      },
+      {
+        "true_intent": "CREATE_REMINDER",
+        "pred_intent": "LIST_REMINDERS",
+        "count": 48
+      },
+      {
+        "true_intent": "VOLUME_UP",
+        "pred_intent": "ALARM",
+        "count": 47
+      },
+      {
+        "true_intent": "VOLUME_DOWN",
+        "pred_intent": "ALARM",
+        "count": 45
+      },
+      {
+        "true_intent": "COLOR",
+        "pred_intent": "ALARM",
+        "count": 41
+      },
+      {
+        "true_intent": "TIMER",
+        "pred_intent": "ALARM",
+        "count": 41
+      },
+      {
+        "true_intent": "TIME",
+        "pred_intent": "LIGHT_ON",
+        "count": 29
+      },
+      {
+        "true_intent": "OUT_OF_SCOPE",
+        "pred_intent": "ALARM",
+        "count": 27
+      }
+    ],
+    "top10_command_confusions": [
+      {
+        "true_command": "Switch color to Red",
+        "pred_command": "Brightness level 100 percent",
+        "count": 36
+      },
+      {
+        "true_command": "Wake me up at 6:00 AM",
+        "pred_command": "Set an alarm for 6:00 AM",
+        "count": 32
+      },
+      {
+        "true_command": "Set an alarm for 8:00 AM",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 31
+      },
+      {
+        "true_command": "Change the temperature to 18 degrees",
+        "pred_command": "Set the temperature to 18 degrees",
+        "count": 31
+      },
+      {
+        "true_command": "Adjust brightness to 20 percent",
+        "pred_command": "Adjust brightness to 100 percent",
+        "count": 30
+      },
+      {
+        "true_command": "Turn on the lights",
+        "pred_command": "Power on the lights",
+        "count": 26
+      },
+      {
+        "true_command": "Brightness level 20 percent",
+        "pred_command": "Brightness level 100 percent",
+        "count": 22
+      },
+      {
+        "true_command": "Turn the volume down",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 21
+      },
+      {
+        "true_command": "Turn the volume up",
+        "pred_command": "Set an alarm for 9:00 PM",
+        "count": 20
+      },
+      {
+        "true_command": "Change the temperature to 22 degrees",
+        "pred_command": "Set the temperature to 26 degrees",
+        "count": 19
+      }
+    ]
+  }
+}

@@ -12,8 +12,13 @@ Prepares the 20-class Voice Command Dataset from Hugging Face:
 - Incorporates physical G-Mark USB microphone ambient room noise into OUT_OF_SCOPE in train.
 - Records rich metadata for evaluation: is_filipino_group, is_oos_speech, voice_type.
 - Executes 12 programmatic zero-leak assertions.
+download_and_prep_dataset.py
+Canonical entrypoint to download and prepare the Voice Command Model dataset.
+Delegates to prep_dataset_94class.py for the full 94-class benchmark schema.
+Pinned Hugging Face Revision: 6947f13073e57eb6ae67e7e2fc3680700b82aa13
 """
 
+import sys
 import os
 import io
 import json
@@ -31,10 +36,13 @@ CACHE_DIR = os.path.join(BASE_DIR, "data", "v2_cache_20class")
 EXPORTS_DIR = os.path.join(BASE_DIR, "exports", "v2_20class")
 os.makedirs(CACHE_DIR, exist_ok=True)
 os.makedirs(EXPORTS_DIR, exist_ok=True)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
 
 TARGET_SR = 16000
 TARGET_DURATION = 2.0
 TARGET_SAMPLES = int(TARGET_SR * TARGET_DURATION)  # 32000
+from prep_dataset_94class import main
 
 # 20-Class Schema: 19 commands + OUT_OF_SCOPE as 20th class (index 19)
 COMMANDS_19 = [
