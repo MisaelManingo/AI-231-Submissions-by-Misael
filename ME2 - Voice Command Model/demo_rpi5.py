@@ -30,38 +30,38 @@ except (ImportError, OSError):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WAKE_ONNX = os.path.join(BASE_DIR, "exports/wakeword_int8.onnx")
 
-# Prefer 94-Class Joint Intent & Slot Model
-VCM_94_EXPORTS = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
-VCM_94_V3 = os.path.join(BASE_DIR, "exports/v3_94class/bcresnet_94class_int8.onnx")
+# 32-Class Voice Command Model (31 Commands + 1 OUT_OF_SCOPE)
+VCM_32_EXPORTS = os.path.join(BASE_DIR, "exports/bcresnet_32class_int8.onnx")
+VCM_32_V4 = os.path.join(BASE_DIR, "exports/v4_32class/bcresnet_32class_int8.onnx")
 VCM_COMPAT = os.path.join(BASE_DIR, "exports/bcresnet_int8.onnx")
 
-if os.path.exists(VCM_94_EXPORTS):
-    VCM_ONNX = VCM_94_EXPORTS
-elif os.path.exists(VCM_94_V3):
-    VCM_ONNX = VCM_94_V3
+if os.path.exists(VCM_32_EXPORTS):
+    VCM_ONNX = VCM_32_EXPORTS
+elif os.path.exists(VCM_32_V4):
+    VCM_ONNX = VCM_32_V4
 elif os.path.exists(VCM_COMPAT):
     VCM_ONNX = VCM_COMPAT
 else:
-    VCM_ONNX = VCM_94_EXPORTS
+    VCM_ONNX = VCM_32_EXPORTS
 
 MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/mel_filters_40.npy")
 if not os.path.exists(MEL_FILTER_PATH):
-    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v3_94class/mel_filters_40.npy")
+    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v4_32class/mel_filters_40.npy")
 
 HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/hann_window_400.npy")
 if not os.path.exists(HANN_WIN_PATH):
-    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v3_94class/hann_window_400.npy")
+    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v4_32class/hann_window_400.npy")
 
-LABELS_EXPORTS = os.path.join(BASE_DIR, "exports/labels_94.json")
-LABELS_DATA = os.path.join(BASE_DIR, "data/labels_94.json")
-LABELS_V3 = os.path.join(BASE_DIR, "exports/v3_94class/labels_94.json")
+LABELS_EXPORTS = os.path.join(BASE_DIR, "exports/labels_32.json")
+LABELS_DATA = os.path.join(BASE_DIR, "data/labels_32.json")
+LABELS_V4 = os.path.join(BASE_DIR, "exports/v4_32class/labels_32.json")
 
 if os.path.exists(LABELS_EXPORTS):
     LABELS_PATH = LABELS_EXPORTS
 elif os.path.exists(LABELS_DATA):
     LABELS_PATH = LABELS_DATA
-elif os.path.exists(LABELS_V3):
-    LABELS_PATH = LABELS_V3
+elif os.path.exists(LABELS_V4):
+    LABELS_PATH = LABELS_V4
 else:
     LABELS_PATH = LABELS_EXPORTS
 
@@ -244,12 +244,16 @@ class RPi5VoiceAssistant:
             for c in label_data["classes"]:
                 idx = int(c["index"])
                 intent = c.get("intent", "")
-                slot = c.get("slot", "")
-                if intent == "OUT_OF_SCOPE" or idx == 93:
+                slot = c.get("slot")
+                if intent == "OUT_OF_SCOPE" or idx == 31 or idx == (len(label_data["classes"]) - 1):
                     label = "OUT_OF_SCOPE"
                     self.slot_meta[label] = {"intent": "OUT_OF_SCOPE", "slot": None, "slot_value": None}
-                elif (intent, slot) in SLOT_LABEL_MAP:
+                elif slot is not None and (intent, slot) in SLOT_LABEL_MAP:
                     label = SLOT_LABEL_MAP[(intent, slot)]
+                    stype = SLOT_TYPE_MAP.get(intent, "slot")
+                    self.slot_meta[label] = {"intent": intent, "slot": stype, "slot_value": slot}
+                elif slot is not None:
+                    label = f"{intent}_{str(slot).upper().replace(' ', '_').replace(':', '_')}"
                     stype = SLOT_TYPE_MAP.get(intent, "slot")
                     self.slot_meta[label] = {"intent": intent, "slot": stype, "slot_value": slot}
                 else:
@@ -441,7 +445,7 @@ class RPi5VoiceAssistant:
                         self.clear_meter()
                         print(f"⏱️  [VCM INFERENCE]: Latency: {latency_ms:.2f} ms")
                         
-                        if top_label in ("_BACKGROUND_", "OUT_OF_SCOPE", "UNKNOWN") or top_conf < self.vcm_thresh or top_idx == 93:
+                        if top_label in ("_BACKGROUND_", "OUT_OF_SCOPE", "UNKNOWN") or top_conf < self.vcm_thresh or top_idx == (len(self.idx2label) - 1):
                             print(f"❌ [COMMAND IGNORED]: Ambient noise or low confidence ({top_label}, {top_conf*100:.1f}%)")
                         else:
                             meta = self.slot_meta.get(top_label, {})

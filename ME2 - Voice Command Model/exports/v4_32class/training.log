@@ -1,0 +1,164 @@
+Compute device: cuda:0 (NVIDIA A100-SXM4-40GB)
+
+================================================================================
+🔬 ABLATION: SYNTHETIC SHARE CAPPING RATIOS (1:1, 2:1, 4:1)
+================================================================================
+
+--- Testing Synthetic:Real Cap Ratio 1:1 ---
+  Ratio 1:1 Result: Val Filipino Acc = 11.11% | Val All Acc = 11.11% | Wall: 32.9s
+
+--- Testing Synthetic:Real Cap Ratio 2:1 ---
+  Ratio 2:1 Result: Val Filipino Acc = 2.78% | Val All Acc = 2.78% | Wall: 32.1s
+
+--- Testing Synthetic:Real Cap Ratio 4:1 ---
+  Ratio 4:1 Result: Val Filipino Acc = 0.0% | Val All Acc = 0.0% | Wall: 36.8s
+
+🏆 Selected Synthetic:Real Ratio on Validation: 1:1 (Filipino Acc: 11.11%)
+
+================================================================================
+ Leave-One-Speaker-Out (LOSO) Cross-Validation over Real Filipino Speakers
+================================================================================
+
+--- Fold 1/4: Holding out '202322013' ---
+  Epoch  5/12 | Train Loss: 1.8037 | Held-out '202322013' Acc:  4.93%
+  Epoch 10/12 | Train Loss: 1.3710 | Held-out '202322013' Acc:  3.08%
+  Epoch 12/12 | Train Loss: 1.3262 | Held-out '202322013' Acc:  2.46%
+  [Fold 1 Best] Epoch 5 | Held-out Acc:  4.93%
+
+--- Fold 2/4: Holding out '202322013_speaker2' ---
+  Epoch  5/12 | Train Loss: 1.7810 | Held-out '202322013_speaker2' Acc: 13.11%
+  Epoch 10/12 | Train Loss: 1.3343 | Held-out '202322013_speaker2' Acc: 13.11%
+  Epoch 12/12 | Train Loss: 1.3115 | Held-out '202322013_speaker2' Acc: 18.03%
+  [Fold 2 Best] Epoch 12 | Held-out Acc: 18.03%
+
+--- Fold 3/4: Holding out '202521746' ---
+  Epoch  5/12 | Train Loss: 1.8235 | Held-out '202521746' Acc:  0.00%
+  Epoch 10/12 | Train Loss: 1.3698 | Held-out '202521746' Acc:  1.39%
+  Epoch 12/12 | Train Loss: 1.3656 | Held-out '202521746' Acc:  1.39%
+  [Fold 3 Best] Epoch 7 | Held-out Acc: 11.11%
+
+--- Fold 4/4: Holding out 'S1_S2_S3' ---
+  Epoch  5/12 | Train Loss: 1.7661 | Held-out 'S1_S2_S3' Acc: 16.67%
+  Epoch 10/12 | Train Loss: 1.3330 | Held-out 'S1_S2_S3' Acc: 26.67%
+  Epoch 12/12 | Train Loss: 1.2839 | Held-out 'S1_S2_S3' Acc: 21.67%
+  [Fold 4 Best] Epoch 3 | Held-out Acc: 45.00%
+
+================================================================================
+📊 POOLED HELD-OUT PREDICTIONS (710 clips: 680 Filipino + 30 OOS speech)
+================================================================================
+  Class-Only FAR on OOS Speech: 93.33%
+  Class-Only FRR on Filipino Speech: 0.44%
+  Pooled Filipino Raw Accuracy: 10.29%
+
+  [Rejection Threshold Selection on Pooled Validation]
+  Strict Operating Point tau*: 0.65 (Achievable: False)
+  Balanced / Lower Operating Point tau_bal: 0.20
+
+================================================================================
+🚀 TRAINING PRODUCTION MODELS ACROSS SEEDS [42, 1337, 2026]
+================================================================================
+  Training batch: 7952 samples/epoch | Real Filipino share: 2720/7952 (34.21%)
+
+======================================================================
+🚀 Training BCRESNET | Seed 42 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.8056 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.6044 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.4821 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.4163 | Effective Filipino Share: 34.21%
+  [Test Result - BCRESNET Seed 42]
+    Strict (tau=0.65): 31-Cmd Acc = 15.96%, 19-Int Acc = 30.09%, Slot Exact = 42.86%, FAR = 1.32%, FRR = 88.37% (Filipino FRR: 98.41%)
+    Lower  (tau=0.20):  31-Cmd Acc = 15.96%, 19-Int Acc = 30.09%, Slot Exact = 42.86%, FAR = 53.95%, FRR = 24.5% (Filipino FRR: 88.36%)
+
+======================================================================
+🚀 Training BCRESNET | Seed 1337 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.8046 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.6145 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.4919 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.4566 | Effective Filipino Share: 34.21%
+  [Test Result - BCRESNET Seed 1337]
+    Strict (tau=0.65): 31-Cmd Acc = 14.43%, 19-Int Acc = 30.02%, Slot Exact = 38.24%, FAR = 3.95%, FRR = 82.0% (Filipino FRR: 99.47%)
+    Lower  (tau=0.20):  31-Cmd Acc = 14.43%, 19-Int Acc = 30.02%, Slot Exact = 38.24%, FAR = 65.79%, FRR = 22.14% (Filipino FRR: 59.79%)
+
+======================================================================
+🚀 Training BCRESNET | Seed 2026 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.7849 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.5962 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.4761 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.4336 | Effective Filipino Share: 34.21%
+  [Test Result - BCRESNET Seed 2026]
+    Strict (tau=0.65): 31-Cmd Acc = 18.91%, 19-Int Acc = 33.54%, Slot Exact = 45.56%, FAR = 0.0%, FRR = 93.11% (Filipino FRR: 99.47%)
+    Lower  (tau=0.20):  31-Cmd Acc = 18.91%, 19-Int Acc = 33.54%, Slot Exact = 45.56%, FAR = 53.95%, FRR = 31.44% (Filipino FRR: 58.2%)
+
+======================================================================
+🚀 Training DSCNN | Seed 42 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.9352 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.7476 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.6884 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.6613 | Effective Filipino Share: 34.21%
+  [Test Result - DSCNN Seed 42]
+    Strict (tau=0.65): 31-Cmd Acc = 13.93%, 19-Int Acc = 27.68%, Slot Exact = 32.41%, FAR = 0.0%, FRR = 95.31% (Filipino FRR: 97.35%)
+    Lower  (tau=0.20):  31-Cmd Acc = 13.93%, 19-Int Acc = 27.68%, Slot Exact = 32.41%, FAR = 69.74%, FRR = 24.18% (Filipino FRR: 88.89%)
+
+======================================================================
+🚀 Training DSCNN | Seed 1337 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.9331 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.7592 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.6554 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.6367 | Effective Filipino Share: 34.21%
+  [Test Result - DSCNN Seed 1337]
+    Strict (tau=0.65): 31-Cmd Acc = 11.7%, 19-Int Acc = 27.46%, Slot Exact = 33.01%, FAR = 0.0%, FRR = 94.44% (Filipino FRR: 97.35%)
+    Lower  (tau=0.20):  31-Cmd Acc = 11.7%, 19-Int Acc = 27.46%, Slot Exact = 33.01%, FAR = 57.89%, FRR = 29.38% (Filipino FRR: 32.28%)
+
+======================================================================
+🚀 Training DSCNN | Seed 2026 | Device cuda:0
+======================================================================
+  Epoch  5/20 | Train Loss: 1.9467 | Effective Filipino Share: 34.21%
+  Epoch 10/20 | Train Loss: 1.7413 | Effective Filipino Share: 34.21%
+  Epoch 15/20 | Train Loss: 1.6692 | Effective Filipino Share: 34.21%
+  Epoch 20/20 | Train Loss: 1.6348 | Effective Filipino Share: 34.21%
+  [Test Result - DSCNN Seed 2026]
+    Strict (tau=0.65): 31-Cmd Acc = 11.97%, 19-Int Acc = 26.6%, Slot Exact = 33.94%, FAR = 0.0%, FRR = 98.95% (Filipino FRR: 97.35%)
+    Lower  (tau=0.20):  31-Cmd Acc = 11.97%, 19-Int Acc = 26.6%, Slot Exact = 33.94%, FAR = 52.63%, FRR = 32.43% (Filipino FRR: 24.87%)
+
+================================================================================
+🏆 FINAL MULTI-SEED SUMMARY (3 SEEDS MEAN +/- STD)
+================================================================================
+[BCRESNET - STRICT tau=0.65]
+  31-Command Acc: 16.43% +/- 1.86%
+  19-Intent Acc:  31.22% +/- 1.64%
+  Slot Match Acc: 42.22% +/- 3.02%
+  OOS Speech FAR: 1.76% +/- 1.64%
+  Overall FRR:    87.83% +/- 4.55%
+  Filipino FRR:   99.12% +/- 0.5%
+  Filipino AccAcc:33.33% +/- 47.14%
+[BCRESNET - LOWER tau=0.20]
+  31-Command Acc: 16.43% +/- 1.86%
+  19-Intent Acc:  31.22% +/- 1.64%
+  Slot Match Acc: 42.22% +/- 3.02%
+  OOS Speech FAR: 57.9% +/- 5.58%
+  Overall FRR:    26.03% +/- 3.95%
+  Filipino FRR:   68.78% +/- 13.86%
+  Filipino AccAcc:11.41% +/- 1.81%
+[DSCNN - STRICT tau=0.65]
+  31-Command Acc: 12.53% +/- 0.99%
+  19-Intent Acc:  27.25% +/- 0.47%
+  Slot Match Acc: 33.12% +/- 0.63%
+  OOS Speech FAR: 0.0% +/- 0.0%
+  Overall FRR:    96.23% +/- 1.95%
+  Filipino FRR:   97.35% +/- 0.0%
+  Filipino AccAcc:0.0% +/- 0.0%
+[DSCNN - LOWER tau=0.20]
+  31-Command Acc: 12.53% +/- 0.99%
+  19-Intent Acc:  27.25% +/- 0.47%
+  Slot Match Acc: 33.12% +/- 0.63%
+  OOS Speech FAR: 60.09% +/- 7.16%
+  Overall FRR:    28.66% +/- 3.41%
+  Filipino FRR:   48.68% +/- 28.59%
+  Filipino AccAcc:6.64% +/- 2.05%
+
+✅ All 32-class training, validation, rejection tuning, and evaluation completed successfully!

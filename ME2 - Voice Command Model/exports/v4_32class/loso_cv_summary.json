@@ -1,0 +1,40 @@
+{
+  "fold_results": [
+    {
+      "fold": 1,
+      "speaker_group": "202322013",
+      "clips": 487,
+      "best_epoch": 5,
+      "held_out_acc_pct": 4.93
+    },
+    {
+      "fold": 2,
+      "speaker_group": "202322013_speaker2",
+      "clips": 61,
+      "best_epoch": 12,
+      "held_out_acc_pct": 18.03
+    },
+    {
+      "fold": 3,
+      "speaker_group": "202521746",
+      "clips": 72,
+      "best_epoch": 7,
+      "held_out_acc_pct": 11.11
+    },
+    {
+      "fold": 4,
+      "speaker_group": "S1_S2_S3",
+      "clips": 60,
+      "best_epoch": 3,
+      "held_out_acc_pct": 45.0
+    }
+  ],
+  "mean_best_epoch": 7,
+  "pooled_heldout_clips": 710,
+  "class_only_far_oos_pct": 93.33,
+  "class_only_frr_filipino_pct": 0.44,
+  "pooled_filipino_raw_acc_pct": 10.29,
+  "tau_star": 0.65,
+  "tau_star_achievable": false,
+  "tau_bal": 0.2
+}

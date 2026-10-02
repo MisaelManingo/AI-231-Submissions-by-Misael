@@ -38,14 +38,15 @@ python simulate_demo.py
 Expected output:
 ```text
 ===========================================================================
-🧪 RUNNING NO-HARDWARE SMOKE TEST (simulate_demo.py)
+🧪 RUNNING NO-HARDWARE SIMULATION & BENCHMARK SMOKE TEST (simulate_demo.py)
 ===========================================================================
 Loading ONNX models...
   Wake Model: .../wakeword_int8.onnx
-  VCM Model:  .../bcresnet_94class_int8.onnx
-  Labels: Loaded 94 classes from .../labels_94.json
+  VCM Model:  .../bcresnet_32class_int8.onnx
+  Labels: Loaded 32 classes from .../labels_32.json
 ...
-✅ SMOKE TEST PASSED: Environment and models are completely functional!
+===========================================================================
+✅ SMOKE TEST PASSED: Pure NumPy + ONNX Runtime pipeline is 100% operational!
 ===========================================================================
 ```
 
@@ -65,10 +66,12 @@ ME2-quickstart/
 ├── simulate_demo.py              # Zero-hardware simulation smoke test
 ├── requirements-pi.txt           # Minimal PyTorch-free dependencies
 ├── QUICKSTART.md                 # This guide
+├── data/
+│   └── labels_32.json            # 32-class label & slot definition map
 └── exports/                      # Quantized INT8 ONNX models and assets
-    ├── wakeword_int8.onnx        # MicroWakeNet wake word detector (22 KB)
-    ├── bcresnet_94class_int8.onnx # BC-ResNet-1 94-command model (115 KB)
-    ├── labels_94.json            # 94-class label & slot map
+    ├── wakeword_int8.onnx        # MicroWakeNet wake word detector (27.4 KB)
+    ├── bcresnet_32class_int8.onnx# BC-ResNet-1 32-class model (113.6 KB)
+    ├── labels_32.json            # 32-class label & slot map
     ├── mel_filters_40.npy        # 40-channel Mel filterbanks
     └── hann_window_400.npy       # Hann analysis window
 ```
@@ -76,13 +79,19 @@ ME2-quickstart/
 ---
 
 ## 4. Class Benchmark Execution (`airimonda/vcm-benchmark`)
-To run the automated benchmark on physical Raspberry Pi hardware:
+To run the automated benchmark on physical Raspberry Pi hardware from your laptop:
 ```bash
 git clone https://github.com/airimonda/vcm-benchmark.git
 cd vcm-benchmark
-python benchmark.py --model ../exports/bcresnet_94class_int8.onnx
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python benchmark.py
 ```
 For every recognized command, `demo_rpi5.py` emits the standardized JSON line format:
 ```json
-{"intent": "TIMER", "slot": "30 seconds", "infer_ms": 85, "audio_ms": 1500}
+{"intent": "TIMER", "slot": "30 seconds", "infer_ms": 22.13, "audio_ms": 2000}
+```
+If rejected or out of scope:
+```json
+{"intent": "OUT_OF_SCOPE", "slot": null, "infer_ms": 17.13, "audio_ms": 2000}
 ```

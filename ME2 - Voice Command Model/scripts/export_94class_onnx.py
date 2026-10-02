@@ -27,7 +27,7 @@ from sklearn.metrics import accuracy_score, f1_score
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-sys.path.insert(0, "/home/misael.andre.maningo/vcm-benchmark")
+sys.path.insert(0, os.path.expanduser("~/vcm-benchmark"))
 
 from models.bcresnet import get_bcresnet
 from models.dscnn import get_dscnn

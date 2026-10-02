@@ -5,8 +5,8 @@ simulate_demo.py
 End-to-End Zero-Hardware Simulation of the Voice Assistant Pipeline:
 - 100% PyTorch-Free: Pure NumPy feature extraction + ONNX Runtime CPU.
 - Tests MicroWakeNet INT8 ('Hey Raspberry') streaming wake word detector.
-- Tests BC-ResNet-1 INT8 94-Class Voice Command Model (93 variations + 1 OUT_OF_SCOPE).
-- Projects 94 variations to 19 intents + slot values.
+- Tests BC-ResNet-1 INT8 32-Class Voice Command Model (31 commands + 1 OUT_OF_SCOPE).
+- Maps 32 classes directly to 19 intents + slot values.
 - Emits standardized benchmark JSON lines:
     {"intent": "...", "slot": "...", "infer_ms": ..., "audio_ms": ...}
 - Verifies rejection rules for non-wake words and out-of-scope ambient noise.
@@ -23,25 +23,25 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 WAKE_MODEL_PATH = os.path.join(BASE_DIR, "exports/wakeword_int8.onnx")
 
-VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
+VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/bcresnet_32class_int8.onnx")
 if not os.path.exists(VCM_MODEL_PATH):
-    VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/v3_94class/bcresnet_94class_int8.onnx")
+    VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/v4_32class/bcresnet_32class_int8.onnx")
 if not os.path.exists(VCM_MODEL_PATH):
     VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/bcresnet_int8.onnx")
 
 MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/mel_filters_40.npy")
 if not os.path.exists(MEL_FILTER_PATH):
-    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v3_94class/mel_filters_40.npy")
+    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v4_32class/mel_filters_40.npy")
 
 HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/hann_window_400.npy")
 if not os.path.exists(HANN_WIN_PATH):
-    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v3_94class/hann_window_400.npy")
+    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v4_32class/hann_window_400.npy")
 
-LABELS_PATH = os.path.join(BASE_DIR, "exports/labels_94.json")
+LABELS_PATH = os.path.join(BASE_DIR, "exports/labels_32.json")
 if not os.path.exists(LABELS_PATH):
-    LABELS_PATH = os.path.join(BASE_DIR, "data/labels_94.json")
+    LABELS_PATH = os.path.join(BASE_DIR, "data/labels_32.json")
 if not os.path.exists(LABELS_PATH):
-    LABELS_PATH = os.path.join(BASE_DIR, "exports/v3_94class/labels_94.json")
+    LABELS_PATH = os.path.join(BASE_DIR, "exports/v4_32class/labels_32.json")
 
 
 class PureNumpyFeatureExtractor:
@@ -102,6 +102,15 @@ class PipelineSimulator:
             self.labels_info = json.load(f)
         self.classes = self.labels_info["classes"]
         self.num_classes = len(self.classes)
+
+        # Assert at startup that the ONNX output size equals the number of labels
+        vcm_outputs = self.vcm_sess.get_outputs()
+        vcm_output_dim = vcm_outputs[0].shape[-1]
+        if isinstance(vcm_output_dim, int):
+            assert vcm_output_dim == self.num_classes, (
+                f"Model output size ({vcm_output_dim}) does not match label count ({self.num_classes})."
+            )
+
         print(f"  Labels: Loaded {self.num_classes} classes from {labels_path}")
 
     def simulate_wake(self, audio_1s):
@@ -128,8 +137,10 @@ class PipelineSimulator:
         intent = meta.get("intent", "UNKNOWN")
         slot = meta.get("slot") or None
         phrase = meta.get("phrase", "")
+        if not phrase and meta.get("variations"):
+            phrase = meta["variations"][0]
 
-        is_accepted = (pred_idx != (self.num_classes - 1)) and (max_prob >= self.vcm_thresh)
+        is_accepted = (pred_idx != (self.num_classes - 1)) and (intent != "OUT_OF_SCOPE") and (max_prob >= self.vcm_thresh)
 
         return {
             "pred_idx": pred_idx,

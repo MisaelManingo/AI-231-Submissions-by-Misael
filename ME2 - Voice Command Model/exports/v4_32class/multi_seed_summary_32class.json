@@ -1,0 +1,310 @@
+{
+  "tau_strict": 0.65,
+  "tau_lower": 0.2,
+  "training_records": [
+    {
+      "arch": "bcresnet",
+      "seed": 42,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 48.88,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.4163
+    },
+    {
+      "arch": "bcresnet",
+      "seed": 1337,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 53.27,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.4566
+    },
+    {
+      "arch": "bcresnet",
+      "seed": 2026,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 53.72,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.4336
+    },
+    {
+      "arch": "dscnn",
+      "seed": 42,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 46.15,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.6613
+    },
+    {
+      "arch": "dscnn",
+      "seed": 1337,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 45.84,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.6367
+    },
+    {
+      "arch": "dscnn",
+      "seed": 2026,
+      "node": "A100-SXM4-40GB Node",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "wall_clock_s": 42.92,
+      "objective": "CrossEntropyLoss with OOS class weight 4.0",
+      "optimizer": "AdamW(lr=1e-3, weight_decay=1e-4)",
+      "schedule": "CosineAnnealingLR(T_max=20)",
+      "steps": 2500,
+      "final_loss": 1.6348
+    }
+  ],
+  "bcresnet_strict": {
+    "accuracy_command_31": {
+      "mean": 16.43,
+      "std": 1.86
+    },
+    "accuracy_intent_19": {
+      "mean": 31.22,
+      "std": 1.64
+    },
+    "slot_exact_match_pct": {
+      "mean": 42.22,
+      "std": 3.02
+    },
+    "balanced_accuracy_command": {
+      "mean": 16.48,
+      "std": 1.81
+    },
+    "macro_f1_command": {
+      "mean": 11.63,
+      "std": 2.22
+    },
+    "macro_f2_command": {
+      "mean": 15.99,
+      "std": 2.28
+    },
+    "far_oos_speech": {
+      "mean": 1.76,
+      "std": 1.64
+    },
+    "far_mic_noise": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "frr": {
+      "mean": 87.83,
+      "std": 4.55
+    },
+    "misfire_rate": {
+      "mean": 7.77,
+      "std": 4.12
+    },
+    "accuracy_accepted_command": {
+      "mean": 39.85,
+      "std": 10.07
+    },
+    "filipino_command_acc": {
+      "mean": 3.88,
+      "std": 1.52
+    },
+    "filipino_frr": {
+      "mean": 99.12,
+      "std": 0.5
+    },
+    "filipino_accuracy_on_accepted": {
+      "mean": 33.33,
+      "std": 47.14
+    }
+  },
+  "bcresnet_lower": {
+    "accuracy_command_31": {
+      "mean": 16.43,
+      "std": 1.86
+    },
+    "accuracy_intent_19": {
+      "mean": 31.22,
+      "std": 1.64
+    },
+    "slot_exact_match_pct": {
+      "mean": 42.22,
+      "std": 3.02
+    },
+    "balanced_accuracy_command": {
+      "mean": 16.48,
+      "std": 1.81
+    },
+    "macro_f1_command": {
+      "mean": 11.63,
+      "std": 2.22
+    },
+    "macro_f2_command": {
+      "mean": 15.99,
+      "std": 2.28
+    },
+    "far_oos_speech": {
+      "mean": 57.9,
+      "std": 5.58
+    },
+    "far_mic_noise": {
+      "mean": 84.44,
+      "std": 22.0
+    },
+    "frr": {
+      "mean": 26.03,
+      "std": 3.95
+    },
+    "misfire_rate": {
+      "mean": 58.66,
+      "std": 4.99
+    },
+    "accuracy_accepted_command": {
+      "mean": 20.83,
+      "std": 2.59
+    },
+    "filipino_command_acc": {
+      "mean": 3.88,
+      "std": 1.52
+    },
+    "filipino_frr": {
+      "mean": 68.78,
+      "std": 13.86
+    },
+    "filipino_accuracy_on_accepted": {
+      "mean": 11.41,
+      "std": 1.81
+    }
+  },
+  "dscnn_strict": {
+    "accuracy_command_31": {
+      "mean": 12.53,
+      "std": 0.99
+    },
+    "accuracy_intent_19": {
+      "mean": 27.25,
+      "std": 0.47
+    },
+    "slot_exact_match_pct": {
+      "mean": 33.12,
+      "std": 0.63
+    },
+    "balanced_accuracy_command": {
+      "mean": 12.5,
+      "std": 0.9
+    },
+    "macro_f1_command": {
+      "mean": 6.9,
+      "std": 0.55
+    },
+    "macro_f2_command": {
+      "mean": 10.81,
+      "std": 0.43
+    },
+    "far_oos_speech": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "far_mic_noise": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "frr": {
+      "mean": 96.23,
+      "std": 1.95
+    },
+    "misfire_rate": {
+      "mean": 2.85,
+      "std": 1.52
+    },
+    "accuracy_accepted_command": {
+      "mean": 25.85,
+      "std": 3.36
+    },
+    "filipino_command_acc": {
+      "mean": 4.94,
+      "std": 1.39
+    },
+    "filipino_frr": {
+      "mean": 97.35,
+      "std": 0.0
+    },
+    "filipino_accuracy_on_accepted": {
+      "mean": 0.0,
+      "std": 0.0
+    }
+  },
+  "dscnn_lower": {
+    "accuracy_command_31": {
+      "mean": 12.53,
+      "std": 0.99
+    },
+    "accuracy_intent_19": {
+      "mean": 27.25,
+      "std": 0.47
+    },
+    "slot_exact_match_pct": {
+      "mean": 33.12,
+      "std": 0.63
+    },
+    "balanced_accuracy_command": {
+      "mean": 12.5,
+      "std": 0.9
+    },
+    "macro_f1_command": {
+      "mean": 6.9,
+      "std": 0.55
+    },
+    "macro_f2_command": {
+      "mean": 10.81,
+      "std": 0.43
+    },
+    "far_oos_speech": {
+      "mean": 60.09,
+      "std": 7.16
+    },
+    "far_mic_noise": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "frr": {
+      "mean": 28.66,
+      "std": 3.41
+    },
+    "misfire_rate": {
+      "mean": 60.25,
+      "std": 2.62
+    },
+    "accuracy_accepted_command": {
+      "mean": 15.53,
+      "std": 0.35
+    },
+    "filipino_command_acc": {
+      "mean": 4.94,
+      "std": 1.39
+    },
+    "filipino_frr": {
+      "mean": 48.68,
+      "std": 28.59
+    },
+    "filipino_accuracy_on_accepted": {
+      "mean": 6.64,
+      "std": 2.05
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "bcresnet": {
+    "model_name": "bcresnet",
+    "checkpoint": "checkpoints/v4_32class/best_bcresnet_32class_seed42.pt",
+    "parameters": 69696,
+    "parameters_m": 0.0697,
+    "fp32": {
+      "path": "exports/v4_32class/bcresnet_32class_fp32.onnx",
+      "size_mb": 0.273,
+      "macs": 42111424,
+      "macs_si": "42.1 M",
+      "flops": 86818688,
+      "flops_si": "86.8 M",
+      "command_acc_31": 15.98,
+      "intent_acc_19": 30.11
+    },
+    "int8": {
+      "path": "exports/v4_32class/bcresnet_32class_int8.onnx",
+      "size_mb": 0.111,
+      "compression_ratio": 2.46,
+      "macs": 42111424,
+      "macs_si": "42.1 M",
+      "flops": 89562198,
+      "flops_si": "89.6 M",
+      "command_acc_31": 15.69,
+      "intent_acc_19": 30.02,
+      "drop_command_31_pct": 0.29,
+      "drop_intent_19_pct": 0.09
+    }
+  },
+  "dscnn": {
+    "model_name": "dscnn",
+    "checkpoint": "checkpoints/v4_32class/best_dscnn_32class_seed42.pt",
+    "parameters": 55008,
+    "parameters_m": 0.055,
+    "fp32": {
+      "path": "exports/v4_32class/dscnn_32class_fp32.onnx",
+      "size_mb": 0.211,
+      "macs": 99161856,
+      "macs_si": "99.2 M",
+      "flops": 200392192,
+      "flops_si": "200 M",
+      "command_acc_31": 13.93,
+      "intent_acc_19": 27.68
+    },
+    "int8": {
+      "path": "exports/v4_32class/dscnn_32class_int8.onnx",
+      "size_mb": 0.075,
+      "compression_ratio": 2.81,
+      "macs": 99161856,
+      "macs_si": "99.2 M",
+      "flops": 204012106,
+      "flops_si": "204 M",
+      "command_acc_31": 13.91,
+      "intent_acc_19": 27.8,
+      "drop_command_31_pct": 0.02,
+      "drop_intent_19_pct": -0.12
+    }
+  }
+}

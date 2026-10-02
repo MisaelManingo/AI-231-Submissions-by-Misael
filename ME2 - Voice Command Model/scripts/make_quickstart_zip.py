@@ -23,15 +23,15 @@ FILES_TO_PACK = [
     ("requirements-pi.txt", "requirements-pi.txt"),
     ("QUICKSTART.md", "QUICKSTART.md"),
     # Required data files
-    ("data/labels_94.json", "data/labels_94.json"),
+    ("data/labels_32.json", "data/labels_32.json"),
 ]
 
 # Assets to place in exports/
 EXPORTS_ASSETS = [
-    ("exports/labels_94.json", "exports/labels_94.json"),
+    ("exports/labels_32.json", "exports/labels_32.json"),
     ("exports/mel_filters_40.npy", "exports/mel_filters_40.npy"),
     ("exports/hann_window_400.npy", "exports/hann_window_400.npy"),
-    ("exports/bcresnet_94class_int8.onnx", "exports/bcresnet_94class_int8.onnx"),
+    ("exports/bcresnet_32class_int8.onnx", "exports/bcresnet_32class_int8.onnx"),
     ("exports/wakeword_int8.onnx", "exports/wakeword_int8.onnx"),
 ]
 
@@ -40,12 +40,12 @@ def resolve_asset_path(base_dir, src_rel):
     primary = os.path.join(base_dir, src_rel)
     if os.path.exists(primary):
         return primary
-    # Fallback to v3_94class if looking in exports/
+    # Fallback to v4_32class if looking in exports/
     if src_rel.startswith("exports/"):
         fname = os.path.basename(src_rel)
-        v3_path = os.path.join(base_dir, "exports/v3_94class", fname)
-        if os.path.exists(v3_path):
-            return v3_path
+        v4_path = os.path.join(base_dir, "exports/v4_32class", fname)
+        if os.path.exists(v4_path):
+            return v4_path
     return primary
 
 

@@ -40,6 +40,8 @@ wheels/
 !*/checkpoints/v2/*.pt
 !checkpoints/v3_94class/*.pt
 !*/checkpoints/v3_94class/*.pt
+!checkpoints/v4_32class/*.pt
+!*/checkpoints/v4_32class/*.pt
 results/
 */results/
 

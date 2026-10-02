@@ -12,7 +12,7 @@ import random
 import numpy as np
 import pandas as pd
 
-BASE_DIR = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OPTIONB_DIR = os.path.join(BASE_DIR, "upstream_repo/MEX2/OptionB")
 NEG_DIR = os.path.join(BASE_DIR, "data/negatives_2s")
 OUT_MANIFEST = os.path.join(BASE_DIR, "data/unified_manifest_32.csv")

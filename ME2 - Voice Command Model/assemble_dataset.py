@@ -12,11 +12,12 @@ TARGET_SR = 16000
 TARGET_DURATION = 2.0
 TARGET_SAMPLES = int(TARGET_SR * TARGET_DURATION)
 
-OPTIONB_DIR = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/upstream_repo/MEX2/OptionB"
-RAW_NEG_DIR = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/data/raw_negatives"
-OUTPUT_NEG_DIR = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/data/negatives_2s"
-OUT_MANIFEST = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/data/unified_manifest.csv"
-OUT_LABELS = "/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/data/labels_20.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OPTIONB_DIR = os.path.join(BASE_DIR, "upstream_repo/MEX2/OptionB")
+RAW_NEG_DIR = os.path.join(BASE_DIR, "data/raw_negatives")
+OUTPUT_NEG_DIR = os.path.join(BASE_DIR, "data/negatives_2s")
+OUT_MANIFEST = os.path.join(BASE_DIR, "data/unified_manifest.csv")
+OUT_LABELS = os.path.join(BASE_DIR, "data/labels_20.json")
 
 os.makedirs(OUTPUT_NEG_DIR, exist_ok=True)
 random.seed(42)
