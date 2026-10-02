@@ -1,22 +1,4 @@
 {
-  "reminders": [
-    {
-      "task": "Drink Water",
-      "updated_at": 1790941895.577673
-    },
-    {
-      "task": "Study",
-      "updated_at": 1790941897.589397
-    },
-    {
-      "task": "Exercise",
-      "updated_at": 1790941898.90657
-    }
-  ],
-  "alarm": {
-    "time": "9:00 PM",
-    "hour": 21,
-    "minute": 0,
-    "active": true
-  }
+  "reminders": [],
+  "alarm": null
 }

@@ -24,5 +24,8 @@ export:
 quickstart:
 	python "ME2 - Voice Command Model/scripts/make_quickstart_zip.py"
 
+actions-quickstart:
+	python "ME2 - Voice Command Model/scripts/make_actions_zip.py"
+
 verify:
 	python "ME2 - Voice Command Model/scripts/verify_readme_math.py" "ME2 - Voice Command Model/README.md"
