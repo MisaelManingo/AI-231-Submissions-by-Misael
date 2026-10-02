@@ -16,6 +16,7 @@ import os
 import sys
 import time
 import json
+import shutil
 import argparse
 import collections
 import numpy as np
@@ -149,12 +150,13 @@ def resample_to_16k(audio, orig_sr):
     return np.interp(target_indices, orig_indices, audio).astype(np.float32)
 
 
-def render_rms_meter(rms, wake_score, wake_thresh, bar_len=18):
+def render_rms_meter(rms, wake_score, wake_thresh, bar_len=8, max_cols=None):
     """
     Renders an ASCII audio VU/RMS meter bar.
     rms typically ranges from 0.0001 (silence) to ~0.20 (loud speech).
+    Keeps width compact (<= 47 chars) so it never wraps or creates new lines
+    on 80-column (or narrower) terminals.
     """
-    # Scale rms non-linearly (dB-like) for clear visual response
     norm_val = min(1.0, np.sqrt(max(0.0, rms * 15.0)))
     filled = int(norm_val * bar_len)
     bar = "█" * filled + "░" * (bar_len - filled)
@@ -163,7 +165,9 @@ def render_rms_meter(rms, wake_score, wake_thresh, bar_len=18):
     color = "\033[92m" if wake_score >= wake_thresh else "\033[90m"
     rst = "\033[0m"
     
-    return f"[MIC: {bar} RMS: {rms:.3f} | {color}Wake: {wake_score*100:4.1f}%{rst}] [IDLE: Say 'Hey Raspberry']"
+    if max_cols is not None and max_cols < 60:
+        return f"[MIC: {bar} {rms:.3f} | {color}Wake: {wake_score*100:4.1f}%{rst}]"
+    return f"[MIC: {bar} RMS: {rms:.3f} | {color}Wake: {wake_score*100:4.1f}%{rst}] [IDLE]"
 
 
 class PureNumpyFeatureExtractor:
@@ -298,13 +302,14 @@ class RPi5VoiceAssistant:
         now = time.time()
         if now - self.last_meter_time < 0.10:
             return
-        meter_str = render_rms_meter(rms, wake_score, self.wake_thresh)
+        cols = shutil.get_terminal_size(fallback=(80, 24)).columns
+        meter_str = render_rms_meter(rms, wake_score, self.wake_thresh, bar_len=8, max_cols=cols)
         if meter_str == self.last_rendered_meter:
             return
         self.last_meter_time = now
         self.last_rendered_meter = meter_str
         self.meter_active = True
-        sys.stderr.write(f"\r\x1b[2K{meter_str}")
+        sys.stderr.write(f"\r\x1b[2K{meter_str}\x1b[K")
         sys.stderr.flush()
 
     def clear_meter(self):
@@ -312,7 +317,7 @@ class RPi5VoiceAssistant:
         Clears the meter line on stderr before printing any event line.
         """
         if self.enable_meter and sys.stderr.isatty() and self.meter_active:
-            sys.stderr.write("\r\x1b[2K")
+            sys.stderr.write("\r\x1b[2K\x1b[K")
             sys.stderr.flush()
             self.last_rendered_meter = ""
             self.meter_active = False
@@ -405,9 +410,9 @@ class RPi5VoiceAssistant:
                         
                 elif self.state == "CAPTURING_COMMAND":
                     pct = min(100, int(len(cmd_buffer) / COMMAND_WINDOW_SAMPLES * 100))
-                    bars = "▓" * (pct // 5) + "░" * (20 - (pct // 5))
+                    bars = "▓" * (pct // 10) + "░" * (10 - (pct // 10))
                     if self.enable_meter and sys.stderr.isatty():
-                        sys.stderr.write(f"\r\x1b[2K[RECORDING COMMAND: {bars} {pct:3d}% | RMS: {last_rms:.3f}]")
+                        sys.stderr.write(f"\r\x1b[2K[RECORDING: {bars} {pct:3d}% | RMS: {last_rms:.3f}]\x1b[K")
                         sys.stderr.flush()
                         self.meter_active = True
                     
