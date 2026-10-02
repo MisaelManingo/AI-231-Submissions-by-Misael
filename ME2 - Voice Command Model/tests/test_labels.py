@@ -21,10 +21,12 @@ def test_labels_and_model():
     print("🧪 RUNNING LABEL REGRESSION TEST (tests/test_labels.py)")
     print("=" * 65)
 
-    labels_path = os.path.join(BASE_DIR, "exports/labels_94.json")
+    labels_path = os.path.join(BASE_DIR, "exports/labels_32.json")
     if not os.path.exists(labels_path):
-        labels_path = os.path.join(BASE_DIR, "data/labels_94.json")
-    assert os.path.exists(labels_path), f"labels_94.json not found at {labels_path}"
+        labels_path = os.path.join(BASE_DIR, "exports/labels_94.json")
+    if not os.path.exists(labels_path):
+        labels_path = os.path.join(BASE_DIR, "data/labels_32.json")
+    assert os.path.exists(labels_path), f"Labels not found at {labels_path}"
 
     with open(labels_path, "r", encoding="utf-8") as f:
         labels_data = json.load(f)
@@ -34,20 +36,25 @@ def test_labels_and_model():
 
     # 2. Check label count
     idx2label = assistant.idx2label
-    assert len(idx2label) == 94, f"Expected 94 labels, got {len(idx2label)}"
-    print(f"✅ Label count is {len(idx2label)} (0..93)")
+    expected_count = len(labels_data.get("classes", []))
+    assert len(idx2label) == expected_count, f"Expected {expected_count} labels, got {len(idx2label)}"
+    print(f"✅ Label count is {len(idx2label)} (0..{expected_count - 1})")
 
-    # 3. Check every index 0..93 resolves without KeyError
-    for i in range(94):
+    # 3. Check every index resolves without KeyError
+    for i in range(expected_count):
         assert i in idx2label, f"Missing index {i} in idx2label"
         label = idx2label[i]
         assert isinstance(label, str) and len(label) > 0, f"Invalid label for index {i}: {label}"
 
-    assert idx2label[93] == "OUT_OF_SCOPE", f"Expected index 93 to be OUT_OF_SCOPE, got {idx2label[93]}"
-    print("✅ All indices 0..93 resolve without KeyError, index 93 is OUT_OF_SCOPE")
+    assert idx2label[expected_count - 1] == "OUT_OF_SCOPE", f"Expected index {expected_count - 1} to be OUT_OF_SCOPE, got {idx2label[expected_count - 1]}"
+    print(f"✅ All indices 0..{expected_count - 1} resolve without KeyError, index {expected_count - 1} is OUT_OF_SCOPE")
 
     # 4. Check ONNX model output size equals label count
-    vcm_path = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
+    vcm_path = os.path.join(BASE_DIR, "exports/bcresnet_32class_int8.onnx")
+    if not os.path.exists(vcm_path):
+        vcm_path = os.path.join(BASE_DIR, "exports/v4_32class/bcresnet_32class_int8.onnx")
+    if not os.path.exists(vcm_path):
+        vcm_path = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
     assert os.path.exists(vcm_path), f"ONNX model not found at {vcm_path}"
     sess = ort.InferenceSession(vcm_path, providers=["CPUExecutionProvider"])
     vcm_output_dim = sess.get_outputs()[0].shape[-1]
@@ -56,9 +63,9 @@ def test_labels_and_model():
     )
     print(f"✅ Model output size ({vcm_output_dim}) matches label count ({len(idx2label)})")
 
-    # 5. Check round-trip with labels_94.json classes
+    # 5. Check round-trip with labels classes
     classes = labels_data["classes"]
-    assert len(classes) == 94, f"Expected 94 classes in labels_94.json, got {len(classes)}"
+    assert len(classes) == expected_count, f"Expected {expected_count} classes, got {len(classes)}"
 
     for c in classes:
         idx = int(c["index"])
@@ -66,7 +73,7 @@ def test_labels_and_model():
         slot = c.get("slot", "")
         label = idx2label[idx]
 
-        if intent == "OUT_OF_SCOPE" or idx == 93:
+        if intent == "OUT_OF_SCOPE" or idx == (expected_count - 1):
             assert label == "OUT_OF_SCOPE", f"Index {idx} expected OUT_OF_SCOPE, got {label}"
         else:
             meta = assistant.slot_meta[label]
@@ -82,10 +89,10 @@ def test_labels_and_model():
                     f"Index {idx}: meta slot_value should be None, got {meta['slot_value']}"
                 )
 
-    print("✅ idx2label round-trips with labels_94.json classes, intents, and slots")
+    print(f"✅ idx2label round-trips with {os.path.basename(labels_path)} classes, intents, and slots")
 
     # 6. Check safe fallback with .get() for unknown / out-of-range indices
-    for bad_idx in [-1, 94, 999]:
+    for bad_idx in [-1, expected_count, 999]:
         fallback_label = idx2label.get(bad_idx, "OUT_OF_SCOPE")
         assert fallback_label == "OUT_OF_SCOPE", (
             f"Expected fallback 'OUT_OF_SCOPE' for index {bad_idx}, got {fallback_label}"

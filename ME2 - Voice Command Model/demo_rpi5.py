@@ -101,7 +101,7 @@ COMMAND_WINDOW_SAMPLES = 32000  # 2.0 seconds @ 16kHz
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Real-Time Voice Command Pipeline on RPi5 (PyTorch-Free)")
-    parser.add_argument("--wake_thresh", type=float, default=0.30, help="Wake word detection threshold (default: 0.30)")
+    parser.add_argument("--wake_thresh", type=float, default=0.20, help="Wake word detection threshold (default: 0.20)")
     parser.add_argument("--vcm_thresh", type=float, default=0.65, help="Voice command acceptance threshold (default: 0.65)")
     parser.add_argument("--device", type=int, default=None, help="Input microphone device ID")
     parser.add_argument("--samplerate", type=int, default=None, help="Hardware sample rate (e.g. 48000, 44100, 16000)")
@@ -245,6 +245,8 @@ class RPi5VoiceAssistant:
                 idx = int(c["index"])
                 intent = c.get("intent", "")
                 slot = c.get("slot")
+                if slot == "":
+                    slot = None
                 if intent == "OUT_OF_SCOPE" or idx == 31 or idx == (len(label_data["classes"]) - 1):
                     label = "OUT_OF_SCOPE"
                     self.slot_meta[label] = {"intent": "OUT_OF_SCOPE", "slot": None, "slot_value": None}
@@ -390,10 +392,11 @@ class RPi5VoiceAssistant:
                         continue
                         
                     buf_np = np.array(self.audio_ring_buffer, dtype=np.float32)
+                    buf_rms = float(np.sqrt(np.mean(buf_np ** 2)))
                     
                     # Voice Activity / Energy Gate:
-                    # If audio energy is below speech threshold (silence or muted mic), suppress wake inference
-                    if last_rms < 0.012:
+                    # Suppress wake inference only if the entire 1.0s window is dead silence or muted mic (< 0.003)
+                    if buf_rms < 0.003:
                         prob_wake = 0.0
                     else:
                         feat = self.extractor.extract(buf_np, WAKE_WINDOW_SAMPLES)

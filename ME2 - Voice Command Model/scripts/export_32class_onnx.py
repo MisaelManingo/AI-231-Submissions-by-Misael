@@ -220,8 +220,9 @@ def main():
     cmd_to_intent_idx = np.array([labels_info["cmd_to_intent_idx"][str(i)] for i in range(NUM_CLASSES)])
 
     # Generate and copy mel_filters_40.npy and hann_window_400.npy
+    # Must use norm=None to match torchaudio.transforms.MelSpectrogram default used in training
     fb = torchaudio.functional.melscale_fbanks(
-        n_freqs=201, f_min=0.0, f_max=8000.0, n_mels=40, sample_rate=16000, norm="slaney", mel_scale="htk"
+        n_freqs=201, f_min=0.0, f_max=8000.0, n_mels=40, sample_rate=16000, norm=None, mel_scale="htk"
     ).numpy()
     win = torch.hann_window(400).numpy()
 
