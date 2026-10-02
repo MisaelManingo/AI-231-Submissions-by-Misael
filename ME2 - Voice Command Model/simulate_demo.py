@@ -22,21 +22,26 @@ import onnxruntime as ort
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 WAKE_MODEL_PATH = os.path.join(BASE_DIR, "exports/wakeword_int8.onnx")
-VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/v3_94class/bcresnet_94class_int8.onnx")
+
+VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
+if not os.path.exists(VCM_MODEL_PATH):
+    VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/v3_94class/bcresnet_94class_int8.onnx")
 if not os.path.exists(VCM_MODEL_PATH):
     VCM_MODEL_PATH = os.path.join(BASE_DIR, "exports/bcresnet_int8.onnx")
 
-MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v3_94class/mel_filters_40.npy")
+MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/mel_filters_40.npy")
 if not os.path.exists(MEL_FILTER_PATH):
-    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/mel_filters_40.npy")
+    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v3_94class/mel_filters_40.npy")
 
-HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v3_94class/hann_window_400.npy")
+HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/hann_window_400.npy")
 if not os.path.exists(HANN_WIN_PATH):
-    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/hann_window_400.npy")
+    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v3_94class/hann_window_400.npy")
 
-LABELS_PATH = os.path.join(BASE_DIR, "exports/v3_94class/labels_94.json")
+LABELS_PATH = os.path.join(BASE_DIR, "exports/labels_94.json")
 if not os.path.exists(LABELS_PATH):
-    LABELS_PATH = os.path.join(BASE_DIR, "exports/labels_94.json")
+    LABELS_PATH = os.path.join(BASE_DIR, "data/labels_94.json")
+if not os.path.exists(LABELS_PATH):
+    LABELS_PATH = os.path.join(BASE_DIR, "exports/v3_94class/labels_94.json")
 
 
 class PureNumpyFeatureExtractor:

@@ -22,17 +22,31 @@ FILES_TO_PACK = [
     ("simulate_demo.py", "simulate_demo.py"),
     ("requirements-pi.txt", "requirements-pi.txt"),
     ("QUICKSTART.md", "QUICKSTART.md"),
+    # Required data files
+    ("data/labels_94.json", "data/labels_94.json"),
 ]
 
 # Assets to place in exports/
 EXPORTS_ASSETS = [
-    ("exports/v3_94class/labels_94.json", "exports/labels_94.json"),
-    ("exports/v3_94class/mel_filters_40.npy", "exports/mel_filters_40.npy"),
-    ("exports/v3_94class/hann_window_400.npy", "exports/hann_window_400.npy"),
-    ("exports/v3_94class/bcresnet_94class_int8.onnx", "exports/bcresnet_94class_int8.onnx"),
-    ("exports/v3_94class/bcresnet_94class_int8.onnx", "exports/bcresnet_int8.onnx"),  # compatibility link
+    ("exports/labels_94.json", "exports/labels_94.json"),
+    ("exports/mel_filters_40.npy", "exports/mel_filters_40.npy"),
+    ("exports/hann_window_400.npy", "exports/hann_window_400.npy"),
+    ("exports/bcresnet_94class_int8.onnx", "exports/bcresnet_94class_int8.onnx"),
     ("exports/wakeword_int8.onnx", "exports/wakeword_int8.onnx"),
 ]
+
+
+def resolve_asset_path(base_dir, src_rel):
+    primary = os.path.join(base_dir, src_rel)
+    if os.path.exists(primary):
+        return primary
+    # Fallback to v3_94class if looking in exports/
+    if src_rel.startswith("exports/"):
+        fname = os.path.basename(src_rel)
+        v3_path = os.path.join(base_dir, "exports/v3_94class", fname)
+        if os.path.exists(v3_path):
+            return v3_path
+    return primary
 
 
 def main():
@@ -45,7 +59,7 @@ def main():
 
     with zipfile.ZipFile(ZIP_OUT, "w", zipfile.ZIP_DEFLATED) as zf:
         for src_rel, dst_rel in FILES_TO_PACK:
-            src = os.path.join(BASE_DIR, src_rel)
+            src = resolve_asset_path(BASE_DIR, src_rel)
             if os.path.exists(src):
                 zf.write(src, arcname=dst_rel)
                 print(f"  + Added: {dst_rel}")
@@ -53,12 +67,12 @@ def main():
                 print(f"  ! Warning: {src_rel} not found!")
 
         for src_rel, dst_rel in EXPORTS_ASSETS:
-            src = os.path.join(BASE_DIR, src_rel)
+            src = resolve_asset_path(BASE_DIR, src_rel)
             if os.path.exists(src):
                 zf.write(src, arcname=dst_rel)
                 print(f"  + Added: {dst_rel} ({os.path.getsize(src) / 1024:.1f} KB)")
             else:
-                print(f"  ! Warning: {src_rel} not found yet (training in progress)")
+                print(f"  ! Warning: {src_rel} not found!")
 
     sz_mb = os.path.getsize(ZIP_OUT) / (1024 * 1024)
     print(f"\n✅ Created: {ZIP_OUT} ({sz_mb:.2f} MB)")

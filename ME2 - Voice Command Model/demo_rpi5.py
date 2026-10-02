@@ -29,28 +29,74 @@ except (ImportError, OSError):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 WAKE_ONNX = os.path.join(BASE_DIR, "exports/wakeword_int8.onnx")
 
-# Prefer 32-Class Joint Intent & Slot Model, fallback to 20-Class if needed
-VCM_32_ONNX = os.path.join(BASE_DIR, "exports/bcresnet_32_int8.onnx")
-VCM_20_ONNX = os.path.join(BASE_DIR, "exports/bcresnet_int8.onnx")
-VCM_ONNX = VCM_32_ONNX if os.path.exists(VCM_32_ONNX) else VCM_20_ONNX
+# Prefer 94-Class Joint Intent & Slot Model
+VCM_94_EXPORTS = os.path.join(BASE_DIR, "exports/bcresnet_94class_int8.onnx")
+VCM_94_V3 = os.path.join(BASE_DIR, "exports/v3_94class/bcresnet_94class_int8.onnx")
+VCM_COMPAT = os.path.join(BASE_DIR, "exports/bcresnet_int8.onnx")
+
+if os.path.exists(VCM_94_EXPORTS):
+    VCM_ONNX = VCM_94_EXPORTS
+elif os.path.exists(VCM_94_V3):
+    VCM_ONNX = VCM_94_V3
+elif os.path.exists(VCM_COMPAT):
+    VCM_ONNX = VCM_COMPAT
+else:
+    VCM_ONNX = VCM_94_EXPORTS
 
 MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/mel_filters_40.npy")
+if not os.path.exists(MEL_FILTER_PATH):
+    MEL_FILTER_PATH = os.path.join(BASE_DIR, "exports/v3_94class/mel_filters_40.npy")
+
 HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/hann_window_400.npy")
+if not os.path.exists(HANN_WIN_PATH):
+    HANN_WIN_PATH = os.path.join(BASE_DIR, "exports/v3_94class/hann_window_400.npy")
 
-LABELS_32_EXPORTS = os.path.join(BASE_DIR, "exports/labels_32.json")
-LABELS_32_DATA = os.path.join(BASE_DIR, "data/labels_32.json")
-LABELS_20_DATA = os.path.join(BASE_DIR, "data/labels_20.json")
+LABELS_EXPORTS = os.path.join(BASE_DIR, "exports/labels_94.json")
+LABELS_DATA = os.path.join(BASE_DIR, "data/labels_94.json")
+LABELS_V3 = os.path.join(BASE_DIR, "exports/v3_94class/labels_94.json")
 
-if os.path.exists(LABELS_32_EXPORTS):
-    LABELS_PATH = LABELS_32_EXPORTS
-elif os.path.exists(LABELS_32_DATA):
-    LABELS_PATH = LABELS_32_DATA
+if os.path.exists(LABELS_EXPORTS):
+    LABELS_PATH = LABELS_EXPORTS
+elif os.path.exists(LABELS_DATA):
+    LABELS_PATH = LABELS_DATA
+elif os.path.exists(LABELS_V3):
+    LABELS_PATH = LABELS_V3
 else:
-    LABELS_PATH = LABELS_20_DATA
+    LABELS_PATH = LABELS_EXPORTS
+
+SLOT_LABEL_MAP = {
+    ("ALARM", "6:00 AM"): "ALARM_6_00AM",
+    ("ALARM", "8:00 AM"): "ALARM_8_00AM",
+    ("ALARM", "9:00 PM"): "ALARM_9_00PM",
+    ("BRIGHTNESS", "20 percent"): "BRIGHTNESS_20",
+    ("BRIGHTNESS", "60 percent"): "BRIGHTNESS_60",
+    ("BRIGHTNESS", "100 percent"): "BRIGHTNESS_100",
+    ("COLOR", "Red"): "COLOR_RED",
+    ("COLOR", "Blue"): "COLOR_BLUE",
+    ("COLOR", "Green"): "COLOR_GREEN",
+    ("TEMPERATURE", "18 degrees"): "TEMPERATURE_18",
+    ("TEMPERATURE", "22 degrees"): "TEMPERATURE_22",
+    ("TEMPERATURE", "26 degrees"): "TEMPERATURE_26",
+    ("TIMER", "10 seconds"): "TIMER_10s",
+    ("TIMER", "30 seconds"): "TIMER_30s",
+    ("TIMER", "1 minute"): "TIMER_1m",
+    ("CREATE_REMINDER", "Drink water"): "CREATE_REMINDER_DRINK_WATER",
+    ("CREATE_REMINDER", "Study"): "CREATE_REMINDER_STUDY",
+    ("CREATE_REMINDER", "Exercise"): "CREATE_REMINDER_EXERCISE",
+}
+
+SLOT_TYPE_MAP = {
+    "ALARM": "time",
+    "BRIGHTNESS": "level",
+    "COLOR": "color",
+    "TEMPERATURE": "degrees",
+    "TIMER": "duration",
+    "CREATE_REMINDER": "task",
+}
 
 MODEL_SR = 16000
-WAKE_WINDOW_SAMPLES = 16000 # 1.0 second @ 16kHz
-COMMAND_WINDOW_SAMPLES = 32000 # 2.0 seconds @ 16kHz
+WAKE_WINDOW_SAMPLES = 16000  # 1.0 second @ 16kHz
+COMMAND_WINDOW_SAMPLES = 32000  # 2.0 seconds @ 16kHz
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Real-Time Voice Command Pipeline on RPi5 (PyTorch-Free)")
@@ -58,6 +104,8 @@ def parse_args():
     parser.add_argument("--vcm_thresh", type=float, default=0.65, help="Voice command acceptance threshold (default: 0.65)")
     parser.add_argument("--device", type=int, default=None, help="Input microphone device ID")
     parser.add_argument("--samplerate", type=int, default=None, help="Hardware sample rate (e.g. 48000, 44100, 16000)")
+    parser.add_argument("--no-meter", action="store_true", help="Disable the live terminal RMS meter")
+    parser.add_argument("--stub-audio", type=float, default=None, metavar="SECONDS", help="Run with stubbed audio input for testing without a microphone")
     return parser.parse_args()
 
 
@@ -157,10 +205,14 @@ class PureNumpyFeatureExtractor:
 
 
 class RPi5VoiceAssistant:
-    def __init__(self, wake_thresh=0.20, vcm_thresh=0.65, hw_samplerate=None):
+    def __init__(self, wake_thresh=0.20, vcm_thresh=0.65, hw_samplerate=None, no_meter=False):
         self.wake_thresh = wake_thresh
         self.vcm_thresh = vcm_thresh
         self.hw_sr = hw_samplerate
+        self.enable_meter = not no_meter
+        self.last_meter_time = 0.0
+        self.last_rendered_meter = ""
+        self.meter_active = False
         
         print("=" * 65)
         print("ON-DEVICE VOICE ASSISTANT (Raspberry Pi 5 - PyTorch-Free)")
@@ -178,10 +230,44 @@ class RPi5VoiceAssistant:
         self.wake_inp = self.wake_session.get_inputs()[0].name
         self.vcm_inp = self.vcm_session.get_inputs()[0].name
         
-        with open(LABELS_PATH, "r") as f:
+        with open(LABELS_PATH, "r", encoding="utf-8") as f:
             label_data = json.load(f)
-        self.idx2label = {int(k): v for k, v in label_data["idx2label"].items()}
-        self.slot_meta = label_data.get("slot_meta", {})
+
+        self.idx2label = {}
+        self.slot_meta = {}
+
+        if "classes" in label_data:
+            for c in label_data["classes"]:
+                idx = int(c["index"])
+                intent = c.get("intent", "")
+                slot = c.get("slot", "")
+                if intent == "OUT_OF_SCOPE" or idx == 93:
+                    label = "OUT_OF_SCOPE"
+                    self.slot_meta[label] = {"intent": "OUT_OF_SCOPE", "slot": None, "slot_value": None}
+                elif (intent, slot) in SLOT_LABEL_MAP:
+                    label = SLOT_LABEL_MAP[(intent, slot)]
+                    stype = SLOT_TYPE_MAP.get(intent, "slot")
+                    self.slot_meta[label] = {"intent": intent, "slot": stype, "slot_value": slot}
+                else:
+                    label = intent
+                    self.slot_meta[label] = {"intent": intent, "slot": None, "slot_value": None}
+                self.idx2label[idx] = label
+        elif "idx2label" in label_data:
+            self.idx2label = {int(k): v for k, v in label_data["idx2label"].items()}
+            self.slot_meta = label_data.get("slot_meta", {})
+        else:
+            raise ValueError(f"Unrecognized label format in {LABELS_PATH}")
+
+        # Assert at startup that the model's output size equals the number of labels
+        vcm_outputs = self.vcm_session.get_outputs()
+        vcm_output_dim = vcm_outputs[0].shape[-1]
+        num_labels = len(self.idx2label)
+        if isinstance(vcm_output_dim, int):
+            assert vcm_output_dim == num_labels, (
+                f"Model output size ({vcm_output_dim}) does not match label count ({num_labels}). "
+                f"Active VCM ONNX = {os.path.basename(VCM_ONNX)}, LABELS_PATH = {os.path.basename(LABELS_PATH)}"
+            )
+
         print(f"[MODEL CONFIG]: Active VCM ONNX = {os.path.basename(VCM_ONNX)}")
         print(f"[MODEL CONFIG]: Loaded {len(self.idx2label)} classes from {os.path.basename(LABELS_PATH)}")
         
@@ -201,7 +287,51 @@ class RPi5VoiceAssistant:
             "reminders": []
         }
 
-    def run_live(self, device_id=None):
+    def draw_meter(self, rms, wake_score):
+        """
+        Renders live VU/RMS meter in place on a single line on stderr,
+        throttled to ~10 Hz and redrawn only when displayed value changes.
+        Silent if stderr is not a TTY or if --no-meter is set.
+        """
+        if not self.enable_meter or not sys.stderr.isatty():
+            return
+        now = time.time()
+        if now - self.last_meter_time < 0.10:
+            return
+        meter_str = render_rms_meter(rms, wake_score, self.wake_thresh)
+        if meter_str == self.last_rendered_meter:
+            return
+        self.last_meter_time = now
+        self.last_rendered_meter = meter_str
+        self.meter_active = True
+        sys.stderr.write(f"\r\x1b[2K{meter_str}")
+        sys.stderr.flush()
+
+    def clear_meter(self):
+        """
+        Clears the meter line on stderr before printing any event line.
+        """
+        if self.enable_meter and sys.stderr.isatty() and self.meter_active:
+            sys.stderr.write("\r\x1b[2K")
+            sys.stderr.flush()
+            self.last_rendered_meter = ""
+            self.meter_active = False
+
+    def run_live(self, device_id=None, stub_duration=None):
+        if stub_duration is not None:
+            print(f"\n[AUDIO CONFIG]: Running with stubbed audio for {stub_duration:.1f}s (--stub-audio)")
+            print("-" * 65)
+            t_start = time.time()
+            while time.time() - t_start < stub_duration:
+                time.sleep(0.05)
+                elapsed = time.time() - t_start
+                sim_rms = 0.005 + 0.04 * abs(np.sin(elapsed * 5.0))
+                prob_wake = 0.02 + 0.08 * abs(np.sin(elapsed * 2.5))
+                self.draw_meter(sim_rms, prob_wake)
+            self.clear_meter()
+            print("Stub audio simulation finished.")
+            return
+
         if sd is None:
             print("\n[ERROR]: 'sounddevice' package not found on RPi5.")
             print("To install inside your virtual environment (~AI_231_venv):")
@@ -262,16 +392,12 @@ class RPi5VoiceAssistant:
                         exp_l = np.exp(logits - np.max(logits, axis=1, keepdims=True))
                         prob_wake = float((exp_l / np.sum(exp_l, axis=1, keepdims=True))[0, 1])
                     
-                    # Update live terminal RMS meter
-                    meter_str = render_rms_meter(last_rms, prob_wake, self.wake_thresh)
-                    sys.stdout.write("\r" + meter_str)
-                    sys.stdout.flush()
+                    # Update live terminal RMS meter on stderr
+                    self.draw_meter(last_rms, prob_wake)
                     
                     if prob_wake >= self.wake_thresh:
                         # Clear line and print activation banner
-                        sys.stdout.write("\r" + " " * 80 + "\r")
-                        sys.stdout.flush()
-                        
+                        self.clear_meter()
                         print(f"⚡ [WAKE DETECTED!] 'Hey Raspberry' (Score: {prob_wake*100:.1f}%)")
                         print("🎙️  [LISTENING]: Speak command now (recording 2.0s)...")
                         cmd_buffer.clear()
@@ -280,12 +406,13 @@ class RPi5VoiceAssistant:
                 elif self.state == "CAPTURING_COMMAND":
                     pct = min(100, int(len(cmd_buffer) / COMMAND_WINDOW_SAMPLES * 100))
                     bars = "▓" * (pct // 5) + "░" * (20 - (pct // 5))
-                    sys.stdout.write(f"\r[RECORDING COMMAND: {bars} {pct:3d}% | RMS: {last_rms:.3f}]")
-                    sys.stdout.flush()
+                    if self.enable_meter and sys.stderr.isatty():
+                        sys.stderr.write(f"\r\x1b[2K[RECORDING COMMAND: {bars} {pct:3d}% | RMS: {last_rms:.3f}]")
+                        sys.stderr.flush()
+                        self.meter_active = True
                     
                     if len(cmd_buffer) >= COMMAND_WINDOW_SAMPLES:
-                        sys.stdout.write("\r" + " " * 80 + "\r")
-                        sys.stdout.flush()
+                        self.clear_meter()
                         
                         cmd_samples = np.array(cmd_buffer[:COMMAND_WINDOW_SAMPLES], dtype=np.float32)
                         
@@ -304,11 +431,12 @@ class RPi5VoiceAssistant:
                         probs = exp_v / np.sum(exp_v, axis=1, keepdims=True)
                         top_idx = int(np.argmax(probs, axis=1)[0])
                         top_conf = float(probs[0, top_idx])
-                        top_label = self.idx2label[top_idx]
+                        top_label = self.idx2label.get(top_idx, "OUT_OF_SCOPE")
                         
+                        self.clear_meter()
                         print(f"⏱️  [VCM INFERENCE]: Latency: {latency_ms:.2f} ms")
                         
-                        if top_label == "_BACKGROUND_" or top_conf < self.vcm_thresh:
+                        if top_label in ("_BACKGROUND_", "OUT_OF_SCOPE", "UNKNOWN") or top_conf < self.vcm_thresh or top_idx == 93:
                             print(f"❌ [COMMAND IGNORED]: Ambient noise or low confidence ({top_label}, {top_conf*100:.1f}%)")
                         else:
                             meta = self.slot_meta.get(top_label, {})
@@ -423,6 +551,7 @@ if __name__ == "__main__":
     assistant = RPi5VoiceAssistant(
         wake_thresh=args.wake_thresh,
         vcm_thresh=args.vcm_thresh,
-        hw_samplerate=args.samplerate
+        hw_samplerate=args.samplerate,
+        no_meter=args.no_meter
     )
-    assistant.run_live(device_id=args.device)
+    assistant.run_live(device_id=args.device, stub_duration=args.stub_audio)
