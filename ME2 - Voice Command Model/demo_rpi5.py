@@ -23,7 +23,7 @@ import onnxruntime as ort
 
 try:
     import sounddevice as sd
-except ImportError:
+except (ImportError, OSError):
     sd = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

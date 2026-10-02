@@ -1,161 +1,287 @@
 {
   "model_name": "bcresnet",
   "seed": 42,
-  "epochs": 25,
-  "train_time_seconds": 155.76,
-  "best_epoch": 14,
-  "val_best_filipino_acc_pct": 8.33,
-  "temperature": 1.696,
-  "tau_raw": 0.85,
-  "tau_raw_achievable": false,
-  "tau_calibrated": 0.55,
-  "tau_calibrated_achievable": false,
-  "test_metrics_raw": {
+  "epochs": 20,
+  "train_time_seconds": 70.72,
+  "tau_star": 0.65,
+  "tau_bal": 0.25,
+  "test_metrics_tau_star": {
     "command_level_94": {
-      "accuracy_pct": 53.25,
+      "accuracy_pct": 36.01,
       "accuracy_ci_95": [
-        51.78,
-        54.72
+        34.61,
+        37.43
       ],
-      "balanced_accuracy_pct": 53.64,
-      "macro_precision_pct": 57.57,
-      "macro_recall_pct": 53.64,
-      "macro_f1_pct": 50.53,
-      "macro_f2_pct": 54.38
+      "balanced_accuracy_pct": 36.24,
+      "macro_precision_pct": 44.74,
+      "macro_recall_pct": 36.24,
+      "macro_f1_pct": 32.82,
+      "macro_f2_pct": 37.67
     },
     "intent_level_19": {
-      "accuracy_pct": 72.27,
+      "accuracy_pct": 55.46,
       "accuracy_ci_95": [
-        70.94,
-        73.57
+        53.99,
+        56.91
       ],
-      "balanced_accuracy_pct": 63.61,
-      "macro_precision_pct": 64.66,
-      "macro_recall_pct": 63.61,
-      "macro_f1_pct": 62.39,
-      "macro_f2_pct": 63.82
+      "balanced_accuracy_pct": 43.97,
+      "macro_precision_pct": 52.98,
+      "macro_recall_pct": 43.97,
+      "macro_f1_pct": 42.39,
+      "macro_f2_pct": 45.52
     },
     "pipeline_rates": {
-      "far_oos_speech_pct": 3.95,
+      "tau": 0.65,
+      "far_oos_speech_pct": 13.16,
       "far_oos_ci_95": [
-        1.35,
-        10.97
+        7.31,
+        22.55
       ],
-      "far_oos_accepted_count": 3,
+      "far_oos_accepted_count": 10,
       "far_oos_total_count": 76,
-      "frr_in_scope_pct": 73.76,
+      "frr_in_scope_pct": 68.86,
       "frr_in_scope_ci_95": [
-        72.43,
-        75.04
+        67.47,
+        70.21
       ],
-      "frr_rejected_count": 3221,
+      "frr_rejected_count": 3007,
       "frr_total_count": 4367,
-      "misfire_rate_pct": 3.23,
+      "misfire_rate_pct": 12.43,
       "misfire_ci_95": [
-        2.74,
-        3.8
+        11.49,
+        13.45
       ],
-      "misfire_count": 141,
-      "command_acc_on_accepted_pct": 87.7,
-      "intent_acc_on_accepted_pct": 96.51,
-      "total_accepted": 1149,
-      "total_rejected": 3294
+      "misfire_count": 543,
+      "command_acc_on_accepted_pct": 60.07,
+      "intent_acc_on_accepted_pct": 78.75,
+      "total_accepted": 1370,
+      "total_rejected": 3073
     },
     "slot_exact_match": {
-      "eligible_clips": 2131,
-      "exact_matches": 1611,
-      "exact_match_pct": 75.6
+      "eligible_clips": 1844,
+      "exact_matches": 1354,
+      "exact_match_pct": 73.43
     },
     "voice_type_breakdown": {
       "real_filipino": {
         "total_clips": 189,
         "in_scope_clips": 189,
-        "raw_command_acc_pct": 8.99,
-        "raw_intent_acc_pct": 29.1,
-        "accepted_in_scope_clips": 4,
+        "raw_command_acc_pct": 5.29,
+        "raw_intent_acc_pct": 18.52,
+        "accepted_in_scope_clips": 8,
         "command_acc_on_accepted_pct": 0.0,
-        "intent_acc_on_accepted_pct": 100.0,
-        "frr_pct": 97.88
+        "intent_acc_on_accepted_pct": 50.0,
+        "frr_pct": 95.77
       },
       "open_source": {
         "total_clips": 635,
         "in_scope_clips": 588,
-        "raw_command_acc_pct": 13.39,
-        "raw_intent_acc_pct": 19.37,
-        "accepted_in_scope_clips": 22,
-        "command_acc_on_accepted_pct": 40.91,
-        "intent_acc_on_accepted_pct": 40.91,
-        "frr_pct": 96.26
+        "raw_command_acc_pct": 10.08,
+        "raw_intent_acc_pct": 14.33,
+        "accepted_in_scope_clips": 46,
+        "command_acc_on_accepted_pct": 21.74,
+        "intent_acc_on_accepted_pct": 28.26,
+        "frr_pct": 92.18
       },
       "synthetic": {
         "total_clips": 3619,
         "in_scope_clips": 3590,
-        "raw_command_acc_pct": 62.56,
-        "raw_intent_acc_pct": 83.81,
-        "accepted_in_scope_clips": 1120,
-        "command_acc_on_accepted_pct": 88.93,
-        "intent_acc_on_accepted_pct": 97.59,
-        "frr_pct": 68.8
-      }
-    },
-    "script_adherence_breakdown": {
-      "on_script": {
-        "total_clips": 4443,
-        "in_scope_clips": 4367,
-        "raw_command_acc_pct": 53.25,
-        "raw_intent_acc_pct": 72.27,
-        "command_acc_on_accepted_pct": 87.7,
-        "frr_pct": 73.76
+        "raw_command_acc_pct": 42.17,
+        "raw_intent_acc_pct": 64.6,
+        "accepted_in_scope_clips": 1306,
+        "command_acc_on_accepted_pct": 61.79,
+        "intent_acc_on_accepted_pct": 80.7,
+        "frr_pct": 63.62
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos_speech_pct": 100.0,
+        "far_oos_speech_pct": 97.37,
         "far_oos_ci_95": [
-          95.19,
-          100.0
+          90.9,
+          99.28
         ],
-        "far_mic_noise_pct": 20.0,
-        "command_acc_accepted_pct": 54.28,
-        "frr_filipino_group_pct": 0.0,
-        "accepted_total": 4435,
-        "rejected_total": 8
+        "far_mic_noise_pct": 100.0,
+        "command_acc_accepted_pct": 37.37,
+        "frr_filipino_group_pct": 11.64,
+        "accepted_total": 4350,
+        "rejected_total": 93
       },
       "threshold_only": {
-        "far_oos_speech_pct": 3.95,
+        "far_oos_speech_pct": 13.16,
         "far_oos_ci_95": [
-          1.35,
-          10.97
+          7.31,
+          22.55
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 87.7,
-        "frr_filipino_group_pct": 97.88,
-        "accepted_total": 1149,
-        "rejected_total": 3294
+        "command_acc_accepted_pct": 59.9,
+        "frr_filipino_group_pct": 95.77,
+        "accepted_total": 1374,
+        "rejected_total": 3069
       },
       "combined": {
-        "far_oos_speech_pct": 3.95,
+        "far_oos_speech_pct": 13.16,
         "far_oos_ci_95": [
-          1.35,
-          10.97
+          7.31,
+          22.55
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 87.7,
-        "frr_filipino_group_pct": 97.88,
-        "accepted_total": 1149,
-        "rejected_total": 3294
+        "command_acc_accepted_pct": 60.07,
+        "frr_filipino_group_pct": 95.77,
+        "accepted_total": 1370,
+        "rejected_total": 3073
       },
       "margin_variant": {
-        "far_oos_speech_pct": 56.58,
+        "far_oos_speech_pct": 46.05,
         "far_oos_ci_95": [
-          45.39,
-          67.14
+          35.31,
+          57.18
         ],
         "far_mic_noise_pct": 6.67,
-        "command_acc_accepted_pct": 65.08,
-        "frr_filipino_group_pct": 68.25,
-        "accepted_total": 3225,
-        "rejected_total": 1218
+        "command_acc_accepted_pct": 47.14,
+        "frr_filipino_group_pct": 74.07,
+        "accepted_total": 2765,
+        "rejected_total": 1678
+      }
+    }
+  },
+  "test_metrics_tau_bal": {
+    "command_level_94": {
+      "accuracy_pct": 36.01,
+      "accuracy_ci_95": [
+        34.61,
+        37.43
+      ],
+      "balanced_accuracy_pct": 36.24,
+      "macro_precision_pct": 44.74,
+      "macro_recall_pct": 36.24,
+      "macro_f1_pct": 32.82,
+      "macro_f2_pct": 37.67
+    },
+    "intent_level_19": {
+      "accuracy_pct": 55.46,
+      "accuracy_ci_95": [
+        53.99,
+        56.91
+      ],
+      "balanced_accuracy_pct": 43.97,
+      "macro_precision_pct": 52.98,
+      "macro_recall_pct": 43.97,
+      "macro_f1_pct": 42.39,
+      "macro_f2_pct": 45.52
+    },
+    "pipeline_rates": {
+      "tau": 0.25,
+      "far_oos_speech_pct": 71.05,
+      "far_oos_ci_95": [
+        60.04,
+        80.04
+      ],
+      "far_oos_accepted_count": 54,
+      "far_oos_total_count": 76,
+      "frr_in_scope_pct": 16.26,
+      "frr_in_scope_ci_95": [
+        15.19,
+        17.38
+      ],
+      "frr_rejected_count": 710,
+      "frr_total_count": 4367,
+      "misfire_rate_pct": 48.66,
+      "misfire_ci_95": [
+        47.18,
+        50.14
+      ],
+      "misfire_count": 2125,
+      "command_acc_on_accepted_pct": 41.89,
+      "intent_acc_on_accepted_pct": 63.58,
+      "total_accepted": 3711,
+      "total_rejected": 732
+    },
+    "slot_exact_match": {
+      "eligible_clips": 1844,
+      "exact_matches": 1354,
+      "exact_match_pct": 73.43
+    },
+    "voice_type_breakdown": {
+      "real_filipino": {
+        "total_clips": 189,
+        "in_scope_clips": 189,
+        "raw_command_acc_pct": 5.29,
+        "raw_intent_acc_pct": 18.52,
+        "accepted_in_scope_clips": 72,
+        "command_acc_on_accepted_pct": 6.94,
+        "intent_acc_on_accepted_pct": 22.22,
+        "frr_pct": 61.9
+      },
+      "open_source": {
+        "total_clips": 635,
+        "in_scope_clips": 588,
+        "raw_command_acc_pct": 10.08,
+        "raw_intent_acc_pct": 14.33,
+        "accepted_in_scope_clips": 302,
+        "command_acc_on_accepted_pct": 16.23,
+        "intent_acc_on_accepted_pct": 22.19,
+        "frr_pct": 48.64
+      },
+      "synthetic": {
+        "total_clips": 3619,
+        "in_scope_clips": 3590,
+        "raw_command_acc_pct": 42.17,
+        "raw_intent_acc_pct": 64.6,
+        "accepted_in_scope_clips": 3283,
+        "command_acc_on_accepted_pct": 45.02,
+        "intent_acc_on_accepted_pct": 68.29,
+        "frr_pct": 8.55
+      }
+    },
+    "rejection_rules": {
+      "class_only": {
+        "far_oos_speech_pct": 97.37,
+        "far_oos_ci_95": [
+          90.9,
+          99.28
+        ],
+        "far_mic_noise_pct": 100.0,
+        "command_acc_accepted_pct": 37.37,
+        "frr_filipino_group_pct": 11.64,
+        "accepted_total": 4350,
+        "rejected_total": 93
+      },
+      "threshold_only": {
+        "far_oos_speech_pct": 71.05,
+        "far_oos_ci_95": [
+          60.04,
+          80.04
+        ],
+        "far_mic_noise_pct": 40.0,
+        "command_acc_accepted_pct": 41.35,
+        "frr_filipino_group_pct": 54.5,
+        "accepted_total": 3759,
+        "rejected_total": 684
+      },
+      "combined": {
+        "far_oos_speech_pct": 71.05,
+        "far_oos_ci_95": [
+          60.04,
+          80.04
+        ],
+        "far_mic_noise_pct": 40.0,
+        "command_acc_accepted_pct": 41.89,
+        "frr_filipino_group_pct": 61.9,
+        "accepted_total": 3711,
+        "rejected_total": 732
+      },
+      "margin_variant": {
+        "far_oos_speech_pct": 46.05,
+        "far_oos_ci_95": [
+          35.31,
+          57.18
+        ],
+        "far_mic_noise_pct": 6.67,
+        "command_acc_accepted_pct": 47.14,
+        "frr_filipino_group_pct": 74.07,
+        "accepted_total": 2765,
+        "rejected_total": 1678
       }
     }
   }

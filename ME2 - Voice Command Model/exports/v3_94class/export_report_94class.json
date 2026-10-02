@@ -11,8 +11,8 @@
       "macs_si": "42.1 M",
       "flops": 86830592,
       "flops_si": "86.8 M",
-      "command_acc_94": 51.27,
-      "intent_acc_19": 67.81
+      "command_acc_94": 36.01,
+      "intent_acc_19": 55.46
     },
     "int8": {
       "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/bcresnet_94class_int8.onnx",
@@ -22,10 +22,10 @@
       "macs_si": "42.1 M",
       "flops": 89574226,
       "flops_si": "89.6 M",
-      "command_acc_94": 52.87,
-      "intent_acc_19": 68.89,
-      "drop_command_94_pct": -1.6,
-      "drop_intent_19_pct": -1.08
+      "command_acc_94": 38.58,
+      "intent_acc_19": 57.69,
+      "drop_command_94_pct": -2.57,
+      "drop_intent_19_pct": -2.23
     }
   },
   "dscnn": {
@@ -40,8 +40,8 @@
       "macs_si": "99.2 M",
       "flops": 200408064,
       "flops_si": "200 M",
-      "command_acc_94": 18.73,
-      "intent_acc_19": 42.97
+      "command_acc_94": 12.67,
+      "intent_acc_19": 29.98
     },
     "int8": {
       "path": "/mnt/jfs_hpc/home/misael.andre.maningo/MEng AI/AI 231/ME2 - Voice Command Model/exports/v3_94class/dscnn_94class_int8.onnx",
@@ -51,10 +51,10 @@
       "macs_si": "99.2 M",
       "flops": 204028102,
       "flops_si": "204 M",
-      "command_acc_94": 18.93,
-      "intent_acc_19": 43.55,
-      "drop_command_94_pct": -0.2,
-      "drop_intent_19_pct": -0.58
+      "command_acc_94": 12.49,
+      "intent_acc_19": 29.69,
+      "drop_command_94_pct": 0.18,
+      "drop_intent_19_pct": 0.29
     }
   }
 }

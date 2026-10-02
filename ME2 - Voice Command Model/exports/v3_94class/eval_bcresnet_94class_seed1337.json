@@ -1,519 +1,288 @@
 {
   "model_name": "bcresnet",
   "seed": 1337,
-  "epochs": 25,
-  "train_time_seconds": 143.71,
-  "best_epoch": 24,
-  "val_best_filipino_acc_pct": 8.33,
-  "temperature": 1.5432,
-  "tau_raw": 0.7,
-  "tau_raw_achievable": false,
-  "tau_calibrated": 0.5,
-  "tau_calibrated_achievable": false,
-  "test_metrics_raw": {
+  "epochs": 20,
+  "train_time_seconds": 72.53,
+  "tau_star": 0.65,
+  "tau_bal": 0.25,
+  "test_metrics_tau_star": {
     "command_level_94": {
-      "accuracy_pct": 61.26,
+      "accuracy_pct": 24.29,
       "accuracy_ci_95": [
-        59.82,
-        62.69
+        23.05,
+        25.57
       ],
-      "balanced_accuracy_pct": 61.68,
-      "macro_precision_pct": 64.06,
-      "macro_recall_pct": 61.68,
-      "macro_f1_pct": 60.05,
-      "macro_f2_pct": 62.14
+      "balanced_accuracy_pct": 24.37,
+      "macro_precision_pct": 32.19,
+      "macro_recall_pct": 24.37,
+      "macro_f1_pct": 22.45,
+      "macro_f2_pct": 25.61
     },
     "intent_level_19": {
-      "accuracy_pct": 74.99,
+      "accuracy_pct": 47.22,
       "accuracy_ci_95": [
-        73.7,
-        76.25
+        45.76,
+        48.69
       ],
-      "balanced_accuracy_pct": 66.71,
-      "macro_precision_pct": 68.34,
-      "macro_recall_pct": 66.71,
-      "macro_f1_pct": 65.94,
-      "macro_f2_pct": 67.03
+      "balanced_accuracy_pct": 34.87,
+      "macro_precision_pct": 47.41,
+      "macro_recall_pct": 34.87,
+      "macro_f1_pct": 34.6,
+      "macro_f2_pct": 36.82
     },
     "pipeline_rates": {
-      "far_oos_speech_pct": 6.58,
+      "tau": 0.65,
+      "far_oos_speech_pct": 11.84,
       "far_oos_ci_95": [
-        2.84,
-        14.49
+        6.36,
+        21.0
       ],
-      "far_oos_accepted_count": 5,
+      "far_oos_accepted_count": 9,
       "far_oos_total_count": 76,
-      "frr_in_scope_pct": 55.76,
+      "frr_in_scope_pct": 67.53,
       "frr_in_scope_ci_95": [
-        54.28,
-        57.23
+        66.13,
+        68.9
       ],
-      "frr_rejected_count": 2435,
+      "frr_rejected_count": 2949,
       "frr_total_count": 4367,
-      "misfire_rate_pct": 4.12,
+      "misfire_rate_pct": 19.69,
       "misfire_ci_95": [
-        3.57,
-        4.75
+        18.54,
+        20.9
       ],
-      "misfire_count": 180,
-      "command_acc_on_accepted_pct": 90.68,
-      "intent_acc_on_accepted_pct": 96.33,
-      "total_accepted": 1937,
-      "total_rejected": 2506
+      "misfire_count": 860,
+      "command_acc_on_accepted_pct": 39.35,
+      "intent_acc_on_accepted_pct": 62.2,
+      "total_accepted": 1427,
+      "total_rejected": 3016
     },
     "slot_exact_match": {
-      "eligible_clips": 2184,
-      "exact_matches": 1880,
-      "exact_match_pct": 86.08
+      "eligible_clips": 1684,
+      "exact_matches": 1080,
+      "exact_match_pct": 64.13
     },
     "voice_type_breakdown": {
       "real_filipino": {
         "total_clips": 189,
         "in_scope_clips": 189,
-        "raw_command_acc_pct": 6.88,
-        "raw_intent_acc_pct": 17.99,
-        "accepted_in_scope_clips": 9,
-        "command_acc_on_accepted_pct": 33.33,
-        "intent_acc_on_accepted_pct": 77.78,
-        "frr_pct": 95.24
+        "raw_command_acc_pct": 3.7,
+        "raw_intent_acc_pct": 10.05,
+        "accepted_in_scope_clips": 0,
+        "command_acc_on_accepted_pct": 0.0,
+        "intent_acc_on_accepted_pct": 0.0,
+        "frr_pct": 100.0
       },
       "open_source": {
         "total_clips": 635,
         "in_scope_clips": 588,
-        "raw_command_acc_pct": 13.07,
-        "raw_intent_acc_pct": 18.43,
-        "accepted_in_scope_clips": 58,
-        "command_acc_on_accepted_pct": 36.21,
-        "intent_acc_on_accepted_pct": 37.93,
-        "frr_pct": 90.14
+        "raw_command_acc_pct": 6.93,
+        "raw_intent_acc_pct": 10.39,
+        "accepted_in_scope_clips": 61,
+        "command_acc_on_accepted_pct": 19.67,
+        "intent_acc_on_accepted_pct": 26.23,
+        "frr_pct": 89.63
       },
       "synthetic": {
         "total_clips": 3619,
         "in_scope_clips": 3590,
-        "raw_command_acc_pct": 72.56,
-        "raw_intent_acc_pct": 87.9,
-        "accepted_in_scope_clips": 1865,
-        "command_acc_on_accepted_pct": 92.65,
-        "intent_acc_on_accepted_pct": 98.23,
-        "frr_pct": 48.05
-      }
-    },
-    "script_adherence_breakdown": {
-      "on_script": {
-        "total_clips": 4443,
-        "in_scope_clips": 4367,
-        "raw_command_acc_pct": 61.26,
-        "raw_intent_acc_pct": 74.99,
-        "command_acc_on_accepted_pct": 90.68,
-        "frr_pct": 55.76
+        "raw_command_acc_pct": 28.41,
+        "raw_intent_acc_pct": 55.62,
+        "accepted_in_scope_clips": 1357,
+        "command_acc_on_accepted_pct": 40.24,
+        "intent_acc_on_accepted_pct": 63.82,
+        "frr_pct": 62.2
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos_speech_pct": 97.37,
+        "far_oos_speech_pct": 92.11,
         "far_oos_ci_95": [
-          90.9,
-          99.28
-        ],
-        "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 62.88,
-        "frr_filipino_group_pct": 3.17,
-        "accepted_total": 4400,
-        "rejected_total": 43
-      },
-      "threshold_only": {
-        "far_oos_speech_pct": 6.58,
-        "far_oos_ci_95": [
-          2.84,
-          14.49
+          83.83,
+          96.33
         ],
         "far_mic_noise_pct": 100.0,
-        "command_acc_accepted_pct": 90.68,
-        "frr_filipino_group_pct": 95.24,
-        "accepted_total": 1937,
-        "rejected_total": 2506
+        "command_acc_accepted_pct": 27.78,
+        "frr_filipino_group_pct": 37.57,
+        "accepted_total": 3933,
+        "rejected_total": 510
+      },
+      "threshold_only": {
+        "far_oos_speech_pct": 13.16,
+        "far_oos_ci_95": [
+          7.31,
+          22.55
+        ],
+        "far_mic_noise_pct": 0.0,
+        "command_acc_accepted_pct": 32.44,
+        "frr_filipino_group_pct": 94.71,
+        "accepted_total": 1730,
+        "rejected_total": 2713
       },
       "combined": {
-        "far_oos_speech_pct": 6.58,
+        "far_oos_speech_pct": 11.84,
         "far_oos_ci_95": [
-          2.84,
-          14.49
+          6.36,
+          21.0
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 90.68,
-        "frr_filipino_group_pct": 95.24,
-        "accepted_total": 1937,
-        "rejected_total": 2506
+        "command_acc_accepted_pct": 39.35,
+        "frr_filipino_group_pct": 100.0,
+        "accepted_total": 1427,
+        "rejected_total": 3016
       },
       "margin_variant": {
-        "far_oos_speech_pct": 44.74,
+        "far_oos_speech_pct": 55.26,
         "far_oos_ci_95": [
-          34.08,
-          55.9
+          44.1,
+          65.92
         ],
-        "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 75.14,
-        "frr_filipino_group_pct": 75.13,
-        "accepted_total": 3288,
-        "rejected_total": 1155
+        "far_mic_noise_pct": 20.0,
+        "command_acc_accepted_pct": 32.78,
+        "frr_filipino_group_pct": 83.07,
+        "accepted_total": 2733,
+        "rejected_total": 1710
       }
-    },
-    "top10_intent_confusions": [
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "BRIGHTNESS",
-        "count": 36
-      },
-      {
-        "true_intent": "STOP",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 33
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 30
-      },
-      {
-        "true_intent": "TIME",
-        "pred_intent": "WEATHER",
-        "count": 23
-      },
-      {
-        "true_intent": "PAUSE",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 21
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "NEXT",
-        "count": 19
-      },
-      {
-        "true_intent": "STOP",
-        "pred_intent": "NEXT",
-        "count": 18
-      },
-      {
-        "true_intent": "TIME",
-        "pred_intent": "CALL",
-        "count": 17
-      },
-      {
-        "true_intent": "OUT_OF_SCOPE",
-        "pred_intent": "TEMPERATURE",
-        "count": 15
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "CREATE_REMINDER",
-        "count": 14
-      }
-    ],
-    "top10_command_confusions": [
-      {
-        "true_command": "Adjust brightness to 20 percent",
-        "pred_command": "Adjust brightness to 100 percent",
-        "count": 21
-      },
-      {
-        "true_command": "Change the temperature to 22 degrees",
-        "pred_command": "Set the temperature to 26 degrees",
-        "count": 19
-      },
-      {
-        "true_command": "Start a timer for 1 minute",
-        "pred_command": "Start a timer for 10 seconds",
-        "count": 16
-      },
-      {
-        "true_command": "Set an alarm for 8:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 16
-      },
-      {
-        "true_command": "Pause audio",
-        "pred_command": "Play music",
-        "count": 15
-      },
-      {
-        "true_command": "Send my message",
-        "pred_command": "Send a message",
-        "count": 14
-      },
-      {
-        "true_command": "Change the temperature to 26 degrees",
-        "pred_command": "Set the temperature to 26 degrees",
-        "count": 14
-      },
-      {
-        "true_command": "Set the temperature to 18 degrees",
-        "pred_command": "Change the temperature to 18 degrees",
-        "count": 14
-      },
-      {
-        "true_command": "Reminder Exercise",
-        "pred_command": "Remind me to Exercise",
-        "count": 14
-      },
-      {
-        "true_command": "What time is it?",
-        "pred_command": "What's the weather?",
-        "count": 13
-      }
-    ]
+    }
   },
-  "test_metrics_calibrated": {
+  "test_metrics_tau_bal": {
     "command_level_94": {
-      "accuracy_pct": 61.26,
+      "accuracy_pct": 24.29,
       "accuracy_ci_95": [
-        59.82,
-        62.69
+        23.05,
+        25.57
       ],
-      "balanced_accuracy_pct": 61.68,
-      "macro_precision_pct": 64.06,
-      "macro_recall_pct": 61.68,
-      "macro_f1_pct": 60.05,
-      "macro_f2_pct": 62.14
+      "balanced_accuracy_pct": 24.37,
+      "macro_precision_pct": 32.19,
+      "macro_recall_pct": 24.37,
+      "macro_f1_pct": 22.45,
+      "macro_f2_pct": 25.61
     },
     "intent_level_19": {
-      "accuracy_pct": 74.99,
+      "accuracy_pct": 47.22,
       "accuracy_ci_95": [
-        73.7,
-        76.25
+        45.76,
+        48.69
       ],
-      "balanced_accuracy_pct": 66.71,
-      "macro_precision_pct": 68.34,
-      "macro_recall_pct": 66.71,
-      "macro_f1_pct": 65.94,
-      "macro_f2_pct": 67.03
+      "balanced_accuracy_pct": 34.87,
+      "macro_precision_pct": 47.41,
+      "macro_recall_pct": 34.87,
+      "macro_f1_pct": 34.6,
+      "macro_f2_pct": 36.82
     },
     "pipeline_rates": {
-      "far_oos_speech_pct": 2.63,
+      "tau": 0.25,
+      "far_oos_speech_pct": 72.37,
       "far_oos_ci_95": [
-        0.72,
-        9.1
+        61.42,
+        81.16
       ],
-      "far_oos_accepted_count": 2,
+      "far_oos_accepted_count": 55,
       "far_oos_total_count": 76,
-      "frr_in_scope_pct": 54.57,
+      "frr_in_scope_pct": 19.78,
       "frr_in_scope_ci_95": [
-        53.09,
-        56.04
+        18.63,
+        20.99
       ],
-      "frr_rejected_count": 2383,
+      "frr_rejected_count": 864,
       "frr_total_count": 4367,
-      "misfire_rate_pct": 4.76,
+      "misfire_rate_pct": 56.31,
       "misfire_ci_95": [
-        4.17,
-        5.44
+        54.83,
+        57.77
       ],
-      "misfire_count": 208,
-      "command_acc_on_accepted_pct": 89.52,
-      "intent_acc_on_accepted_pct": 97.68,
-      "total_accepted": 1986,
-      "total_rejected": 2457
+      "misfire_count": 2459,
+      "command_acc_on_accepted_pct": 29.8,
+      "intent_acc_on_accepted_pct": 57.35,
+      "total_accepted": 3558,
+      "total_rejected": 885
     },
     "slot_exact_match": {
-      "eligible_clips": 2184,
-      "exact_matches": 1880,
-      "exact_match_pct": 86.08
+      "eligible_clips": 1684,
+      "exact_matches": 1080,
+      "exact_match_pct": 64.13
     },
     "voice_type_breakdown": {
       "real_filipino": {
         "total_clips": 189,
         "in_scope_clips": 189,
-        "raw_command_acc_pct": 6.88,
-        "raw_intent_acc_pct": 17.99,
-        "accepted_in_scope_clips": 9,
-        "command_acc_on_accepted_pct": 44.44,
-        "intent_acc_on_accepted_pct": 88.89,
-        "frr_pct": 95.24
+        "raw_command_acc_pct": 3.7,
+        "raw_intent_acc_pct": 10.05,
+        "accepted_in_scope_clips": 75,
+        "command_acc_on_accepted_pct": 9.33,
+        "intent_acc_on_accepted_pct": 24.0,
+        "frr_pct": 60.32
       },
       "open_source": {
         "total_clips": 635,
         "in_scope_clips": 588,
-        "raw_command_acc_pct": 13.07,
-        "raw_intent_acc_pct": 18.43,
-        "accepted_in_scope_clips": 40,
-        "command_acc_on_accepted_pct": 40.0,
-        "intent_acc_on_accepted_pct": 42.5,
-        "frr_pct": 93.2
+        "raw_command_acc_pct": 6.93,
+        "raw_intent_acc_pct": 10.39,
+        "accepted_in_scope_clips": 270,
+        "command_acc_on_accepted_pct": 12.96,
+        "intent_acc_on_accepted_pct": 17.78,
+        "frr_pct": 54.08
       },
       "synthetic": {
         "total_clips": 3619,
         "in_scope_clips": 3590,
-        "raw_command_acc_pct": 72.56,
-        "raw_intent_acc_pct": 87.9,
-        "accepted_in_scope_clips": 1935,
-        "command_acc_on_accepted_pct": 90.75,
-        "intent_acc_on_accepted_pct": 98.86,
-        "frr_pct": 46.1
-      }
-    },
-    "script_adherence_breakdown": {
-      "on_script": {
-        "total_clips": 4443,
-        "in_scope_clips": 4367,
-        "raw_command_acc_pct": 61.26,
-        "raw_intent_acc_pct": 74.99,
-        "command_acc_on_accepted_pct": 89.52,
-        "frr_pct": 54.57
+        "raw_command_acc_pct": 28.41,
+        "raw_intent_acc_pct": 55.62,
+        "accepted_in_scope_clips": 3158,
+        "command_acc_on_accepted_pct": 31.73,
+        "intent_acc_on_accepted_pct": 61.53,
+        "frr_pct": 12.03
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos_speech_pct": 97.37,
+        "far_oos_speech_pct": 92.11,
         "far_oos_ci_95": [
-          90.9,
-          99.28
-        ],
-        "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 62.88,
-        "frr_filipino_group_pct": 3.17,
-        "accepted_total": 4400,
-        "rejected_total": 43
-      },
-      "threshold_only": {
-        "far_oos_speech_pct": 2.63,
-        "far_oos_ci_95": [
-          0.72,
-          9.1
+          83.83,
+          96.33
         ],
         "far_mic_noise_pct": 100.0,
-        "command_acc_accepted_pct": 89.52,
-        "frr_filipino_group_pct": 95.24,
-        "accepted_total": 1986,
-        "rejected_total": 2457
+        "command_acc_accepted_pct": 27.78,
+        "frr_filipino_group_pct": 37.57,
+        "accepted_total": 3933,
+        "rejected_total": 510
+      },
+      "threshold_only": {
+        "far_oos_speech_pct": 78.95,
+        "far_oos_ci_95": [
+          68.5,
+          86.6
+        ],
+        "far_mic_noise_pct": 93.33,
+        "command_acc_accepted_pct": 26.22,
+        "frr_filipino_group_pct": 25.93,
+        "accepted_total": 4042,
+        "rejected_total": 401
       },
       "combined": {
-        "far_oos_speech_pct": 2.63,
+        "far_oos_speech_pct": 72.37,
         "far_oos_ci_95": [
-          0.72,
-          9.1
+          61.42,
+          81.16
         ],
-        "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 89.52,
-        "frr_filipino_group_pct": 95.24,
-        "accepted_total": 1986,
-        "rejected_total": 2457
+        "far_mic_noise_pct": 93.33,
+        "command_acc_accepted_pct": 29.8,
+        "frr_filipino_group_pct": 60.32,
+        "accepted_total": 3558,
+        "rejected_total": 885
       },
       "margin_variant": {
-        "far_oos_speech_pct": 25.0,
+        "far_oos_speech_pct": 55.26,
         "far_oos_ci_95": [
-          16.63,
-          35.78
+          44.1,
+          65.92
         ],
-        "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 81.93,
-        "frr_filipino_group_pct": 84.13,
-        "accepted_total": 2692,
-        "rejected_total": 1751
+        "far_mic_noise_pct": 20.0,
+        "command_acc_accepted_pct": 32.78,
+        "frr_filipino_group_pct": 83.07,
+        "accepted_total": 2733,
+        "rejected_total": 1710
       }
-    },
-    "top10_intent_confusions": [
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "BRIGHTNESS",
-        "count": 36
-      },
-      {
-        "true_intent": "STOP",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 33
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 30
-      },
-      {
-        "true_intent": "TIME",
-        "pred_intent": "WEATHER",
-        "count": 23
-      },
-      {
-        "true_intent": "PAUSE",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 21
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "NEXT",
-        "count": 19
-      },
-      {
-        "true_intent": "STOP",
-        "pred_intent": "NEXT",
-        "count": 18
-      },
-      {
-        "true_intent": "TIME",
-        "pred_intent": "CALL",
-        "count": 17
-      },
-      {
-        "true_intent": "OUT_OF_SCOPE",
-        "pred_intent": "TEMPERATURE",
-        "count": 15
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "CREATE_REMINDER",
-        "count": 14
-      }
-    ],
-    "top10_command_confusions": [
-      {
-        "true_command": "Adjust brightness to 20 percent",
-        "pred_command": "Adjust brightness to 100 percent",
-        "count": 21
-      },
-      {
-        "true_command": "Change the temperature to 22 degrees",
-        "pred_command": "Set the temperature to 26 degrees",
-        "count": 19
-      },
-      {
-        "true_command": "Start a timer for 1 minute",
-        "pred_command": "Start a timer for 10 seconds",
-        "count": 16
-      },
-      {
-        "true_command": "Set an alarm for 8:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 16
-      },
-      {
-        "true_command": "Pause audio",
-        "pred_command": "Play music",
-        "count": 15
-      },
-      {
-        "true_command": "Send my message",
-        "pred_command": "Send a message",
-        "count": 14
-      },
-      {
-        "true_command": "Change the temperature to 26 degrees",
-        "pred_command": "Set the temperature to 26 degrees",
-        "count": 14
-      },
-      {
-        "true_command": "Set the temperature to 18 degrees",
-        "pred_command": "Change the temperature to 18 degrees",
-        "count": 14
-      },
-      {
-        "true_command": "Reminder Exercise",
-        "pred_command": "Remind me to Exercise",
-        "count": 14
-      },
-      {
-        "true_command": "What time is it?",
-        "pred_command": "What's the weather?",
-        "count": 13
-      }
-    ]
+    }
   }
 }

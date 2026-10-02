@@ -17,7 +17,6 @@ import sys
 import time
 import json
 import numpy as np
-import soundfile as sf
 import onnxruntime as ort
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

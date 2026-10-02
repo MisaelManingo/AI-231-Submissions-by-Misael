@@ -1,519 +1,288 @@
 {
   "model_name": "dscnn",
   "seed": 42,
-  "epochs": 25,
-  "train_time_seconds": 115.78,
-  "best_epoch": 10,
-  "val_best_filipino_acc_pct": 5.56,
-  "temperature": 1.6748,
-  "tau_raw": 0.25,
-  "tau_raw_achievable": false,
-  "tau_calibrated": 0.15,
-  "tau_calibrated_achievable": false,
-  "test_metrics_raw": {
+  "epochs": 20,
+  "train_time_seconds": 62.31,
+  "tau_star": 0.65,
+  "tau_bal": 0.25,
+  "test_metrics_tau_star": {
     "command_level_94": {
-      "accuracy_pct": 18.73,
+      "accuracy_pct": 12.67,
       "accuracy_ci_95": [
-        17.61,
-        19.9
+        11.73,
+        13.68
       ],
-      "balanced_accuracy_pct": 18.88,
-      "macro_precision_pct": 19.76,
-      "macro_recall_pct": 18.88,
-      "macro_f1_pct": 14.79,
-      "macro_f2_pct": 19.05
+      "balanced_accuracy_pct": 12.72,
+      "macro_precision_pct": 15.06,
+      "macro_recall_pct": 12.72,
+      "macro_f1_pct": 8.36,
+      "macro_f2_pct": 13.13
     },
     "intent_level_19": {
-      "accuracy_pct": 42.97,
+      "accuracy_pct": 29.98,
       "accuracy_ci_95": [
-        41.52,
-        44.43
+        28.65,
+        31.34
       ],
-      "balanced_accuracy_pct": 34.74,
-      "macro_precision_pct": 40.61,
-      "macro_recall_pct": 34.74,
-      "macro_f1_pct": 33.92,
-      "macro_f2_pct": 35.77
+      "balanced_accuracy_pct": 25.96,
+      "macro_precision_pct": 35.3,
+      "macro_recall_pct": 25.96,
+      "macro_f1_pct": 22.95,
+      "macro_f2_pct": 27.41
     },
     "pipeline_rates": {
-      "far_oos_speech_pct": 34.21,
+      "tau": 0.65,
+      "far_oos_speech_pct": 0.0,
       "far_oos_ci_95": [
-        24.54,
-        45.4
+        0.0,
+        4.81
       ],
-      "far_oos_accepted_count": 26,
+      "far_oos_accepted_count": 0,
       "far_oos_total_count": 76,
-      "frr_in_scope_pct": 68.97,
+      "frr_in_scope_pct": 96.57,
       "frr_in_scope_ci_95": [
-        67.58,
-        70.33
+        95.98,
+        97.07
       ],
-      "frr_rejected_count": 3012,
+      "frr_rejected_count": 4217,
       "frr_total_count": 4367,
-      "misfire_rate_pct": 22.01,
+      "misfire_rate_pct": 1.76,
       "misfire_ci_95": [
-        20.8,
-        23.26
+        1.41,
+        2.2
       ],
-      "misfire_count": 961,
-      "command_acc_on_accepted_pct": 29.08,
-      "intent_acc_on_accepted_pct": 68.49,
-      "total_accepted": 1381,
-      "total_rejected": 3062
+      "misfire_count": 77,
+      "command_acc_on_accepted_pct": 48.67,
+      "intent_acc_on_accepted_pct": 91.33,
+      "total_accepted": 150,
+      "total_rejected": 4293
     },
     "slot_exact_match": {
-      "eligible_clips": 1402,
-      "exact_matches": 645,
-      "exact_match_pct": 46.01
+      "eligible_clips": 919,
+      "exact_matches": 442,
+      "exact_match_pct": 48.1
     },
     "voice_type_breakdown": {
       "real_filipino": {
         "total_clips": 189,
         "in_scope_clips": 189,
-        "raw_command_acc_pct": 4.23,
-        "raw_intent_acc_pct": 13.76,
-        "accepted_in_scope_clips": 10,
-        "command_acc_on_accepted_pct": 30.0,
-        "intent_acc_on_accepted_pct": 100.0,
-        "frr_pct": 94.71
+        "raw_command_acc_pct": 3.7,
+        "raw_intent_acc_pct": 10.05,
+        "accepted_in_scope_clips": 0,
+        "command_acc_on_accepted_pct": 0.0,
+        "intent_acc_on_accepted_pct": 0.0,
+        "frr_pct": 100.0
       },
       "open_source": {
         "total_clips": 635,
         "in_scope_clips": 588,
-        "raw_command_acc_pct": 5.51,
-        "raw_intent_acc_pct": 11.18,
-        "accepted_in_scope_clips": 124,
-        "command_acc_on_accepted_pct": 11.29,
-        "intent_acc_on_accepted_pct": 23.39,
-        "frr_pct": 78.91
+        "raw_command_acc_pct": 6.46,
+        "raw_intent_acc_pct": 10.87,
+        "accepted_in_scope_clips": 6,
+        "command_acc_on_accepted_pct": 33.33,
+        "intent_acc_on_accepted_pct": 83.33,
+        "frr_pct": 98.98
       },
       "synthetic": {
         "total_clips": 3619,
         "in_scope_clips": 3590,
-        "raw_command_acc_pct": 21.8,
-        "raw_intent_acc_pct": 50.07,
-        "accepted_in_scope_clips": 1221,
-        "command_acc_on_accepted_pct": 30.88,
-        "intent_acc_on_accepted_pct": 72.81,
-        "frr_pct": 65.99
-      }
-    },
-    "script_adherence_breakdown": {
-      "on_script": {
-        "total_clips": 4443,
-        "in_scope_clips": 4367,
-        "raw_command_acc_pct": 18.73,
-        "raw_intent_acc_pct": 42.97,
-        "command_acc_on_accepted_pct": 29.08,
-        "frr_pct": 68.97
+        "raw_command_acc_pct": 14.23,
+        "raw_intent_acc_pct": 34.37,
+        "accepted_in_scope_clips": 144,
+        "command_acc_on_accepted_pct": 49.31,
+        "intent_acc_on_accepted_pct": 91.67,
+        "frr_pct": 95.99
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos_speech_pct": 96.05,
+        "far_oos_speech_pct": 85.53,
         "far_oos_ci_95": [
-          89.03,
-          98.65
+          75.91,
+          91.72
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 19.28,
-        "frr_filipino_group_pct": 0.53,
-        "accepted_total": 4372,
-        "rejected_total": 71
+        "command_acc_accepted_pct": 13.4,
+        "frr_filipino_group_pct": 42.33,
+        "accepted_total": 4185,
+        "rejected_total": 258
       },
       "threshold_only": {
-        "far_oos_speech_pct": 34.21,
+        "far_oos_speech_pct": 0.0,
         "far_oos_ci_95": [
-          24.54,
-          45.4
+          0.0,
+          4.81
         ],
         "far_mic_noise_pct": 73.33,
-        "command_acc_accepted_pct": 28.55,
-        "frr_filipino_group_pct": 94.71,
-        "accepted_total": 1406,
-        "rejected_total": 3037
+        "command_acc_accepted_pct": 44.51,
+        "frr_filipino_group_pct": 100.0,
+        "accepted_total": 164,
+        "rejected_total": 4279
       },
       "combined": {
-        "far_oos_speech_pct": 34.21,
+        "far_oos_speech_pct": 0.0,
         "far_oos_ci_95": [
-          24.54,
-          45.4
+          0.0,
+          4.81
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 29.08,
-        "frr_filipino_group_pct": 94.71,
-        "accepted_total": 1381,
-        "rejected_total": 3062
+        "command_acc_accepted_pct": 48.67,
+        "frr_filipino_group_pct": 100.0,
+        "accepted_total": 150,
+        "rejected_total": 4293
       },
       "margin_variant": {
-        "far_oos_speech_pct": 25.0,
+        "far_oos_speech_pct": 18.42,
         "far_oos_ci_95": [
-          16.63,
-          35.78
+          11.3,
+          28.58
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 31.99,
+        "command_acc_accepted_pct": 25.32,
         "frr_filipino_group_pct": 98.41,
-        "accepted_total": 935,
-        "rejected_total": 3508
+        "accepted_total": 954,
+        "rejected_total": 3489
       }
-    },
-    "top10_intent_confusions": [
-      {
-        "true_intent": "CREATE_REMINDER",
-        "pred_intent": "ALARM",
-        "count": 158
-      },
-      {
-        "true_intent": "CREATE_REMINDER",
-        "pred_intent": "TIMER",
-        "count": 104
-      },
-      {
-        "true_intent": "TIMER",
-        "pred_intent": "BRIGHTNESS",
-        "count": 96
-      },
-      {
-        "true_intent": "TIMER",
-        "pred_intent": "ALARM",
-        "count": 89
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 66
-      },
-      {
-        "true_intent": "LIGHT_ON",
-        "pred_intent": "ALARM",
-        "count": 64
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "LIGHT_OFF",
-        "count": 62
-      },
-      {
-        "true_intent": "VOLUME_DOWN",
-        "pred_intent": "ALARM",
-        "count": 62
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "VOLUME_DOWN",
-        "count": 49
-      },
-      {
-        "true_intent": "TEMPERATURE",
-        "pred_intent": "BRIGHTNESS",
-        "count": 49
-      }
-    ],
-    "top10_command_confusions": [
-      {
-        "true_command": "Alarm 8:00 AM",
-        "pred_command": "Alarm 9:00 PM",
-        "count": 45
-      },
-      {
-        "true_command": "Brightness 60 percent",
-        "pred_command": "Brightness 100 percent",
-        "count": 36
-      },
-      {
-        "true_command": "Set an alarm for 8:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 35
-      },
-      {
-        "true_command": "Brightness 20 percent",
-        "pred_command": "Brightness 100 percent",
-        "count": 35
-      },
-      {
-        "true_command": "Reminder Study",
-        "pred_command": "Timer 1 minute",
-        "count": 34
-      },
-      {
-        "true_command": "Adjust brightness to 100 percent",
-        "pred_command": "Brightness level 100 percent",
-        "count": 32
-      },
-      {
-        "true_command": "Brightness level 60 percent",
-        "pred_command": "Brightness level 20 percent",
-        "count": 32
-      },
-      {
-        "true_command": "Start a timer for 1 minute",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 31
-      },
-      {
-        "true_command": "Wake me up at 9:00 PM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 31
-      },
-      {
-        "true_command": "Set an alarm for 6:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 30
-      }
-    ]
+    }
   },
-  "test_metrics_calibrated": {
+  "test_metrics_tau_bal": {
     "command_level_94": {
-      "accuracy_pct": 18.73,
+      "accuracy_pct": 12.67,
       "accuracy_ci_95": [
-        17.61,
-        19.9
+        11.73,
+        13.68
       ],
-      "balanced_accuracy_pct": 18.88,
-      "macro_precision_pct": 19.76,
-      "macro_recall_pct": 18.88,
-      "macro_f1_pct": 14.79,
-      "macro_f2_pct": 19.05
+      "balanced_accuracy_pct": 12.72,
+      "macro_precision_pct": 15.06,
+      "macro_recall_pct": 12.72,
+      "macro_f1_pct": 8.36,
+      "macro_f2_pct": 13.13
     },
     "intent_level_19": {
-      "accuracy_pct": 42.97,
+      "accuracy_pct": 29.98,
       "accuracy_ci_95": [
-        41.52,
-        44.43
+        28.65,
+        31.34
       ],
-      "balanced_accuracy_pct": 34.74,
-      "macro_precision_pct": 40.61,
-      "macro_recall_pct": 34.74,
-      "macro_f1_pct": 33.92,
-      "macro_f2_pct": 35.77
+      "balanced_accuracy_pct": 25.96,
+      "macro_precision_pct": 35.3,
+      "macro_recall_pct": 25.96,
+      "macro_f1_pct": 22.95,
+      "macro_f2_pct": 27.41
     },
     "pipeline_rates": {
-      "far_oos_speech_pct": 23.68,
+      "tau": 0.25,
+      "far_oos_speech_pct": 22.37,
       "far_oos_ci_95": [
-        15.54,
-        34.36
+        14.46,
+        32.93
       ],
-      "far_oos_accepted_count": 18,
+      "far_oos_accepted_count": 17,
       "far_oos_total_count": 76,
-      "frr_in_scope_pct": 75.29,
+      "frr_in_scope_pct": 69.13,
       "frr_in_scope_ci_95": [
-        73.99,
-        76.55
+        67.75,
+        70.48
       ],
-      "frr_rejected_count": 3288,
+      "frr_rejected_count": 3019,
       "frr_total_count": 4367,
-      "misfire_rate_pct": 17.22,
+      "misfire_rate_pct": 23.77,
       "misfire_ci_95": [
-        16.13,
-        18.37
+        22.53,
+        25.05
       ],
-      "misfire_count": 752,
-      "command_acc_on_accepted_pct": 30.31,
-      "intent_acc_on_accepted_pct": 76.09,
-      "total_accepted": 1097,
-      "total_rejected": 3346
+      "misfire_count": 1038,
+      "command_acc_on_accepted_pct": 23.0,
+      "intent_acc_on_accepted_pct": 51.78,
+      "total_accepted": 1365,
+      "total_rejected": 3078
     },
     "slot_exact_match": {
-      "eligible_clips": 1402,
-      "exact_matches": 645,
-      "exact_match_pct": 46.01
+      "eligible_clips": 919,
+      "exact_matches": 442,
+      "exact_match_pct": 48.1
     },
     "voice_type_breakdown": {
       "real_filipino": {
         "total_clips": 189,
         "in_scope_clips": 189,
-        "raw_command_acc_pct": 4.23,
-        "raw_intent_acc_pct": 13.76,
-        "accepted_in_scope_clips": 11,
-        "command_acc_on_accepted_pct": 27.27,
+        "raw_command_acc_pct": 3.7,
+        "raw_intent_acc_pct": 10.05,
+        "accepted_in_scope_clips": 5,
+        "command_acc_on_accepted_pct": 20.0,
         "intent_acc_on_accepted_pct": 100.0,
-        "frr_pct": 94.18
+        "frr_pct": 97.35
       },
       "open_source": {
         "total_clips": 635,
         "in_scope_clips": 588,
-        "raw_command_acc_pct": 5.51,
-        "raw_intent_acc_pct": 11.18,
-        "accepted_in_scope_clips": 75,
-        "command_acc_on_accepted_pct": 9.33,
-        "intent_acc_on_accepted_pct": 22.67,
-        "frr_pct": 87.24
+        "raw_command_acc_pct": 6.46,
+        "raw_intent_acc_pct": 10.87,
+        "accepted_in_scope_clips": 68,
+        "command_acc_on_accepted_pct": 10.29,
+        "intent_acc_on_accepted_pct": 22.06,
+        "frr_pct": 88.44
       },
       "synthetic": {
         "total_clips": 3619,
         "in_scope_clips": 3590,
-        "raw_command_acc_pct": 21.8,
-        "raw_intent_acc_pct": 50.07,
-        "accepted_in_scope_clips": 993,
-        "command_acc_on_accepted_pct": 31.92,
-        "intent_acc_on_accepted_pct": 79.86,
-        "frr_pct": 72.34
-      }
-    },
-    "script_adherence_breakdown": {
-      "on_script": {
-        "total_clips": 4443,
-        "in_scope_clips": 4367,
-        "raw_command_acc_pct": 18.73,
-        "raw_intent_acc_pct": 42.97,
-        "command_acc_on_accepted_pct": 30.31,
-        "frr_pct": 75.29
+        "raw_command_acc_pct": 14.23,
+        "raw_intent_acc_pct": 34.37,
+        "accepted_in_scope_clips": 1275,
+        "command_acc_on_accepted_pct": 23.69,
+        "intent_acc_on_accepted_pct": 53.18,
+        "frr_pct": 64.48
       }
     },
     "rejection_rules": {
       "class_only": {
-        "far_oos_speech_pct": 96.05,
+        "far_oos_speech_pct": 85.53,
         "far_oos_ci_95": [
-          89.03,
-          98.65
+          75.91,
+          91.72
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 19.28,
-        "frr_filipino_group_pct": 0.53,
-        "accepted_total": 4372,
-        "rejected_total": 71
+        "command_acc_accepted_pct": 13.4,
+        "frr_filipino_group_pct": 42.33,
+        "accepted_total": 4185,
+        "rejected_total": 258
       },
       "threshold_only": {
-        "far_oos_speech_pct": 23.68,
+        "far_oos_speech_pct": 26.32,
         "far_oos_ci_95": [
-          15.54,
-          34.36
+          17.73,
+          37.18
         ],
-        "far_mic_noise_pct": 60.0,
-        "command_acc_accepted_pct": 29.78,
-        "frr_filipino_group_pct": 94.18,
-        "accepted_total": 1116,
-        "rejected_total": 3327
+        "far_mic_noise_pct": 100.0,
+        "command_acc_accepted_pct": 21.66,
+        "frr_filipino_group_pct": 89.95,
+        "accepted_total": 1451,
+        "rejected_total": 2992
       },
       "combined": {
-        "far_oos_speech_pct": 23.68,
+        "far_oos_speech_pct": 22.37,
         "far_oos_ci_95": [
-          15.54,
-          34.36
+          14.46,
+          32.93
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 30.31,
-        "frr_filipino_group_pct": 94.18,
-        "accepted_total": 1097,
-        "rejected_total": 3346
+        "command_acc_accepted_pct": 23.0,
+        "frr_filipino_group_pct": 97.35,
+        "accepted_total": 1365,
+        "rejected_total": 3078
       },
       "margin_variant": {
-        "far_oos_speech_pct": 7.89,
+        "far_oos_speech_pct": 18.42,
         "far_oos_ci_95": [
-          3.67,
-          16.17
+          11.3,
+          28.58
         ],
         "far_mic_noise_pct": 0.0,
-        "command_acc_accepted_pct": 51.25,
-        "frr_filipino_group_pct": 100.0,
-        "accepted_total": 246,
-        "rejected_total": 4197
+        "command_acc_accepted_pct": 25.32,
+        "frr_filipino_group_pct": 98.41,
+        "accepted_total": 954,
+        "rejected_total": 3489
       }
-    },
-    "top10_intent_confusions": [
-      {
-        "true_intent": "CREATE_REMINDER",
-        "pred_intent": "ALARM",
-        "count": 158
-      },
-      {
-        "true_intent": "CREATE_REMINDER",
-        "pred_intent": "TIMER",
-        "count": 104
-      },
-      {
-        "true_intent": "TIMER",
-        "pred_intent": "BRIGHTNESS",
-        "count": 96
-      },
-      {
-        "true_intent": "TIMER",
-        "pred_intent": "ALARM",
-        "count": 89
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "PLAY_MUSIC",
-        "count": 66
-      },
-      {
-        "true_intent": "LIGHT_ON",
-        "pred_intent": "ALARM",
-        "count": 64
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "LIGHT_OFF",
-        "count": 62
-      },
-      {
-        "true_intent": "VOLUME_DOWN",
-        "pred_intent": "ALARM",
-        "count": 62
-      },
-      {
-        "true_intent": "COLOR",
-        "pred_intent": "VOLUME_DOWN",
-        "count": 49
-      },
-      {
-        "true_intent": "TEMPERATURE",
-        "pred_intent": "BRIGHTNESS",
-        "count": 49
-      }
-    ],
-    "top10_command_confusions": [
-      {
-        "true_command": "Alarm 8:00 AM",
-        "pred_command": "Alarm 9:00 PM",
-        "count": 45
-      },
-      {
-        "true_command": "Brightness 60 percent",
-        "pred_command": "Brightness 100 percent",
-        "count": 36
-      },
-      {
-        "true_command": "Set an alarm for 8:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 35
-      },
-      {
-        "true_command": "Brightness 20 percent",
-        "pred_command": "Brightness 100 percent",
-        "count": 35
-      },
-      {
-        "true_command": "Reminder Study",
-        "pred_command": "Timer 1 minute",
-        "count": 34
-      },
-      {
-        "true_command": "Adjust brightness to 100 percent",
-        "pred_command": "Brightness level 100 percent",
-        "count": 32
-      },
-      {
-        "true_command": "Brightness level 60 percent",
-        "pred_command": "Brightness level 20 percent",
-        "count": 32
-      },
-      {
-        "true_command": "Start a timer for 1 minute",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 31
-      },
-      {
-        "true_command": "Wake me up at 9:00 PM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 31
-      },
-      {
-        "true_command": "Set an alarm for 6:00 AM",
-        "pred_command": "Set an alarm for 9:00 PM",
-        "count": 30
-      }
-    ]
+    }
   }
 }

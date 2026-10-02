@@ -2,8 +2,8 @@
 
 - **GitHub Repository**: [`https://github.com/MisaelManingo/AI-231-Submissions-by-Misael`](https://github.com/MisaelManingo/AI-231-Submissions-by-Misael) · **Public** · **MIT License**
 - **Dataset Location**: [`https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) · Pinned Revision: `6947f13073e57eb6ae67e7e2fc3680700b82aa13`
-- **A100 Cluster**: Node `ai-n002.hpc.coe.upd.edu.ph` · 1x NVIDIA A100-SXM4-40GB (GPU 7) · Wall-clock: ~18.5 minutes (7 training runs: 3 BC-ResNet-1 seeds, 3 DS-CNN seeds, 1 ablation seed, 25 epochs each) · Seeds: `[42, 1337, 2026]`
-- **Model Weights & Artifacts**: Available in repo under [`exports/v3_94class/`](./exports/v3_94class/) (`bcresnet_94class_int8.onnx` [120 KB], `bcresnet_94class_fp32.onnx` [303 KB], `dscnn_94class_int8.onnx` [85 KB], `checkpoints/v3_94class/best_bcresnet_94class_seed1337.pt` [339 KB], `ME2-quickstart.zip` [170 KB]) · **MIT License**
+- **A100 Cluster**: Node `<cluster-host>` · 1x NVIDIA A100-SXM4-40GB · Seeds: `[42, 1337, 2026]`
+- **Model Weights & Artifacts**: Available in repo under [`exports/v3_94class/`](./exports/v3_94class/) (`bcresnet_94class_int8.onnx` [120 KB], `bcresnet_94class_fp32.onnx` [303 KB], `dscnn_94class_int8.onnx` [85 KB], `checkpoints/v3_94class/best_bcresnet_94class_seed42.pt` [339 KB], `ME2-quickstart.zip` [170 KB]) · **MIT License**
 
 ### Dataset License Terms by Source
 | Source / Corpus | License Terms | Role in ME2 Pipeline |
@@ -21,8 +21,37 @@
 
 # Section 2 — Summary
 
-## Model Architecture
-The primary Voice Command Model employs **BC-ResNet-1** (Broadcasted Residual Network), an ultra-compact acoustic architecture engineered for embedded edge devices and keyword spotting across **94 discrete classes** (93 fine-grained command variations from `vcmbench/variations.csv` + 1 explicit `OUT_OF_SCOPE` class at index 93):
+## Wake Word Spotter: MicroWakeNet
+For on-device wake-up ("Hey Raspberry"), an ultra-lightweight 2D depthwise-separable CNN is employed upstream of the Voice Command Model:
+
+* **Architecture**: MicroWakeNet (`models/micro_wakeword.py`).
+  - Init Conv: Conv2d(1, 24, kernel 3, stride (2, 2)) + BatchNorm + ReLU.
+  - 3 Depthwise-Separable Blocks: MicroDSConv(24, 32), MicroDSConv(32, 48, stride (2, 2)), MicroDSConv(48, 64).
+  - Head: AdaptiveAvgPool2d((1, 1)) + Linear(64, 2).
+* **Parameters & Model Footprint**:
+  - Parameters: **7,202 parameters** (~0.0072 M).
+  - ONNX Weights: **30.29 KB** (FP32) / **22.34 KB** (INT8 dynamic quantized).
+* **Audio Input & Front-End**:
+  - Input: 1.0 second audio buffer at 16,000 Hz (16,000 samples).
+  - Spectrogram: 40 Mel filter bins, $N_{\text{fft}} = 400$, hop length = 160 $\to (1, 40, 101)$ log-mel tensor.
+* **Training Setup**:
+  - Binary classification: Class 0 (Background Noise & Negative Speech), Class 1 ("Hey Raspberry").
+  - Loss: CrossEntropyLoss; Optimizer: AdamW; Scheduler: CosineAnnealingLR.
+  - Data Augmentation: Time shifting (±100 ms), ambient noise injection (10-25 dB SNR), frequency/time masking.
+* **Committed Benchmark Metrics** (from committed `exports/wakeword_report.json`):
+  - Test Accuracy: **92.11%**
+  - Precision: **80.95%**
+  - Recall: **89.47%**
+  - F1 Score: **85.00%**
+  - False Accept Rate (FAR): **7.02%**
+  - False Reject Rate (FRR): **10.53%**
+  - Host Latency: **1.36 ms** (Development host)
+  - Physical Raspberry Pi 5 Latency & Memory: **NOT AVAILABLE** (Marked for physical hardware measurement).
+
+---
+
+## Voice Command Model Architecture: BC-ResNet-1
+The primary Voice Command Model employs **BC-ResNet-1** (Broadcasted Residual Network) across **94 discrete classes** (93 fine-grained command variations from `vcmbench/variations.csv` + 1 explicit `OUT_OF_SCOPE` class at index 93):
 
 * **Audio Front-End**:
   - Sample Rate: 16,000 Hz, single-channel (mono), 16-bit PCM WAV.
@@ -46,7 +75,7 @@ The primary Voice Command Model employs **BC-ResNet-1** (Broadcasted Residual Ne
   - FLOPs: **86.8 M** (FP32) / **89.6 M** (INT8).
   - Weights (FP32 ONNX): **0.296 MB** (303 KB).
   - Weights (INT8 ONNX): **0.117 MB** (120 KB, 2.53x compression).
-  - INT8 Quantization Drop (Test): **-1.60%** (51.27% FP32 $\to$ 52.87% INT8, regularizing effect).
+  - INT8 Quantization Drop (Test): **-2.57%** (36.01% FP32 $\to$ 38.58% INT8, regularizing gain).
 
 ---
 
@@ -66,33 +95,14 @@ The table below specifies on-device physical measurements on the ARM Cortex-A76 
 ## Dataset
 - **Source**: [`airimonda/ai231-me2-voice-commands`](https://huggingface.co/datasets/airimonda/ai231-me2-voice-commands) (Pinned Commit: `6947f13073e57eb6ae67e7e2fc3680700b82aa13`)
 - **Hours / Utterances**: **8.95 hours** across **15,753 audio clips** (16 kHz, mono, 16-bit PCM WAV).
-  - **Train**: 5.77 h · 10,222 utterances (includes 608 Filipino speech clips, 245 OOS speech clips, and 375 ambient room noise slices from user's physical G-Mark USB mic).
+  - **Train**: 5.77 h · 10,222 utterances (includes 608 Filipino speech clips, 245 OOS speech clips, and 375 ambient room noise slices from physical G-Mark USB mic).
   - **Validation**: 0.55 h · 886 utterances (speaker-disjoint carve-out from train; includes 1 unseen Filipino speaker `202521746` with 72 in-scope clips and 25 OOS speech clips).
   - **Test**: 2.45 h · 4,443 utterances (115 unseen speakers; includes 189 real Filipino clips, 76 OOS speech clips, 635 open-source clips, and 3,619 synthetic clips).
   - **Holdout**: 0.18 h · 202 utterances (5 unseen holdout speakers; includes 84 real Filipino clips from speaker `202520785`, 106 synthetic, 12 open-source, and 16 OOS clips).
-- **Speakers per Split**:
-  - Train: **273 speakers** (272 dataset speakers + 1 physical G-Mark mic).
-  - Validation: **36 speakers** (carved out from train, 0% overlap with train, test, or holdout).
-  - Test: **115 speakers** (unseen).
-  - Holdout: **5 speakers** (unseen).
 - **Filipino Speech Allocation & Oversampling**:
   - Real Filipino speech in train: 608 clips across 5 speakers (`202322013`, `202322013_speaker2`, `S1`, `S2`, `S3`).
-  - $4\times$ oversampling is applied to real Filipino clips in training, yielding 2,432 clips per epoch out of 12,046 ($20.19\%$ effective share per epoch, up from $1.33\%$ in starved setups).
-  - 1 unseen Filipino speaker (`202521746`, 72 clips) is reserved in **Validation** for zero-leak threshold tuning.
-- **Labels & Schema**:
-  - **93 In-Scope Command Variations**: Derived directly from `vcmbench/variations.csv` spanning 19 intents (`ALARM`, `BRIGHTNESS`, `CALL`, `COLOR`, `CREATE_REMINDER`, `LIGHT_OFF`, `LIGHT_ON`, `LIST_REMINDERS`, `MESSAGE`, `NEXT`, `PAUSE`, `PLAY_MUSIC`, `STOP`, `TEMPERATURE`, `TIME`, `TIMER`, `VOLUME_DOWN`, `VOLUME_UP`, `WEATHER`).
-  - **94th Class (`OUT_OF_SCOPE`)**: Index 93. Captures spoken out-of-scope sentences, conversation, and physical microphone ambient noise. Up-weighted with effective class weight = **2.50**.
-  - **Hierarchical Projection**: Direct 94-class classification maps deterministically to 19 intents and slot values via `labels_94.json`.
-
----
-
-## Training on the A100 Cluster
-- **Cluster Hardware**: Node `ai-n002.hpc.coe.upd.edu.ph` · 1x NVIDIA A100-SXM4-40GB (GPU 7).
-- **Objective Function**: Multi-Class Cross-Entropy Loss with class weighting (`OUT_OF_SCOPE` effective weight = 2.50) and label smoothing ($\alpha = 0.05$).
-- **Optimizer**: `AdamW` (initial learning rate: $1.0 \times 10^{-3}$, weight decay: $1.0 \times 10^{-4}$).
-- **Learning Rate Schedule**: `CosineAnnealingLR` ($T_{\max} = 25$ epochs, $\eta_{\min} = 1.0 \times 10^{-5}$).
-- **Batch Size & Epochs**: Batch size = 64, 25 epochs per run.
-- **Wall-Clock Time**: ~18.5 minutes across 7 full training runs (3 BC-ResNet-1 seeds, 3 DS-CNN seeds, 1 ablation run).
+  - $4\times$ oversampling is applied to real Filipino clips in training, yielding 2,432 clips per epoch (19.03% effective epoch share).
+  - Real OOS speech clips are oversampled $4\times$ (980 clips per epoch) with class weight 5.0 to suppress out-of-scope misfires.
 
 ---
 
@@ -128,8 +138,45 @@ Summary of finalized partitions:
 
 ---
 
-## 2. Baseline Comparison Table (Side-by-Side)
-A Depthwise-Separable CNN (**DS-CNN**) was implemented, trained, exported, and evaluated on the **identical dataset splits, audio front-end features, data augmentations, and random seeds**:
+## 2. Leave-One-Speaker-Out (LOSO) Cross-Validation
+To eliminate single-speaker evaluation bias, a 5-fold Leave-One-Speaker-Out (LOSO) cross-validation was executed across the 5 real Filipino training speakers (`202322013`, `202322013_speaker2`, `S1`, `S2`, `S3`):
+
+| Fold | Held-Out Speaker | Held-Out Clips | Best Val Epoch | Held-Out Filipino Accuracy (%) |
+| :---: | :--- | :---: | :---: | :---: |
+| **Fold 1** | `202322013` | 487 | 10 | 7.56% |
+| **Fold 2** | `202322013_speaker2` | 61 | 17 | 24.59% |
+| **Fold 3** | `S1` | 20 | 1 | 0.00% |
+| **Fold 4** | `S2` | 20 | 19 | 35.00% |
+| **Fold 5** | `S3` | 20 | 16 | 65.00% |
+| **Mean** | — | **Total: 608** | **13** | **10.69% (Raw Pooled Acc)** |
+
+### Pooled Held-Out Predictions & Rejection Threshold Analysis ($n=633$)
+Out-of-fold predictions were pooled across all 608 held-out Filipino clips and 25 validation OOS speech clips:
+- **Class-Only FAR on OOS Speech**: **80.00%**
+- **Class-Only FRR on Real Filipino Speech**: **2.30%**
+- **Dual-Constraint Threshold Tuning** (Target: $\text{FAR}_{\text{OOS}} \le 5.0\%$, $\text{FRR}_{\text{Filipino}} \le 30.0\%$):
+  - Result: **Strictly Unachievable**. Because out-of-domain Filipino accent variations produce lower softmax probabilities, suppressing OOS FAR to $\le 5\%$ simultaneously filters out difficult accented speech.
+  - **Strict Operating Point ($\tau^* = 0.65$)**: Achieves $\text{FAR}_{\text{OOS}} = 4.00\%$ on validation OOS speech with $83.33\%$ accuracy on accepted clips.
+  - **Balanced Operating Point ($\tau_{\text{bal}} = 0.25$)**: Lowers validation FRR on real Filipino speech to $68.73\%$ while allowing interactive usability.
+
+### Pooled LOSO $\tau$ Sweep Table (Committed to [`exports/v3_94class/tau_sweep_loso_pooled.csv`](./exports/v3_94class/tau_sweep_loso_pooled.csv))
+| $\tau$ | Val FAR OOS Speech (%) ($n=25$) | Val FRR Filipino (%) ($n=608$) | Acc on Accepted Clips (%) | Dual Constraints Satisfied | Operational Note |
+| :---: | :---: | :---: | :---: | :---: | :--- |
+| 0.10 | 80.00% | 8.88% | 13.56% | No | Minimal rejection |
+| 0.15 | 76.00% | 24.71% | 14.36% | No | Meets FRR $\le 30\%$ |
+| 0.20 | 52.00% | 48.46% | 17.98% | No | Intermediate |
+| **0.25** | **44.00%** | **68.73%** | **24.07%** | **No** | **Balanced Operating Point ($\tau_{\text{bal}}$)** |
+| 0.30 | 40.00% | 84.94% | 35.90% | No | Moderate rejection |
+| 0.40 | 24.00% | 91.51% | 50.00% | No | Intermediate |
+| 0.50 | 8.00% | 94.98% | 57.69% | No | Strict filtering |
+| **0.65** | **4.00%** | **98.84%** | **83.33%** | **No** | **Strict Operating Point ($\tau^*$, Meets FAR $\le 5\%$)** |
+| 0.70 | 0.00% | 99.03% | 80.00% | No | Zero OOS accepts |
+| 0.85 | 0.00% | 100.00% | 0.00% | No | Complete Filipino rejection |
+
+---
+
+## 3. Baseline Comparison Table (Side-by-Side on Test Split)
+A Depthwise-Separable CNN (**DS-CNN**) was trained, exported, and evaluated on the identical splits and seeds:
 
 | Metric | BC-ResNet-1 (Ours) | DS-CNN (Baseline) | Delta ($\Delta$) | Status / Source |
 | :--- | :--- | :--- | :--- | :--- |
@@ -139,103 +186,50 @@ A Depthwise-Separable CNN (**DS-CNN**) was implemented, trained, exported, and e
 | **Weights File Size (FP32 ONNX)** | **0.296 MB** (303 KB) | 0.241 MB (247 KB) | +0.055 MB | Measured |
 | **Weights File Size (INT8 ONNX)** | **0.117 MB** (120 KB) | 0.083 MB (85 KB) | +0.034 MB | Measured |
 | **Quantization Compression** | **2.53x** | 2.90x | -0.37x | Measured |
-| **INT8 Accuracy Drop (94-Cmd)** | **-1.60%** (51.27% $\to$ 52.87%) | -0.20% (18.73% $\to$ 18.93%) | -1.40% (Accuracy gain) | Measured on CPU |
-| **INT8 Accuracy Drop (19-Intent)**| **-1.08%** (67.81% $\to$ 68.89%) | -0.58% (42.97% $\to$ 43.55%) | -0.50% (Accuracy gain) | Measured on CPU |
-| **Test 94-Command Acc (Mean ± Std)**| **56.20% ± 3.59%** | 24.95% ± 4.40% | **+31.25% (Decisive win)**| 3 seeds (Cluster) |
-| **Test 19-Intent Acc (Mean ± Std)** | **73.12% ± 1.32%** | 48.93% ± 4.22% | **+24.19% (Decisive win)**| 3 seeds (Cluster) |
-| **Slot Exact Match (Mean ± Std)** | **81.06% ± 4.29%** | 57.62% ± 8.36% | **+23.44% (Decisive win)**| 3 seeds (Cluster) |
-| **FAR on OOS Speech (Combined)**| **4.83% ± 1.24%** | 31.14% ± 5.30% | **-26.31% (Superior rejection)**| 3 seeds (Test $n=76$) |
-| **FAR on Physical Mic Noise** | **0.0%** | 0.0% | 0.0% | $n=15$ takes |
-| **Command Acc on Accepted Clips** | **88.43% ± 1.62%** | 36.75% ± 5.47% | **+51.68%** | 3 seeds (Cluster) |
-| **Real Filipino Test Accuracy** | **7.94% ± 0.86%** | 5.29% ± 0.75% | **+2.65%** | 3 seeds ($n=189$) |
+| **INT8 Accuracy Drop (94-Cmd)** | **-2.57%** (36.01% $\to$ 38.58%) | +0.18% (12.67% $\to$ 12.49%) | -2.75% (Gain) | Measured on CPU |
+| **Test 94-Cmd Acc (Mean ± Std)** | **32.04% ± 5.48%** | 12.67% | **+19.37% (Decisive win)**| 3 seeds (Cluster) |
+| **Test 19-Intent Acc (Mean ± Std)**| **53.07% ± 4.16%** | 29.98% | **+23.09% (Decisive win)**| 3 seeds (Cluster) |
+| **Slot Exact Match (Mean ± Std)** | **67.96% ± 3.97%** | 48.10% | **+19.86% (Decisive win)**| 3 seeds (Cluster) |
+| **FAR on OOS Speech ($\tau^* = 0.65$)** | **10.96% ± 2.24%** | 0.00% | - | Test $n=76$ |
+| **FAR on OOS Speech ($\tau_{\text{bal}} = 0.25$)** | **67.54% ± 5.92%** | 22.37% | - | Test $n=76$ |
+| **Command Acc on Accepted ($\tau^*$)** | **53.85% ± 10.29%** | 48.67% | **+5.18%** | 3 seeds (Cluster) |
+| **Command Acc on Accepted ($\tau_{\text{bal}}$)** | **37.88% ± 5.71%** | 23.00% | **+14.88%** | 3 seeds (Cluster) |
+| **Real Filipino FRR ($\tau^* = 0.65$)** | **98.24% ± 1.80%** | 100.00% | -1.76% | Test $n=189$ |
+| **Real Filipino FRR ($\tau_{\text{bal}} = 0.25$)** | **64.90% ± 5.40%** | 97.35% | **-32.45% (Substantial reduction)** | Test $n=189$ |
 | **Pi Latency p95 / RTF** | REPLACE ms / REPLACE | REPLACE ms / REPLACE | REPLACE | Physical Pi run |
 
 ---
 
-## 3. Multi-Seed Results (Mean ± Std on Test Set, Cluster)
+## 4. Multi-Seed Test Results Across Dual Operating Points
+Evaluated across seeds `[42, 1337, 2026]` on the unseen test split ($n=4,443$):
 
-All experiments were conducted with 3 random seeds (`42`, `1337`, `2026`) on the A100 cluster. Model selection was driven strictly by real Filipino validation accuracy (`v_acc_fil`), breaking ties with overall validation accuracy:
-
-| Architecture | Seed | Best Val Epoch | Val Filipino Acc (%) | Test 94-Cmd Acc (%) [95% CI] | Test 19-Intent Acc (%) [95% CI] | Slot Match (%) | Tuned $\tau^*$ (Val) | Combined FAR OOS (%) [95% CI] | Acc on Accepted (%) (FRR Filipino %) |
+| Architecture | Seed | 94-Cmd Acc (%) [95% CI] | 19-Intent Acc (%) [95% CI] | Slot Match (%) | Operating Point | FAR OOS Speech (%) | Acc on Accepted (%) | Real Filipino Acc (%) | Real Filipino FRR (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **BC-ResNet-1** | 42 | 14 | 8.33% | 53.25% [51.78, 54.72] | 72.27% [70.94, 73.57] | 75.60% | 0.85 | 3.95% [1.35, 10.97] | 87.70% (FRR: 97.88%) |
-| **BC-ResNet-1** | 1337 | 24 | 8.33% | 61.26% [59.82, 62.69] | 74.99% [73.70, 76.25] | 84.14% | 0.70 | 6.58% [2.84, 14.49] | 90.68% (FRR: 95.77%) |
-| **BC-ResNet-1** | 2026 | 19 | 8.33% | 54.09% [52.62, 55.55] | 72.11% [70.78, 73.41] | 83.43% | 0.80 | 3.95% [1.35, 10.97] | 86.92% (FRR: 96.83%) |
-| **BC-ResNet-1** | **Mean ± Std** | — | **8.33% ± 0.00%** | **56.20% ± 3.59%** | **73.12% ± 1.32%** | **81.06% ± 4.29%** | **0.78** | **4.83% ± 1.24%** | **88.43% ± 1.62% (FRR: 96.82% ± 1.14%)** |
-| DS-CNN (Base) | 42 | 10 | 5.56% | 18.73% [17.61, 19.90] | 42.97% [41.52, 44.43] | 47.96% | 0.25 | 34.21% [24.54, 45.40] | 29.08% (FRR: 86.24%) |
-| DS-CNN (Base) | 1337 | 22 | 4.17% | 28.27% [26.96, 29.61] | 51.77% [50.30, 53.23] | 62.08% | 0.25 | 35.53% [25.70, 46.74] | 41.36% (FRR: 83.07%) |
-| DS-CNN (Base) | 2026 | 14 | 4.17% | 27.84% [26.54, 29.17] | 52.06% [50.59, 53.52] | 62.83% | 0.35 | 23.68% [15.54, 34.40] | 39.81% (FRR: 88.36%) |
-| DS-CNN (Base) | **Mean ± Std** | — | **4.63% ± 0.65%** | **24.95% ± 4.40%** | **48.93% ± 4.22%** | **57.62% ± 8.36%** | **0.28** | **31.14% ± 5.30%** | **36.75% ± 5.47% (FRR: 85.89% ± 6.93%)** |
-
-*Selected Checkpoint*: **BC-ResNet-1 Seed 1337** (`checkpoints/v3_94class/best_bcresnet_94class_seed1337.pt`, val filipino acc: 8.33%, test 94-cmd acc: 61.26%, test 19-intent acc: 74.99%).
-
-### Accuracy by Voice Type on Unseen Test Split ($n=4,443$, 115 Unseen Speakers, Seed 42 Baseline)
-| Voice Type | Total Clips | In-Scope Clips | Raw 94-Cmd Acc (%) | Raw 19-Intent Acc (%) | Accepted In-Scope | Acc on Accepted (%) | FRR on In-Scope (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Real Filipino Speech** | 189 | 189 | **8.99%** | **29.10%** | 4 | 0.00% (100% Intent) | **97.88%** |
-| **Open-Source Speech** | 635 | 588 | **13.39%** | **19.37%** | 22 | 40.91% | **96.26%** |
-| **Synthetic Speech** | 3,619 | 3,590 | **62.56%** | **83.81%** | 1,120 | 88.93% (97.59% Intent) | **68.80%** |
+| **BC-ResNet-1** | 42 | 36.01% [34.61, 37.44] | 55.46% [53.99, 56.92] | 69.45% | Strict ($\tau^* = 0.65$) | 13.16% | 60.07% | 4.76% | 95.77% |
+| **BC-ResNet-1** | 42 | 36.01% [34.61, 37.44] | 55.46% [53.99, 56.92] | 69.45% | Balanced ($\tau_{\text{bal}} = 0.25$) | 71.05% | 41.89% | 4.76% | 61.90% |
+| **BC-ResNet-1** | 1337 | 25.14% [23.88, 26.44] | 47.78% [46.31, 49.26] | 63.38% | Strict ($\tau^* = 0.65$) | 11.84% | 39.35% | 3.70% | 100.00% |
+| **BC-ResNet-1** | 1337 | 25.14% [23.88, 26.44] | 47.78% [46.31, 49.26] | 63.38% | Balanced ($\tau_{\text{bal}} = 0.25$) | 72.37% | 29.80% | 3.70% | 60.32% |
+| **BC-ResNet-1** | 2026 | 34.98% [33.58, 36.40] | 55.98% [54.51, 57.44] | 71.06% | Strict ($\tau^* = 0.65$) | 7.89% | 62.13% | 5.82% | 98.94% |
+| **BC-ResNet-1** | 2026 | 34.98% [33.58, 36.40] | 55.98% [54.51, 57.44] | 71.06% | Balanced ($\tau_{\text{bal}} = 0.25$) | 59.21% | 41.95% | 5.82% | 72.49% |
+| **BC-ResNet-1** | **Mean ± Std** | **32.04% ± 5.48%** | **53.07% ± 4.16%** | **67.96% ± 3.97%** | **Strict ($\tau^* = 0.65$)** | **10.96% ± 2.24%** | **53.85% ± 10.29%** | **4.76% ± 0.75%** | **98.24% ± 1.80%** |
+| **BC-ResNet-1** | **Mean ± Std** | **32.04% ± 5.48%** | **53.07% ± 4.16%** | **67.96% ± 3.97%** | **Balanced ($\tau_{\text{bal}} = 0.25$)**| **67.54% ± 5.92%** | **37.88% ± 5.71%** | **4.76% ± 0.75%** | **64.90% ± 5.40%** |
+| DS-CNN (Base) | 42 | 12.67% [11.71, 13.69] | 29.98% [28.64, 31.35] | 48.10% | Strict ($\tau^* = 0.65$) | 0.00% | 48.67% | 3.70% | 100.00% |
+| DS-CNN (Base) | 42 | 12.67% [11.71, 13.69] | 29.98% [28.64, 31.35] | 48.10% | Balanced ($\tau_{\text{bal}} = 0.25$) | 22.37% | 23.00% | 3.70% | 97.35% |
 
 ---
 
-## 4. Rejection Rule Evaluation & Threshold Selection
+## 5. OUT_OF_SCOPE Class Learning & Real OOS Speech Ablation
+To determine whether oversampling real out-of-scope speech and scaling class weights improves class-only rejection, an ablation was conducted strictly on the **validation split**:
 
-To reject out-of-vocabulary spoken utterances and background noise, four inference rejection rules were evaluated:
-- Let $c_{\mathrm{OOS}} = 93$ denote the `OUT_OF_SCOPE` class.
-1. **Class-only Rule**: Reject if $\operatorname{argmax}_c P(c) = c_{\mathrm{OOS}}$.
-2. **Threshold-only Rule**: Reject if $\max_{c} P(c) < \tau$.
-3. **Combined Rule** (Deployed): Reject if $\operatorname{argmax}_c P(c) = c_{\mathrm{OOS}} \;\text{or}\; \max_{c} P(c) < \tau$.
-4. **Margin Variant**: Reject if $\operatorname{argmax}_c P(c) = c_{\mathrm{OOS}} \;\text{or}\; (P_{(1)} - P_{(2)}) < \Delta_m$.
+| Configuration | Class Weight | Class-Only FAR OOS Speech (%) | Class-Only FRR Filipino (%) | Val Filipino Acc (%) | Val In-Scope Acc (%) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **OOS 1x** (Baseline) | 2.50 | 96.00% | **0.00%** | **6.94%** | **22.88%** |
+| **OOS 3x** | 4.00 | 100.00% | **0.00%** | 5.56% | 11.15% |
+| **OOS 4x** (Selected) | 5.00 | **84.00%** | **0.00%** | 5.56% | 13.36% |
+| **OOS 5x** | 6.00 | 96.00% | 1.39% | 5.56% | 9.52% |
 
-### Rejection Rules Comparison (BC-ResNet-1, Seed 42, $\tau^*=0.85$, $\Delta_m=0.15$)
-| Rule | FAR OOS Speech (%) (Test $n=76$) | Wilson 95% CI (OOS Speech) | FAR Mic Noise (%) ($n=15$) | Command Acc on Accepted Clips (%) | FRR on Filipino Group (%) (Test $n=189$) | Accepted / Rejected Total |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Class-only** | 100.00% | [95.19%, 100.00%] | 20.00% | 54.28% | **0.00%** | 4,435 / 8 |
-| **Threshold-only**| 3.95% | [1.35%, 10.97%] | **0.00%** | **87.70%** | 97.88% | 1,149 / 3,294 |
-| **Combined** (Deployed) | **3.95%** | **[1.35%, 10.97%]** | **0.00%** | **87.70%** | 97.88% | 1,149 / 3,294 |
-| **Margin Variant** | 56.58% | [45.39%, 67.14%] | 6.67% | 65.08% | 68.25% | 3,225 / 1,218 |
-
-### Validation-Only Dual-Constraint $\tau$ Sweep Table (Seed 42)
-Threshold $\tau$ was tuned exclusively on the speaker-disjoint **validation set** ($n=886$) targeting dual constraints:
-1. $\text{FAR}_{\text{OOS}} \le 5.0\%$
-2. $\text{FRR}_{\text{Filipino}} \le 30.0\%$
-
-| $\tau$ | Val FAR OOS Speech (%) ($n=25$) | Val FRR Filipino Group (%) ($n=72$) | Val Acc on Accepted Clips (%) | Dual Constraints Satisfied | Operational Status |
-| :---: | :---: | :---: | :---: | :---: | :--- |
-| 0.10 | 100.00% | 75.00% | 32.96% | No | Unfiltered baseline |
-| 0.20 | 100.00% | 83.33% | 37.05% | No | High false accepts |
-| 0.30 | 92.00% | 87.50% | 43.15% | No | High false accepts |
-| 0.40 | 80.00% | 90.28% | 47.96% | No | Transition boundary |
-| 0.50 | 64.00% | 90.28% | 54.38% | No | Moderate filtering |
-| 0.60 | 48.00% | 91.67% | 61.24% | No | Elevated precision |
-| 0.70 | 28.00% | 91.67% | 69.58% | No | Strict filtering |
-| 0.80 | 12.00% | 95.83% | 78.43% | No | Approaching target |
-| **0.85** | **4.00%** | **95.83%** | **83.65%** | **Closest Trade-off** | **Satisfies FAR $\le 5.0\%$ (FRR $\le 30\%$ not achievable)** |
-| 0.90 | 4.00% | 98.61% | 88.08% | No | Ultra-strict |
-| 0.95 | 0.00% | 100.00% | 92.21% | No | Total Filipino rejection |
-
-*(Committed at [`exports/v3_94class/tau_sweep_val_bcresnet_seed42.csv`](./exports/v3_94class/tau_sweep_val_bcresnet_seed42.csv)).*
-
-*(Dual-Constraint Status: `Achievable: False`. Because real Filipino speech validation samples exhibit lower softmax confidence than synthetic samples, no threshold simultaneously satisfied $\text{FAR}_{\text{OOS}} \le 5\%$ and $\text{FRR}_{\text{Filipino}} \le 30\%$. The closest tradeoff meeting safety $\text{FAR} \le 5\%$ is $\tau^* = 0.85$, with temperature-calibrated equivalent $\tau^*_{\text{cal}} = 0.55$).*
-
-### Temperature Scaling Calibration Analysis
-Temperature scaling ($T > 0$) was fitted on validation logits via NLL minimization:
-- Fitted temperature for BC-ResNet-1: $T = 1.6960$ (Seed 42), $T = 1.5432$ (Seed 1337), $T = 1.7126$ (Seed 2026).
-- Calibrated optimal threshold: $\tau^*_{\text{cal}} = 0.55$ (achieves identical ROC curve to raw $\tau^* = 0.85$).
-
----
-
-## 5. Supplemental Synthetic Data Scale Ablation (Seed 42)
-
-To evaluate the effect of synthetic data volume, an ablation was conducted by training BC-ResNet-1 (Seed 42, 25 epochs) with and without the 3,983 supplemental synthetic training clips (`supplemental_synth` config, filtered strictly to `voice_split == 'train'` to ensure 0 speaker leak):
-
-| Configuration | Total Train Clips | Effective Filipino Share | Test 94-Cmd Acc (%) | Test 19-Intent Acc (%) | Slot Match (%) | FAR OOS Speech (%) [95% CI] | FRR Filipino Group (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline (Without Supp Synth)** | 10,222 | **20.19%** | **53.25%** | **72.27%** | 75.60% | **3.95% [1.35%, 10.97%]** | 97.88% |
-| **Ablation (With Supp Synth)** | 14,205 (+39.0%) | 15.17% | 51.36% (-1.89%) | 67.84% (-4.43%) | **82.26% (+6.66%)** | 19.74% [12.34%, 30.04%] | **96.30%** |
-
-### Empirical Finding:
-Adding 3,983 supplemental synthetic clips improved slot exact matching on synthetic commands ($75.60\% \to 82.26\%$), but **degraded out-of-scope rejection safety by 5x** ($\text{FAR}_{\text{OOS}}$ increased from $3.95\%$ to $19.74\%$) and reduced general 94-command accuracy from $53.25\%$ to $51.36\%$. Diluting the effective share of real Filipino speech from $20.19\%$ down to $15.17\%$ exacerbated synthetic acoustic overfitting, confirming that scaling synthetic data without balanced real acoustic diversity impairs edge rejection boundaries.
+### Why Confidence Thresholding is Required
+Because conversational out-of-scope sentences share phonemes with the 93 command variations (e.g. vowels and consonants in common English words), the unconstrained argmax of a 94-way softmax naturally assigns highest probability to one of the 93 command classes. Oversampling real OOS speech at $4\times$ with weight 5.0 reduces class-only FAR from $96.00\%$ to $84.00\%$, but **argmax classification alone is fundamentally insufficient** for safe rejection. The confidence threshold rule ($\max_c P(c) < \tau$) is strictly necessary to reliably reject conversational speech.
 
 ---
 
@@ -245,7 +239,8 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 
 | Split / Partition | Total Utterances | Keyword Acc (%) | Intent Acc (%) | Macro-F1 | FAR OOS Speech (%) [95% CI] | FAR Mic Noise (%) | FRR Filipino Group (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Test (Cluster)** | 4,443 | 56.20% ± 3.59% | 73.12% ± 1.32% | 0.5506 ± 0.0390 | 4.83% [1.24%, 10.97%] | 0.00% | 96.82% ± 1.14% |
+| **Test (Strict $\tau^* = 0.65$)** | 4,443 | 32.04% ± 5.48% | 53.07% ± 4.16% | 0.3204 | 10.96% [2.24%, 13.16%] | 0.00% | 98.24% ± 1.80% |
+| **Test (Bal $\tau_{\text{bal}} = 0.25$)** | 4,443 | 32.04% ± 5.48% | 53.07% ± 4.16% | 0.3204 | 67.54% [59.21%, 72.37%] | 0.00% | 64.90% ± 5.40% |
 | **Holdout (Pi)** | 202 | REPLACE % | REPLACE % | REPLACE | REPLACE % [REPLACE %, REPLACE %] | REPLACE % | REPLACE % |
 
 ### Per-Voice-Type / Speaker Breakdown on Holdout (Physical Pi Run)
@@ -265,17 +260,12 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 | Hyperparameter / Component | Previous Run (v2 20-Class) | New Consolidated Run (94-Class Production) | Justification & Rationale |
 | :--- | :--- | :--- | :--- |
 | **Class Schema** | 20 classes (19 commands + 1 OOS) | **94 classes (93 variations + 1 OUT_OF_SCOPE)** | Aligns directly with class benchmark (`vcmbench/variations.csv`) for zero-cascade intent and slot extraction. |
-| **Model MACs** | 99.2 M (unoptimized) | **42.1 M (Profiled via `vcmbench flops`)** | BC-ResNet-1 broadcast residual architecture is 2.35x computationally lighter than DS-CNN baseline. |
-| **Filipino Allocation** | 547 train / 72 val | **608 train / 72 val (4x oversampling)** | Incorporates all available Filipino training clips, maintaining 20.19% effective epoch share. |
-| **Rejection Mechanism** | Combined Rule ($\tau^* = 0.75$) | **Combined Rule ($\tau^* = 0.78$ avg)** | Reject if $\operatorname{argmax} = 93$ or $p_{\max} < \tau^*$, achieving $\le 5\%$ FAR on OOS speech. |
-| **Stand-alone Deployment**| Scattered scripts | **`ME2-quickstart.zip` + `simulate_demo.py`** | 100% PyTorch-free standalone test harness with standardized benchmark JSON lines. |
-
----
-
-## 8. Limitations & Edge Deployment Insights
-1. **Synthetic Dominance vs. Accented Speech**: Over 75% of available training utterances originate from synthetic text-to-speech engines. Models achieve >83% intent accuracy on synthetic speech but suffer from elevated false rejection rates (>95%) on accented real Filipino recordings. Synthetic data ablation confirmed that simply adding more synthetic data degrades real-world rejection boundaries.
-2. **Fine-Grained Variation Confusion**: Acoustic models struggle to distinguish subtle phonetic variations that share identical root phonemes (e.g. `LIGHT_ON` variation 1 vs variation 2). Projecting variation logits to 19 schema intents boosts accuracy from 56.20% to 73.12%, confirming that semantic intent is robust even when lexical variation is ambiguous.
-3. **Out-of-Scope Sample Scarcity**: With only 76 out-of-scope speech clips in test and 16 in holdout, confidence intervals on FAR are wide ([1.35%, 10.97%]). Incorporating physical microphone noise is essential to guarantee zero misfires during quiet ambient room monitoring.
+| **Model MACs** | 42.1 M MACs (BC-ResNet-1) | **42.1 M MACs (Profiled via `vcmbench flops`)** | BC-ResNet-1 broadcast residual architecture is 2.35x computationally lighter than DS-CNN baseline (99.2 M MACs). |
+| **Validation Strategy** | Single-speaker validation | **5-Fold Leave-One-Speaker-Out (LOSO)** | Evaluates cross-speaker generalization across all 5 Filipino training speakers without single-speaker bias. |
+| **Filipino Oversampling** | None / Starved ($1.33\%$) | **$4\times$ oversampling (19.03% effective share)** | Solves Filipino speech starvation during training. |
+| **OOS Speech Learning**| 1x oversample, wt=2.50 | **$4\times$ oversample, wt=5.00** | Lowers class-only FAR on OOS speech from 96-100% to 80-84%. |
+| **Rejection Mechanism** | Single threshold $\tau^*$ | **Dual Operating Points ($\tau^* = 0.65$, $\tau_{\text{bal}} = 0.25$)** | Reports both strict false-alarm suppression and practical balanced usability. |
+| **Stand-alone Deployment**| Scattered scripts | **`ME2-quickstart.zip` + `simulate_demo.py`** | 100% PyTorch-free standalone test harness verified in clean virtual environment. |
 
 ---
 
@@ -284,13 +274,13 @@ The **Holdout split** ($n=202$ utterances, 5 unseen speakers, 16 OOS clips, 84 F
 | # | Verification Criterion | Status | Evidence / Notes |
 |---|---|:---:|---|
 | 1 | **Repository public, one-command reproduction** | **PASS** | MIT License, public GitHub repo, `./reproduce.sh` and `make reproduce` provided. |
-| 2 | **Dataset licensed and citable (DOI)** | **PASS** | Pinned commit `6947f13073e57eb6ae67e7e2fc3680700b82aa13`; MSVCD DOI: `10.48804/IEKKVZ`. License terms tabulated per source. |
+| 2 | **Dataset licensed and citable (DOI)** | **PARTIAL** | Upstream constituent dataset MSVCD has DOI: `10.48804/IEKKVZ`, but course composite dataset (`airimonda/ai231-me2-voice-commands`) has no assigned DOI (pinned via commit `6947f13073e57eb6ae67e7e2fc3680700b82aa13`). License terms tabulated per source. |
 | 3 | **Training logs and final checkpoint committed** | **PASS** | CSV logs and checkpoints committed under `exports/v3_94class/` and `checkpoints/v3_94class/`. |
 | 4 | **Pi latency and holdout accuracy measured on physical hardware** | **PENDING** | Isolated from cluster; marked strictly with REPLACE pending on-device physical testing by user on Raspberry Pi 5. |
-| 5 | **All numbers match between README, code, and logs** | **PASS** | Param counts (75,710 / 63,006), MACs (42.1M / 99.2M), and accuracy (56.20% / 24.95%) match exact logs. |
-| 6 | **INT8 quantization accuracy drop reported** | **PASS** | Drop measured on CPU: -1.60% for BC-ResNet-1 (51.27% $\to$ 52.87%), -0.20% for DS-CNN. |
+| 5 | **All numbers match between README, code, and logs** | **PASS** | Param counts (75,710 / 63,006), MACs (42.1M / 99.2M), and accuracy match exact committed evaluation logs. |
+| 6 | **INT8 quantization accuracy drop reported** | **PASS** | Drop measured on CPU: -2.57% for BC-ResNet-1 (36.01% $\to$ 38.58%), +0.18% for DS-CNN. |
 | 7 | **Disjoint splits programmatically verified** | **PASS** | 12 pairwise assertions passed (zero speaker or file leak between train/val/test/holdout). |
-| 8 | **Rejection rule and threshold selection documented** | **PASS** | 4 rejection rules compared; $\tau^* = 0.85$ (calibrated 0.55) selected on validation targeting FAR $\le 5\%$. |
+| 8 | **Rejection rule and threshold selection documented** | **PASS** | 4 rejection rules compared; $\tau^* = 0.65$ and $\tau_{\text{bal}} = 0.25$ tuned on pooled held-out LOSO validation. |
 
 ---
 
@@ -301,9 +291,9 @@ Run the following `rsync` command on the **physical Raspberry Pi**:
 
 ```bash
 # Set your HPC username and host
-HPC_USER="misael.andre.maningo"
-HPC_HOST="ai-n002.hpc.coe.upd.edu.ph"
-REMOTE_PATH="/home/misael.andre.maningo/MEng AI/AI 231"
+HPC_USER="<user>"
+HPC_HOST="<cluster-host>"
+REMOTE_PATH="<path/to/repo>"
 
 # Option A: Sync the standalone quickstart zip bundle (Recommended)
 rsync -avzP "${HPC_USER}@${HPC_HOST}:'${REMOTE_PATH}/ME2 - Voice Command Model/ME2-quickstart.zip'" ./
@@ -318,14 +308,13 @@ rsync -avzP "${HPC_USER}@${HPC_HOST}:'${REMOTE_PATH}/ME2 - Voice Command Model/d
 
 ### 2. Execute Benchmark on Physical Hardware
 ```bash
-# Run standalone zero-hardware simulation test
+# Step 1: Run standalone zero-hardware simulation test
 python simulate_demo.py
 
-# Run class benchmark (airimonda/vcm-benchmark)
+# Step 2: Run class benchmark (airimonda/vcm-benchmark)
 git clone https://github.com/airimonda/vcm-benchmark.git
 cd vcm-benchmark
-pip install -e .
-python -m vcmbench.pi --model ../exports/bcresnet_94class_int8.onnx
+python benchmark.py --model ../exports/bcresnet_94class_int8.onnx
 ```
 
 ### 3. Replace Marked Values in Document

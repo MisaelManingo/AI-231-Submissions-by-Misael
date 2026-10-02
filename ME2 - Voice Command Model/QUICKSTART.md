@@ -1,6 +1,6 @@
 # ME2 Voice Command Assistant: Quick-Start Guide
 
-Real-time, on-device voice assistant pipeline designed for the **Raspberry Pi 5** (ARM Cortex-A76). Completely **PyTorch-free**, running in under 20 MB of RAM with sub-100 ms inference latency via ONNX Runtime and pure NumPy.
+Real-time, on-device voice assistant pipeline designed for the **Raspberry Pi 5** (ARM Cortex-A76). Completely **PyTorch-free**, optimized for embedded CPU execution via ONNX Runtime and pure NumPy.
 
 ---
 
@@ -80,8 +80,7 @@ To run the automated benchmark on physical Raspberry Pi hardware:
 ```bash
 git clone https://github.com/airimonda/vcm-benchmark.git
 cd vcm-benchmark
-pip install -e .
-python -m vcmbench.pi --model ../exports/bcresnet_94class_int8.onnx
+python benchmark.py --model ../exports/bcresnet_94class_int8.onnx
 ```
 For every recognized command, `demo_rpi5.py` emits the standardized JSON line format:
 ```json
