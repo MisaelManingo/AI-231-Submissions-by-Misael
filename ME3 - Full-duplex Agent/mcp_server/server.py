@@ -116,6 +116,44 @@ WEATHER_CODE_DESCRIPTIONS = {
 }
 
 
+def _light_color_key(strip, color: str):
+    """Any colour -> a key of strip.COLOR_MAP (hardware/leds.py stays untouched: custom colours are registered in that same
+    table at runtime). Accepts the 8 LED-tuned names, '#RGB'/'#RRGGBB', CSS names ('hotpink', 'light blue'), 'rgb(r,g,b)',
+    'hsl(...)' and 'r,g,b'. Returns None if the colour cannot be understood (the tool then asks the model for a hex code)."""
+    raw = (color or "").strip()
+    key = raw.upper()
+    if key in strip.COLOR_MAP:          # basic names keep their LED-tuned values (e.g. yellow 255,200,0)
+        return key
+    rgb = None
+    m = re.fullmatch(r"#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})", raw)
+    if m:
+        h = m.group(1)
+        h = "".join(c * 2 for c in h) if len(h) == 3 else h
+        rgb = (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    if rgb is None:
+        m = re.fullmatch(r"\s*(\d{1,3})\s*[, ]\s*(\d{1,3})\s*[, ]\s*(\d{1,3})\s*", raw)
+        if m:
+            rgb = tuple(min(255, int(g)) for g in m.groups())
+    if rgb is None:
+        try:
+            from PIL import ImageColor
+            for cand in (raw, re.sub(r"[\s_-]+", "", raw)):   # 'light blue' -> 'lightblue'
+                try:
+                    rgb = tuple(ImageColor.getrgb(cand)[:3])
+                    break
+                except ValueError:
+                    continue
+        except Exception:
+            rgb = None
+    if rgb is None:
+        return None
+    key = "#%02X%02X%02X" % rgb
+    for k in [k for k in strip.COLOR_MAP if k.startswith("#")][:-60]:   # keep the shared table small
+        strip.COLOR_MAP.pop(k, None)
+    strip.COLOR_MAP[key] = rgb
+    return key
+
+
 def create_mcp_server(hardware_manager=None):
     """Creates and configures the MCP server with the hardware facade."""
     if hardware_manager is None:
@@ -220,17 +258,24 @@ def create_mcp_server(hardware_manager=None):
     @mcp.tool()
     def control_lights(power: bool, brightness: int = 100, color: str = "RED") -> str:
         """
-        Controls the 10-NeoPixel WS2813 LED strip.
+        Controls the 10-NeoPixel WS2813 LED strip. It can show ANY colour.
         power: True to turn on, False to turn off.
         brightness: 0 to 100 percent.
-        color: 'RED', 'GREEN', 'BLUE', 'WHITE', 'YELLOW', 'CYAN', 'PURPLE'
+        color: any colour the user asks for. For anything other than a basic name, work out the RGB yourself and pass a hex
+        code '#RRGGBB' (e.g. warm sunset orange '#FF7A18', hot pink '#FF69B4', lavender '#B57EDC', mint '#98FF98', teal
+        '#008080', warm white '#FFC987'). Basic names also work: RED, GREEN, BLUE, WHITE, YELLOW, CYAN, PURPLE, ORANGE.
+        Always give the colour in English or hex, even when the user speaks Filipino (pula=red, asul=blue, berde=green).
         """
         hardware_manager.on_thinking(f"Lights: {'ON' if power else 'OFF'}")
-        hardware_manager.set_lights(power=power, brightness=brightness, color=color)
         if power:
-            return f"Lights turned ON with {color} color at {brightness}% brightness."
-        else:
-            return "Lights turned OFF."
+            key = _light_color_key(hardware_manager.strip, color)
+            if key is None:
+                return (f"Could not understand the colour '{color}'. Call this tool again with a hex code like '#FF8C00' "
+                        "for the colour the user asked for.")
+            hardware_manager.set_lights(power=power, brightness=brightness, color=key)
+            return f"Lights turned ON with {color} color ({key}) at {brightness}% brightness."
+        hardware_manager.set_lights(power=power, brightness=brightness, color=color)
+        return "Lights turned OFF."
 
     # -------------------------------------------------------------------------
     # 4. TIMERS (TM1637 Display & Active Buzzer)

@@ -248,6 +248,7 @@ AI 231 ME3: FULL-DUPLEX VOICE AGENT LATENCY BENCHMARK REPORT
    - *"What time is it?"* (Reports internet-synced system time).
 3. **Lights Control**:
    - *"Turn on the lights"*, *"Dim the lights to 40 percent"*, *"Change light color to blue / red / green"*.
+   - Any color works (*"make it sunset orange"*, *"hot pink"*, *"lavender"*): the model works out a hex code and the tool also accepts CSS names, `rgb()`, `hsl()` and `r,g,b`; the 8 basic names keep their LED-tuned values.
 4. **Timers**:
    - *"Set a timer for 30 seconds"* (Starts countdown on TM1637 and sounds buzzer when finished).
    - *"Cancel the timer"* (Cancels countdown and silences buzzer).
