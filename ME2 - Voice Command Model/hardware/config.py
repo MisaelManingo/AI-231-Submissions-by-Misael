@@ -49,8 +49,8 @@ PIN_BUZZER = 6           # Physical Pin 31 (Moved from 5 to avoid Button conflic
 # ---------------------------------------------------------
 # TELEPHONY & ADB CONSTANTS (Easily editable at the top)
 # ---------------------------------------------------------
-CALL_NUMBER = "+639088152097"
-MESSAGE_NUMBER = "+639088152097"
+CALL_NUMBER = "+63XXXXXXXXXX"
+MESSAGE_NUMBER = "+63XXXXXXXXXX"
 MESSAGE_TEXT = "Hello from my Raspberry Pi!"
 CALL_CARRIER = "Globe"   # Carrier name for SIM selection (e.g. "Globe" or "SMART")
 

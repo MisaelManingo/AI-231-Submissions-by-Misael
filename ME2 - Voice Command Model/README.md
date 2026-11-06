@@ -430,8 +430,8 @@ This deployment features full offline physical execution for all 32 voice comman
 All hardware pin assignments, telephony constants, and file paths are centralized in [`hardware/config.py`](./hardware/config.py):
 ```python
 # Telephony and SMS Configuration
-CALL_NUMBER = "+639088152097"       # Destination phone number
-MESSAGE_NUMBER = "+639088152097"    # Destination phone number
+CALL_NUMBER = "+63XXXXXXXXXX"       # Destination phone number
+MESSAGE_NUMBER = "+63XXXXXXXXXX"    # Destination phone number
 MESSAGE_TEXT = "Hello from my Raspberry Pi!"  # SMS body
 CALL_CARRIER = "Globe"              # SIM carrier prompt selection
 

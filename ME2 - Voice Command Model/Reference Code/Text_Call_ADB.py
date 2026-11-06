@@ -41,7 +41,7 @@ def send_sms(number, text):
     d(descriptionContains="Send").click()
 
 if __name__ == "__main__":
-    TARGET_NUMBER = "+639088152097"
+    TARGET_NUMBER = "+63XXXXXXXXXX"
     
 #     call(TARGET_NUMBER, "Globe") # SMART or Globe
 #     time.sleep(30)
