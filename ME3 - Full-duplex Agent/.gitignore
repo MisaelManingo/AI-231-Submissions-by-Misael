@@ -1,0 +1,8 @@
+.env
+*.csv
+__pycache__/
+*.pyc
+assistant_state.json
+served_pages/
+*.tmp
+

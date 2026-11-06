@@ -10,6 +10,7 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 |---|---|---|---|
 | [`ME1 - Einops/Einsum`](./ME1%20-%20Einops/Einsum/) | Custom 3-Layer CNN for MNIST Classification | PyTorch, `einops`, `torch.einsum`, First-Principles CNN | Completed (Test Acc: 98.99%) |
 | [`ME2 - Voice Command Model`](./ME2%20-%20Voice%20Command%20Model/) | On-Device Tiny Voice Command & Personalized Wake Word Spotter on Raspberry Pi 5 | BC-ResNet-1, RobustWakeNet, ONNX Runtime INT8, Pure NumPy DSP, 20-Class Acoustic Intent & OOS Rejection | Completed (Test Acc: 83.62% ± 0.18%, FAR: 4.97%) |
+| [`ME3 - Full-duplex Agent`](./ME3%20-%20Full-duplex%20Agent/) | Full-Duplex Voice-Enabled AI Agent ("Berry") on Raspberry Pi 5 with fullscreen GUI | Pipecat, Gemini 3.8 Live, local Silero VAD barge-in, MCP tools, live captions (Gemini 3.5 Transcribe Live), English + Filipino, pygame GUI | Completed |
 
 ---
 
@@ -26,6 +27,11 @@ This repository contains Machine Exercises, projects, and assignments for **AI 2
 - **20-Class Voice Command Model (BC-ResNet-1)**: 110 KB INT8 (0.0685 M parameters), 83.62% ± 0.18% test accuracy across 121 unseen speakers on the multi-source Hugging Face benchmark, combined OOS FAR of 4.97% (at tuned $\tau^* = 0.77$).
 - Full real-time smart-home state management with continuous ALSA audio capture, adaptive peak normalization, and VAD energy gating.
 - Full multi-seed A100 training logs, DS-CNN baseline comparison, INT8 ONNX export, and one-command reproduction (`./reproduce.sh`).
+
+### 3. [ME3: Full-Duplex Voice Agent "Berry"](./ME3%20-%20Full-duplex%20Agent/)
+- Always-listening, interruptible speech-to-speech assistant on **Raspberry Pi 5** (Pipecat + Gemini 3.8 Live) with local voice barge-in, an attention gate that ignores speech not addressed to it, and MCP smart-home/media/productivity tools.
+- Fullscreen GUI with state-coloured backgrounds, rolling user transcript, streamed AI transcript and live interim captions; English + Filipino; music routed to the HDMI speaker.
+- Launch with `./start_all.sh` (see the ME3 README for flags, setup and the benchmark).
 
 ---
 
