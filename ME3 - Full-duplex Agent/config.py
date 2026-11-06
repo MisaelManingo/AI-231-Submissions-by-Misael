@@ -98,6 +98,93 @@ if os.getenv("ME3_EMPATHY", "1") != "0":
         "tiredness) and respond accordingly: match their energy, soften and slow down when they sound upset, be upbeat "
         "when they are happy, and briefly acknowledge strong feelings in one short phrase. Stay concise.")
 
+# WEB / NEWS SEARCH (mcp_server/extras.py): Gemini Google-Search grounding in a separate call. ME3_WEB_SEARCH=0 disables.
+WEB_SEARCH_ENABLED = os.getenv("ME3_WEB_SEARCH", "1").lower() in ("1", "true", "yes")
+SEARCH_MODEL = os.getenv("SEARCH_MODEL", "gemini-3.8-flash")
+SEARCH_MAX_CHARS = int(os.getenv("SEARCH_MAX_CHARS", "400"))
+SEARCH_TIMEOUT_S = max(10.0, float(os.getenv("SEARCH_TIMEOUT_S", "25")))  # API minimum deadline is 10 s
+if WEB_SEARCH_ENABLED and GOOGLE_API_KEY:
+    SYSTEM_INSTRUCTION += (
+        " WEB SEARCH (use sparingly): answer from your own knowledge by default, including general explanations, science, "
+        "history, how things work, definitions, advice and chat (e.g. 'how does a laser work'). Call web_search ONLY when the "
+        "answer needs information after your knowledge cutoff or that changes (news, recent events, live scores, prices, "
+        "election results, new releases), or the user explicitly says to search/look it up, or it is a very complex or obscure "
+        "factual question you cannot answer reliably. Never search for common knowledge. When you do, first say a very short "
+        "'let me check' in the user's language, then read the short result aloud in the user's language.")
+
+# IMAGE GENERATION (mcp_server/extras.py): Nano Banana 2 Lite in a background thread, shown as a GUI overlay.
+# ME3_IMAGE_GEN=0 disables. Files go to workspace/images/ (local only, never uploaded).
+IMAGE_GEN_ENABLED = os.getenv("ME3_IMAGE_GEN", "1").lower() in ("1", "true", "yes")
+IMAGE_MODEL = os.getenv("IMAGE_MODEL", "gemini-3.1-flash-lite-image")
+IMAGE_SHOW_S = float(os.getenv("IMAGE_SHOW_S", "15"))
+IMAGE_TIMEOUT_S = max(10.0, float(os.getenv("IMAGE_TIMEOUT_S", "60")))
+IMAGES_DIR = BASE_DIR / "workspace" / "images"
+if IMAGE_GEN_ENABLED and GOOGLE_API_KEY:
+    SYSTEM_INSTRUCTION += (
+        " IMAGE GENERATION: when the user asks you to draw, make or generate a picture, first say what you will create in one "
+        "short sentence and ask 'okay?' in the user's language; only after they say yes, call generate_image with a detailed "
+        "English prompt, then say in one short sentence that it is being made and will appear on the screen.")
+
+# SOUND-BYTE GENERATION (mcp_server/extras.py): Lyria 3 Clip in a background thread, saved to workspace/sounds/.
+# Generation + saving only: NOTHING is played by this feature. ME3_SOUND_GEN=0 disables.
+SOUND_GEN_ENABLED = os.getenv("ME3_SOUND_GEN", "1").lower() in ("1", "true", "yes")
+SOUND_MODEL = os.getenv("SOUND_MODEL", "lyria-3-clip-preview")
+SOUND_TIMEOUT_S = max(10.0, float(os.getenv("SOUND_TIMEOUT_S", "90")))
+SOUNDS_DIR = BASE_DIR / "workspace" / "sounds"
+# Generated clips play automatically on the HDMI speaker via MusicPlayer.play_oneshot (never on the USB speaker), at most
+# the default music volume x SOUND_PLAY_GAIN. SOUND_AUTOPLAY=0 = save only.
+SOUND_AUTOPLAY = os.getenv("SOUND_AUTOPLAY", "1").lower() in ("1", "true", "yes")
+SOUND_PLAY_GAIN = float(os.getenv("SOUND_PLAY_GAIN", "0.8"))
+if SOUND_GEN_ENABLED and GOOGLE_API_KEY:
+    SYSTEM_INSTRUCTION += (
+        " SOUND GENERATION: when the user asks for a sound effect, jingle, tune or short music clip, first say what you will "
+        "create in one short sentence and ask 'okay?' in the user's language; only after they say yes, call generate_sound "
+        "with a detailed English prompt, then say in one short sentence that it takes about 15 seconds and will play "
+        "by itself on the monitor speaker when ready.")
+
+# SPOTIFY SEARCH (mcp_server/extras.py): Web API client-credentials search only (previews are gone for new apps, so this
+# finds songs; playback is a separate feature). Needs SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET in .env. ME3_SPOTIFY=0 disables.
+SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID", "")
+SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET", "")
+SPOTIFY_ENABLED = os.getenv("ME3_SPOTIFY", "1").lower() in ("1", "true", "yes") and bool(SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET)
+SPOTIFY_MARKET = os.getenv("SPOTIFY_MARKET", "PH")
+# SPOTIFY PLAYBACK: librespot (official Raspotify build, unpacked in ~/.local/share/berry-librespot, no system install) is a
+# Connect device whose audio is piped into the HDMI music writer thread (hardware/spotify_source.py). Needs Premium, a one-time
+# librespot login (cache dir) and a one-time Web API authorization (token file). Anything missing => search-only, as before.
+# ME3_SPOTIFY_PLAY=0 disables playback.
+_SP_DIR = Path.home() / ".local" / "share" / "berry-librespot"
+LIBRESPOT_BIN = Path(os.getenv("LIBRESPOT_BIN", str(_SP_DIR / "librespot")))
+LIBRESPOT_CACHE_DIR = Path(os.getenv("LIBRESPOT_CACHE_DIR", str(_SP_DIR / "cache")))
+SPOTIFY_TOKEN_FILE = Path(os.getenv("SPOTIFY_TOKEN_FILE", str(_SP_DIR / "web_token.json")))
+SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8888/callback")
+SPOTIFY_DEVICE_NAME = os.getenv("SPOTIFY_DEVICE_NAME", "Berry")
+# Backend 1 (preferred): Spotify Soloist, Spotify's official headless client (binary in ~/.local/share/berry-soloist, never
+# committed; needs SOLOIST_API_KEY in .env and a one-time pairing, marked by the file `paired`). librespot is the fallback.
+_SO_DIR = Path.home() / ".local" / "share" / "berry-soloist"
+SOLOIST_BIN = Path(os.getenv("SOLOIST_BIN", str(_SO_DIR / "soloist")))
+SOLOIST_DATA_DIR = _SO_DIR / "data"
+SOLOIST_CACHE_DIR = _SO_DIR / "cache"
+SOLOIST_API_KEY = os.getenv("SOLOIST_API_KEY", "")
+_SOLOIST_READY = SOLOIST_BIN.exists() and bool(SOLOIST_API_KEY) and (_SO_DIR / "paired").exists()
+_LIBRESPOT_READY = (LIBRESPOT_BIN.exists() and SPOTIFY_TOKEN_FILE.exists()
+                    and (LIBRESPOT_CACHE_DIR / "credentials.json").exists())
+SPOTIFY_BACKEND = "soloist" if _SOLOIST_READY else "librespot"
+SPOTIFY_PLAY_ENABLED = (SPOTIFY_ENABLED and os.getenv("ME3_SPOTIFY_PLAY", "1").lower() in ("1", "true", "yes")
+                        and SPOTIFY_TOKEN_FILE.exists() and (_SOLOIST_READY or _LIBRESPOT_READY))
+if SPOTIFY_ENABLED:
+    if SPOTIFY_PLAY_ENABLED:
+        SYSTEM_INSTRUCTION += (
+            " SPOTIFY: to play a specific song or artist on Spotify, call spotify_play with the title and artist, then say in "
+            "one short sentence what is playing. To pause, resume, skip or go back on Spotify call spotify_control. "
+            "spotify_search only looks a song up. Spotify and the local music never play together. A plain 'play music' "
+            "request (no song named, or 'my music') still uses control_media; 'stop music' / 'pause' while Spotify plays "
+            "should use spotify_control. Playback needs the monitor speaker: if a tool says it is unavailable, tell the user.")
+    else:
+        SYSTEM_INSTRUCTION += (
+            " SPOTIFY: when the user asks you to find or look up a specific song, artist or album by name, call spotify_search "
+            "with the title and artist, then tell them in one short sentence what you found. You cannot play Spotify songs yet: "
+            "say so and offer the local music instead. A plain 'play music' request still uses control_media.")
+
 if not ATTENTION_ENABLED:  # no ignore_speech tool is registered: drop every mention of it
     SYSTEM_INSTRUCTION = (SYSTEM_INSTRUCTION.replace(" EXCEPT ignore_speech", "")
                           .replace(" (the only exception is ignore_speech, after which you stay completely silent)", "")
@@ -162,7 +249,7 @@ PROBE_DEFER_MS = int(os.getenv("PROBE_DEFER_MS", "500"))
 # 0.03 -> unreliable, >=0.04 -> not understood (and 0.35, the old default, -> nothing heard). So the user-facing
 # volume % is mapped quadratically: gain = MUSIC_MAX_GAIN * (pct/100)^2 * loudness_norm. Default 15% -> ~0.008.
 MUSIC_MAX_GAIN = float(os.getenv("MUSIC_MAX_GAIN", "0.35"))
-MUSIC_DEFAULT_VOLUME_PCT = int(os.getenv("MUSIC_DEFAULT_VOLUME_PCT", "15"))
+MUSIC_DEFAULT_VOLUME_PCT = int(os.getenv("MUSIC_DEFAULT_VOLUME_PCT", "35"))  # was 15; +2 voice steps of 10%
 # Music on the HDMI monitor speaker (isolated from the USB mic/speaker housing). MUSIC_TO_HDMI=0 mixes music into the USB
 # speaker again. HDMI gain ceiling is higher than MUSIC_MAX_GAIN because voice commands no longer have to be heard over it.
 MUSIC_TO_HDMI = os.getenv("MUSIC_TO_HDMI", "1") != "0"
@@ -214,8 +301,8 @@ WEATHER_CITY_NAME = os.getenv("WEATHER_CITY_NAME", "Manila")
 # -----------------------------------------------------------------------------
 # TELEPHONY & ADB CONSTANTS
 # -----------------------------------------------------------------------------
-CALL_NUMBER = os.getenv("CALL_NUMBER", "+63XXXXXXXXXX")
-MESSAGE_NUMBER = os.getenv("MESSAGE_NUMBER", "+63XXXXXXXXXX")
+CALL_NUMBER = os.getenv("CALL_NUMBER", "+63XXXXXXXXXX")  # real number lives in .env
+MESSAGE_NUMBER = os.getenv("MESSAGE_NUMBER", "+63XXXXXXXXXX")  # real number lives in .env
 MESSAGE_TEXT = os.getenv("MESSAGE_TEXT", "Hello from my Raspberry Pi 5 AI Assistant!")
 CALL_CARRIER = os.getenv("CALL_CARRIER", "Globe")
 

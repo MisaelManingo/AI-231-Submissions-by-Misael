@@ -20,6 +20,7 @@ import threading
 import subprocess
 from pathlib import Path
 import numpy as np
+from config import MUSIC_MAX_GAIN
 
 RATE = 48000
 FRAMES = 1920  # 40 ms per write
@@ -56,6 +57,7 @@ class HdmiMusicOutput:
         self._thread = None
         self._stop = threading.Event()
         self.device = None
+        self.spotify = None                 # SpotifySource (hardware/spotify_source.py), attached by mcp_server/extras.py
 
     @property
     def alive(self) -> bool:
@@ -88,6 +90,7 @@ class HdmiMusicOutput:
             return False
         self._thread = threading.Thread(target=self._run, name="music-hdmi", daemon=True)
         self._thread.start()
+        self.player.hdmi = self   # lets MusicPlayer.play_oneshot() confirm the HDMI speaker is alive
         print(f"🎵 [MUSIC HDMI]: music routed to {self.device} (agent voice stays on USB).", flush=True)
         return True
 
@@ -105,7 +108,16 @@ class HdmiMusicOutput:
                     time.sleep(0.2)
                     continue
                 data = silence
-                if self.player.is_playing:
+                sp_chunk = None
+                sp = self.spotify
+                # Spotify (piped librespot) is mixed like local music: same volume setting, same ducking under Berry's voice.
+                # A generated sound clip (player._saved) has priority; Spotify then simply waits (back-pressured pipe).
+                if sp is not None and getattr(self.player, "_saved", None) is None:
+                    sp_chunk = sp.read_chunk()
+                    if sp_chunk is not None:
+                        eff = MUSIC_MAX_GAIN * (self.player.volume ** 2) * (self.player.ducked_gain if self.is_ducked() else 1.0)
+                        data = to_int16_stereo(sp_chunk, eff * self.gain_scale)
+                if sp_chunk is None and self.player.is_playing:
                     chunk = self.player.get_audio_chunk(FRAMES, ducked=bool(self.is_ducked()))
                     if chunk is not None:
                         data = to_int16_stereo(chunk, self.gain_scale)
@@ -119,6 +131,8 @@ class HdmiMusicOutput:
 
     def stop(self):
         self._stop.set()
+        if self.spotify is not None:
+            self.spotify.stop()
         p = self.proc
         if p is not None:
             try:

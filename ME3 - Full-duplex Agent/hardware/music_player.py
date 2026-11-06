@@ -34,6 +34,11 @@ class MusicPlayer:
         self.norm = 1.0  # per-track loudness normalisation
         self.ducked_gain = 0.15  # Ducking factor when assistant speaks (15% of current vol)
         self.lock = threading.Lock()
+        # One-shot clip playback (generated sounds): previous track state is parked here and restored when the clip ends.
+        self._saved = None
+        self._vol_cap = None   # while a clip plays, its volume never exceeds this fraction
+        self.on_play_hook = None   # called when the user starts local music (extras uses it to pause Spotify)
+        self.hdmi = None       # set by HdmiMusicOutput.start(); clips only play while the HDMI speaker is alive
 
         self.refresh_library()
 
@@ -84,9 +89,59 @@ class MusicPlayer:
             self.current_audio = None
             return False
 
+    def _end_oneshot_locked(self):
+        """Restores the track that was loaded before a one-shot clip (lock must be held). No-op if no clip is active."""
+        if self._saved is not None:
+            (self.current_audio, self.current_title, self.play_pos, self.current_idx, self.norm) = self._saved["track"]
+            self.is_playing = self._saved["playing"]
+            self._saved = None
+            self._vol_cap = None
+
+    def play_oneshot(self, path, gain: float = 1.0) -> bool:
+        """Plays an audio file once on the HDMI speaker (generated sound bytes), then goes back to what was playing.
+        Returns False (and plays nothing) unless the HDMI output is alive: a clip must never land on the USB speaker
+        next to the mic. Decoding/resampling happens here, outside the lock and outside any audio callback."""
+        hdmi = self.hdmi
+        if not (hdmi is not None and hdmi.alive):
+            return False
+        try:
+            data, sr = sf.read(str(path), dtype="float32")
+            if data.ndim == 1:
+                data = np.column_stack((data, data))
+            elif data.shape[1] > 2:
+                data = data[:, :2]
+            if sr != 48000:
+                import scipy.signal
+                from math import gcd
+                g = gcd(48000, int(sr))
+                data = scipy.signal.resample_poly(data, 48000 // g, int(sr) // g, axis=0).astype(np.float32)
+            rms = float(np.sqrt(np.mean(data[:: 8] ** 2))) or 1e-6
+            peak = float(np.max(np.abs(data))) or 1e-6
+            norm = float(np.clip(MUSIC_REF_RMS / rms, 0.25, 2.0))
+            norm = min(norm, 0.98 / peak) * float(gain)   # same loudness as the tracks, never clipping
+            with self.lock:
+                if self._saved is None:   # a second clip while one plays keeps the ORIGINAL track parked
+                    self._saved = {"track": (self.current_audio, self.current_title, self.play_pos, self.current_idx, self.norm),
+                                   "playing": self.is_playing}
+                self.current_audio, self.current_title, self.play_pos, self.norm = data, Path(path).stem, 0, norm
+                self._vol_cap = MUSIC_DEFAULT_VOLUME_PCT / 100.0   # never louder than the default music volume
+                self.is_playing = True
+            print(f"🎼 [MUSIC PLAYER]: playing clip '{Path(path).name}' ({len(data)/48000:.1f}s) on HDMI", flush=True)
+            return True
+        except Exception as e:
+            print(f"❌ [MUSIC PLAYER]: clip failed: {e}", flush=True)
+            return False
+
     def play(self, track_name_or_idx=None) -> str:
         """Starts or resumes music playback."""
+        if self.on_play_hook:
+            try:
+                self.on_play_hook()
+            except Exception:
+                pass
         with self.lock:
+            if track_name_or_idx is not None:
+                self._end_oneshot_locked()
             if not self.music_files:
                 self.refresh_library()
             if not self.music_files:
@@ -122,13 +177,20 @@ class MusicPlayer:
     def stop(self) -> bool:
         """Stops music playback and rewinds to the beginning."""
         with self.lock:
+            self._end_oneshot_locked()
             self.is_playing = False
             self.play_pos = 0
             return True
 
     def next_track(self) -> str:
         """Advances to next track and starts playback."""
+        if self.on_play_hook:
+            try:
+                self.on_play_hook()
+            except Exception:
+                pass
         with self.lock:
+            self._end_oneshot_locked()
             if not self.music_files:
                 return "No tracks available"
             self.current_idx = (self.current_idx + 1) % len(self.music_files)
@@ -168,6 +230,9 @@ class MusicPlayer:
                 return None
 
             total_len = len(self.current_audio)
+            if self._saved is not None and self.play_pos >= total_len:
+                self._end_oneshot_locked()   # clip finished: back to the previous track (paused/playing as before)
+                return None
             if self.play_pos >= total_len:
                 # Song finished: advance to next song
                 self.current_idx = (self.current_idx + 1) % len(self.music_files)
@@ -182,7 +247,9 @@ class MusicPlayer:
             self.play_pos = end_pos
 
             # If track looped during this frame
-            if needed > 0 and self.play_pos >= total_len:
+            if needed > 0 and self.play_pos >= total_len and self._saved is not None:
+                chunk = np.vstack((chunk, np.zeros((needed, 2), dtype=np.float32)))   # clip ends inside this chunk
+            elif needed > 0 and self.play_pos >= total_len:
                 self.current_idx = (self.current_idx + 1) % len(self.music_files)
                 if self._load_track(self.current_idx) and self.current_audio is not None:
                     extra = self.current_audio[:needed]
@@ -194,6 +261,7 @@ class MusicPlayer:
                     chunk = np.vstack((chunk, pad))
 
             # Apply volume and ducking gain
-            eff_vol = MUSIC_MAX_GAIN * (self.volume ** 2) * self.norm * (self.ducked_gain if ducked else 1.0)
+            vol = self.volume if self._vol_cap is None else min(self.volume, self._vol_cap)
+            eff_vol = MUSIC_MAX_GAIN * (vol ** 2) * self.norm * (self.ducked_gain if ducked else 1.0)
             return chunk * eff_vol
 

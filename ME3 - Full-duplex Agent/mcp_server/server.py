@@ -669,5 +669,11 @@ def create_mcp_server(hardware_manager=None):
                     reports.append(f"Output: {str(tinfo['result'])[:200]}")
         return "\n".join(reports) if reports else f"No task found matching '{task_name}'."
 
+    try:  # optional extras (web search, ...): own flags, never allowed to break the base server
+        from mcp_server.extras import register_extras
+        register_extras(mcp, hardware_manager)
+    except Exception as e:
+        print(f"⚠️ [EXTRAS]: not loaded ({e})", flush=True)
+
     return mcp
 

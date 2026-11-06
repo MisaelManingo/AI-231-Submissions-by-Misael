@@ -215,6 +215,9 @@ class BerryGui:
         self.user_tr = UserTranscript()
         self._user_cache = {}
         self._tr_cache = None       # (key, [surfaces]) so text is re-rendered only when it changes
+        self.img_surf = None        # generated-image overlay (agent sends only a file path); None = nothing shown
+        self.img_t0 = 0.0
+        self.img_secs = 0.0
 
         # Socket setup
         self.sock = None
@@ -317,7 +320,9 @@ class BerryGui:
             try:
                 data, _ = self.sock.recvfrom(2048)  # was 512; transcript datagrams are larger
                 # Transcript datagrams ({"type":"tr"}) are applied in order; state datagrams: newest wins (as before).
-                if b'"type"' in data and b'"tr"' in data:
+                if b'"type": "img"' in data:
+                    self._handle_image(data)
+                elif b'"type"' in data and b'"tr"' in data:
                     self._handle_transcript(data)
                 else:
                     latest_data = data
@@ -366,6 +371,33 @@ class BerryGui:
                 self.user_tr.apply(msg.get("op", ""), msg.get("text", ""), now)
         except Exception:
             pass
+
+    def _handle_image(self, data: bytes):
+        """Loads a generated image (only from workspace/images/) and scales it once to fit the screen. Never raises."""
+        try:
+            msg = json.loads(data.decode("utf-8"))
+            p = Path(msg.get("path", "")).resolve()
+            p.relative_to((BASE_DIR / "workspace" / "images").resolve())   # refuse any other location
+            surf = self.pygame.image.load(str(p)).convert()
+            w, h = surf.get_size()
+            k = min(self.width * 0.92 / w, self.height * 0.92 / h)
+            self.img_surf = self.pygame.transform.smoothscale(surf, (int(w * k), int(h * k)))
+            self.img_t0 = time.time()
+            self.img_secs = max(2.0, min(float(msg.get("secs", 15.0)), 120.0))
+        except Exception as e:
+            print(f"[GUI]: image overlay skipped ({type(e).__name__}: {e})", flush=True)
+
+    def _draw_image(self, now: float):
+        """Generated-image overlay: fades in 0.5 s, holds, fades out 1 s, then disappears."""
+        if self.img_surf is None:
+            return
+        age = now - self.img_t0
+        if age >= self.img_secs:
+            self.img_surf = None
+            return
+        a = min(1.0, age / 0.5, (self.img_secs - age) / 1.0)
+        self.img_surf.set_alpha(int(255 * max(0.0, a)))
+        self.screen.blit(self.img_surf, self.img_surf.get_rect(center=(self.width // 2, self.height // 2)))
 
     def _draw_ai_transcript(self, now: float):
         """Bottom band: last TR_MAX_LINES wrapped lines of Berry's current reply, bottom-anchored."""
@@ -560,6 +592,9 @@ class BerryGui:
 
             # 3. Blit official logo cleanly centered over horizon
             self.screen.blit(self.logo, self.logo_rect)
+
+            # 3b. Generated image overlay (above logo/waveform, below the transcripts)
+            self._draw_image(now)
 
             # 4. Transcript overlay (drawn last; flag-gated)
             if TRANSCRIPT_ENABLED:

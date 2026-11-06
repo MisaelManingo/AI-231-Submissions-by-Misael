@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+from config import CALL_NUMBER, MESSAGE_NUMBER
 from hardware import HardwareManager
 from mcp_server import create_mcp_server
 from mcp_server.client_bridge import get_mcp_function_schemas
@@ -55,8 +56,8 @@ def main():
     print(tools["list_reminders"]())
 
     print("\n--- Testing Telephony ---")
-    print(tools["make_phone_call"](phone_number="+63XXXXXXXXXX"))
-    print(tools["send_sms"](phone_number="+63XXXXXXXXXX", message_text="Test from RPi5"))
+    print(tools["make_phone_call"](phone_number=CALL_NUMBER))
+    print(tools["send_sms"](phone_number=MESSAGE_NUMBER, message_text="Test from RPi5"))
 
     print("\n--- Testing Agentic Website Builder ---")
     web_res = tools["create_simple_website"](

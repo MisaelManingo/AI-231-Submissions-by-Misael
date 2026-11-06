@@ -40,11 +40,17 @@ class AgentStatePublisher:
         self._running = False
         # Transcript events queued by pipeline hooks; drained by _publish_loop (bounded: oldest dropped, never blocks)
         self._tr_queue = deque(maxlen=64)
+        self._img_queue = deque(maxlen=4)  # image-overlay requests (see publish_image)
 
     def publish_transcript(self, who: str, op: str, text: str = ""):
         """O(1), non-blocking: just queues an event. No socket I/O here (called on the asyncio event loop)."""
         if TRANSCRIPT_ENABLED and self._running:
             self._tr_queue.append((who, op, text))
+
+    def publish_image(self, path: str, seconds: float = 15.0):
+        """Thread-safe, non-blocking: queues 'show this image file' for the GUI (the file path travels, never pixels)."""
+        if self._running:
+            self._img_queue.append({"type": "img", "path": str(path), "secs": float(seconds)})
 
     def _drain_transcripts(self):
         """Builds datagrams from queued events; consecutive AI 'append' fragments are coalesced into one."""
@@ -154,6 +160,14 @@ class AgentStatePublisher:
                             pass
                 elif self._tr_queue:
                     self._tr_queue.clear()
+
+                while self._img_queue:  # image overlay request: one tiny datagram, same non-blocking send
+                    m = self._img_queue.popleft()
+                    if self._sock:
+                        try:
+                            self._sock.sendto(json.dumps(m, ensure_ascii=False).encode("utf-8"), sock_str)
+                        except (BlockingIOError, ConnectionRefusedError, FileNotFoundError, OSError):
+                            pass
 
                 await asyncio.sleep(0.04)  # 25 Hz
             except asyncio.CancelledError:
